@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { UserPlus, Mail, Lock, RefreshCw, CheckCircle, CalendarDays, Check, Phone, MapPin, CreditCard, Info, IdCard } from 'lucide-react';
+import { getConsultations, verifyConsultation, registerUser } from '../services/api';
 
 const ACCOUNT_TYPES = [
   {
@@ -59,8 +60,7 @@ const EmployeeDashboard = () => {
 
   const fetchConsultations = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/consultations');
-      const data = await response.json();
+      const data = await getConsultations();
       if (data.success) {
         setConsultations(data.data);
       }
@@ -82,12 +82,7 @@ const EmployeeDashboard = () => {
 
   const handleVerifyConsultation = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/consultations/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'verified' })
-      });
-      const data = await response.json();
+      const data = await verifyConsultation(id);
       if (data.success) {
         setConsultations(consultations.map(c => c.id === id ? { ...c, status: 'verified' } : c));
       }
@@ -115,20 +110,11 @@ const EmployeeDashboard = () => {
     setMessage('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          role: 'customer',
-          balance: 1000.00
-        })
+      const data = await registerUser({
+        ...formData,
+        role: 'customer',
+        balance: 1000.00
       });
-
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to create customer account.');
-      }
 
       setMessage(`Customer account for ${formData.fullName} successfully created! Verification email sent.`);
       setFormData({ 

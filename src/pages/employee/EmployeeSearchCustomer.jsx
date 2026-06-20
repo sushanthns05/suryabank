@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, User, Mail, Phone, CreditCard, RefreshCw, Eye } from 'lucide-react';
+import { getCustomers } from '../../services/api';
 
 const EmployeeSearchCustomer = () => {
   const [customers, setCustomers] = useState([]);
@@ -9,14 +10,10 @@ const EmployeeSearchCustomer = () => {
   const fetchCustomers = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/customers');
-      const data = await response.json();
-      
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to fetch customers');
+      const data = await getCustomers();
+      if (data.success) {
+        setCustomers(data.data);
       }
-      
-      setCustomers(data.data);
     } catch (error) {
       console.error('Error fetching customers:', error);
     } finally {

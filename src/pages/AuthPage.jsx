@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Fingerprint, Mail, Lock, Eye, EyeOff, CheckCircle, AlertCircle, RefreshCw, Phone, MapPin, CreditCard, Info, IdCard } from 'lucide-react';
 import { sendOTPVerificationEmail, sendWelcomeEmail } from '../utils/emailService';
+import { registerUser, loginUser } from '../services/api';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import './AuthPage.css';
@@ -120,22 +121,12 @@ const AuthPage = () => {
           assignedRole = 'employee';
         }
 
-        // 1. Send data to custom PostgreSQL backend
-        const res = await fetch('http://localhost:5000/api/auth/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...formData,
-            role: assignedRole,
-            balance: 1000.00 // Initial signup bonus
-          })
+        // 1. Send data to custom PostgreSQL backend via API service
+        const data = await registerUser({
+          ...formData,
+          role: assignedRole,
+          balance: 1000.00 // Initial signup bonus
         });
-
-        const data = await res.json();
-        
-        if (!res.ok || !data.success) {
-          throw new Error(data.error || 'Registration failed');
-        }
 
         const user = data.user;
         localStorage.setItem('token', data.token);
@@ -148,20 +139,10 @@ const AuthPage = () => {
         
       } else {
         // Login Flow
-        const res = await fetch('http://localhost:5000/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password
-          })
+        const data = await loginUser({
+          email: formData.email,
+          password: formData.password
         });
-
-        const data = await res.json();
-
-        if (!res.ok || !data.success) {
-          throw new Error(data.error || 'Login failed');
-        }
         
         localStorage.setItem('token', data.token);
         localStorage.setItem('userRole', data.user.role || 'customer');
@@ -220,21 +201,11 @@ const AuthPage = () => {
       }
 
       // Send data to custom PostgreSQL backend
-      const res = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          role: assignedRole,
-          balance: 1000.00 // Initial signup bonus
-        })
+      const data = await registerUser({
+        ...formData,
+        role: assignedRole,
+        balance: 1000.00 // Initial signup bonus
       });
-
-      const data = await res.json();
-      
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Registration failed');
-      }
 
       const user = data.user;
       localStorage.setItem('token', data.token);

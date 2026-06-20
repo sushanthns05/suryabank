@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CreditCard, Shield, TrendingUp, Briefcase, HeartPulse, Landmark, Calendar, User, Mail, MessageSquare, X, CheckCircle, RefreshCw } from 'lucide-react';
+import { createConsultation } from '../services/api';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import './Services.css';
@@ -18,22 +19,9 @@ const Services = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      // Connecting to our new Express/PostgreSQL backend running on port 5000
-      const response = await fetch('http://localhost:5000/api/consultations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-        }),
+      const data = await createConsultation({
+        ...formData,
       });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to submit');
-      }
 
       setSubmitSuccess(true);
       setTimeout(() => {

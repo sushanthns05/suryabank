@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { testApiConnection } from '../../services/api';
 import { 
   Users, Activity, FileText, UserPlus, DollarSign, 
   Wallet, Briefcase, UserCheck, ArrowUpRight, ArrowDownRight, Clock
@@ -54,6 +55,19 @@ const RECENT_TXNS = [
 
 const EmployeeOverview = () => {
   const navigate = useNavigate();
+  const [apiStatus, setApiStatus] = useState({ loading: true, data: null, error: null });
+
+  useEffect(() => {
+    const checkApi = async () => {
+      try {
+        const response = await testApiConnection();
+        setApiStatus({ loading: false, data: response, error: null });
+      } catch (err) {
+        setApiStatus({ loading: false, data: null, error: err.message });
+      }
+    };
+    checkApi();
+  }, []);
 
   const handleDownloadReport = () => {
     // Generate CSV content
@@ -86,6 +100,20 @@ const EmployeeOverview = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       
+      {/* API Connection Banner */}
+      {!apiStatus.loading && (
+        <div className={`p-4 rounded-xl border flex items-center gap-3 ${apiStatus.data?.message ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'}`}>
+          <div className="flex-1">
+            <h4 className={`text-sm font-bold ${apiStatus.data?.message ? 'text-green-800 dark:text-green-300' : 'text-red-800 dark:text-red-300'}`}>
+              Backend API Status: {apiStatus.data?.message ? 'Connected' : 'Disconnected'}
+            </h4>
+            <p className={`text-xs mt-1 ${apiStatus.data?.message ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+              {apiStatus.data?.message ? `Response from /api/test: "${apiStatus.data.message}"` : `Error: ${apiStatus.error}`}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
