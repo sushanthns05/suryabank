@@ -40,6 +40,22 @@ const EmployeeLayout = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: 'New Loan Request', desc: 'Ramesh Kumar applied for a Home Loan', time: '2m ago', unread: true },
+    { id: 2, title: 'System Update', desc: 'Server maintenance scheduled for 2 AM', time: '1h ago', unread: true },
+    { id: 3, title: 'Account Approved', desc: 'Priya Patel savings account approved', time: '3h ago', unread: false },
+  ]);
+
+  const unreadCount = notifications.filter(n => n.unread).length;
+
+  const handleMarkAllAsRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, unread: false })));
+  };
+
+  const handleNotificationClick = (id) => {
+    setNotifications(notifications.map(n => n.id === id ? { ...n, unread: false } : n));
+  };
+
   const navigate = useNavigate();
   const location = useLocation();
   const notificationRef = useRef(null);
@@ -164,25 +180,27 @@ const EmployeeLayout = () => {
                 className="relative p-2 rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
                 <Bell size={20} />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-surya-danger"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-surya-danger"></span>
+                )}
               </button>
               
               {isNotificationOpen && (
                 <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-surya-surfaceDark border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
                   <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
                     <h3 className="font-bold text-slate-800 dark:text-white">Notifications</h3>
-                    <span className="text-xs text-surya-primary dark:text-surya-secondary cursor-pointer hover:underline">Mark all as read</span>
+                    <span onClick={handleMarkAllAsRead} className="text-xs text-surya-primary dark:text-surya-secondary cursor-pointer hover:underline">Mark all as read</span>
                   </div>
                   <div className="max-h-80 overflow-y-auto">
-                    {[
-                      { title: 'New Loan Request', desc: 'Ramesh Kumar applied for a Home Loan', time: '2m ago', unread: true },
-                      { title: 'System Update', desc: 'Server maintenance scheduled for 2 AM', time: '1h ago', unread: true },
-                      { title: 'Account Approved', desc: 'Priya Patel savings account approved', time: '3h ago', unread: false },
-                    ].map((notif, idx) => (
-                      <div key={idx} className={`p-4 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors ${notif.unread ? 'bg-slate-50/50 dark:bg-slate-800/30' : ''}`}>
+                    {notifications.map((notif) => (
+                      <div 
+                        key={notif.id} 
+                        onClick={() => handleNotificationClick(notif.id)}
+                        className={`p-4 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors ${notif.unread ? 'bg-slate-50/50 dark:bg-slate-800/30' : ''}`}
+                      >
                         <div className="flex justify-between items-start">
                           <p className={`text-sm font-medium ${notif.unread ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>{notif.title}</p>
-                          {notif.unread && <span className="w-2 h-2 rounded-full bg-surya-primary mt-1"></span>}
+                          {notif.unread && <span className="w-2 h-2 rounded-full bg-surya-primary mt-1 shrink-0 ml-2"></span>}
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{notif.desc}</p>
                         <p className="text-xs text-slate-400 mt-1">{notif.time}</p>

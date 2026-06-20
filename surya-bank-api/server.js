@@ -44,7 +44,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'surya-bank-super-secret-key-2026';
 // Note: The URI provided is an INTERNAL Render URL. 
 // It will only work if this Node.js app is also hosted on Render.
 // For local testing, we would normally use the External URL (e.g. adding .oregon-postgres.render.com)
-const RENDER_DB_URI = "postgresql://surya_bank_user:8kDMiMFVvzGDi7rXdsN7Vvbq9nZNP12n@dpg-d8r8300js32c73bntid0-a.oregon-postgres.render.com/surya_bank";
+const RENDER_DB_URI = "postgresql://surya_bank_user:8kDMiMFVvzGDi7rXdsN7Vvbq9nZNP12n@dpg-d8r8300js32c73bntid0-a/surya_bank";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
