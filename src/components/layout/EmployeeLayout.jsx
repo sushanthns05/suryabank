@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, UserPlus, FileText, CreditCard, 
@@ -38,8 +38,25 @@ const SIDEBAR_MENU = [
 const EmployeeLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const notificationRef = useRef(null);
+  const profileRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setIsNotificationOpen(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     // Check local storage for dark mode preference
@@ -139,12 +156,75 @@ const EmployeeLayout = () => {
             <button onClick={toggleDarkMode} className="p-2 rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <button className="relative p-2 rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-              <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-surya-danger"></span>
-            </button>
-            <div className="w-8 h-8 rounded-full bg-surya-primary text-white flex items-center justify-center font-bold text-sm">
-              E
+            
+            {/* Notification Dropdown */}
+            <div className="relative" ref={notificationRef}>
+              <button 
+                onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                className="relative p-2 rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                <Bell size={20} />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-surya-danger"></span>
+              </button>
+              
+              {isNotificationOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-surya-surfaceDark border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                  <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                    <h3 className="font-bold text-slate-800 dark:text-white">Notifications</h3>
+                    <span className="text-xs text-surya-primary dark:text-surya-secondary cursor-pointer hover:underline">Mark all as read</span>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {[
+                      { title: 'New Loan Request', desc: 'Ramesh Kumar applied for a Home Loan', time: '2m ago', unread: true },
+                      { title: 'System Update', desc: 'Server maintenance scheduled for 2 AM', time: '1h ago', unread: true },
+                      { title: 'Account Approved', desc: 'Priya Patel savings account approved', time: '3h ago', unread: false },
+                    ].map((notif, idx) => (
+                      <div key={idx} className={`p-4 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors ${notif.unread ? 'bg-slate-50/50 dark:bg-slate-800/30' : ''}`}>
+                        <div className="flex justify-between items-start">
+                          <p className={`text-sm font-medium ${notif.unread ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>{notif.title}</p>
+                          {notif.unread && <span className="w-2 h-2 rounded-full bg-surya-primary mt-1"></span>}
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{notif.desc}</p>
+                        <p className="text-xs text-slate-400 mt-1">{notif.time}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="p-3 text-center border-t border-slate-100 dark:border-slate-700">
+                    <button className="text-sm text-surya-primary dark:text-surya-secondary hover:underline font-medium">View All Notifications</button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Profile Dropdown */}
+            <div className="relative" ref={profileRef}>
+              <button 
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="w-8 h-8 rounded-full bg-surya-primary text-white flex items-center justify-center font-bold text-sm cursor-pointer hover:ring-2 hover:ring-offset-2 hover:ring-surya-primary dark:hover:ring-offset-slate-900 transition-all"
+              >
+                E
+              </button>
+              
+              {isProfileOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-surya-surfaceDark border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                  <div className="p-4 border-b border-slate-100 dark:border-slate-700">
+                    <p className="text-sm font-bold text-slate-800 dark:text-white">Employee User</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">employee@suryabank.com</p>
+                  </div>
+                  <div className="p-2">
+                    <button onClick={() => { setIsProfileOpen(false); navigate('/employee/profile'); }} className="w-full flex items-center px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                      <Settings size={16} className="mr-2" />
+                      Profile Settings
+                    </button>
+                  </div>
+                  <div className="p-2 border-t border-slate-100 dark:border-slate-700">
+                    <button onClick={handleLogout} className="w-full flex items-center px-3 py-2 text-sm text-surya-danger hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                      <LogOut size={16} className="mr-2" />
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </header>
