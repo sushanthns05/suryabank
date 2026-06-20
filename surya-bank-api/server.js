@@ -5,7 +5,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 require('dotenv').config();
 const { Pool } = pkg;
-
+console.log("DATABASE_URL:", process.env.DATABASE_URL ? "FOUND" : "MISSING");
+console.log("JWT_SECRET:", process.env.JWT_SECRET ? "FOUND" : "MISSING");
 const app = express();
 app.use(cors());
 app.use(express.json());
