@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Transaction Receipt</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F8FAFC; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #0F172A;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #F8FAFC; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <!-- Main Card -->
+        <table width="100%" max-width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #FFFFFF; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+          <!-- Header -->
+          <tr>
+            <td align="center" style="background-color: #0F172A; padding: 30px;">
+              <img src="https://placehold.co/400x100/0F172A/F59E0B?text=Surya+Bank&font=Montserrat" alt="Surya Bank Logo" width="200" style="display: block; max-width: 100%; height: auto;">
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding: 40px 30px;">
+              <div style="text-align: center; margin-bottom: 30px;">
+                <span style="font-size: 48px; color: #10B981;">✓</span>
+                <h2 style="margin: 10px 0 0 0; font-size: 24px; color: #0F172A; font-weight: 700;">Transfer Successful</h2>
+              </div>
+              
+              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.5; color: #475569;">Hello {{to_name}},</p>
+              <p style="margin: 0 0 30px 0; font-size: 16px; line-height: 1.5; color: #475569;">This email is to confirm that your recent fund transfer has been processed successfully.</p>
+              
+              <!-- Receipt Box -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 20px;">
+                <tr>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #E2E8F0;">
+                    <span style="font-size: 14px; color: #64748B; text-transform: uppercase; font-weight: bold;">Amount Sent</span>
+                  </td>
+                  <td align="right" style="padding: 10px 0; border-bottom: 1px solid #E2E8F0;">
+                    <span style="font-size: 20px; font-weight: bold; color: #0F172A;">{{transaction_amount}}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0;">
+                    <span style="font-size: 14px; color: #64748B; text-transform: uppercase; font-weight: bold;">Recipient</span>
+                  </td>
+                  <td align="right" style="padding: 10px 0;">
+                    <span style="font-size: 16px; font-weight: 500; color: #0F172A;">{{recipient_name}}</span>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 30px 0 0 0; font-size: 14px; line-height: 1.5; color: #EF4444; background-color: #FEF2F2; padding: 15px; border-radius: 8px;"><strong>Security Alert:</strong> If you did not authorize this transaction, please contact our 24/7 fraud department immediately.</p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="background-color: #F1F5F9; padding: 20px; font-size: 12px; color: #94A3B8;">
+              <p style="margin: 0;">&copy; 2026 Surya Bank. All rights reserved.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

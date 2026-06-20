@@ -1,0 +1,150 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  padding: 20px 0;
+}
+
+.navbar.scrolled {
+  padding: 15px 0;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+.brand-text {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-blue);
+  letter-spacing: -0.5px;
+}
+
+.brand-accent {
+  color: var(--primary-gold);
+}
+
+.navbar-links {
+  display: flex;
+  gap: 30px;
+}
+
+.nav-link {
+  font-weight: 500;
+  font-size: 1rem;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--primary-gold);
+}
+
+.navbar-actions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.login-btn {
+  border-color: rgba(15, 23, 42, 0.2);
+}
+
+.mobile-only {
+  display: none;
+}
+
+.mobile-menu-btn {
+  background: transparent;
+  border: none;
+  color: var(--primary-blue);
+  cursor: pointer;
+}
+
+.mobile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+.mobile-link {
+  font-size: 1.1rem;
+  font-weight: 500;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.mobile-actions {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.mb-2 {
+  margin-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none;
+  }
+  .mobile-only {
+    display: block;
+  }
+}
+
+/* Dark Theme Navbar Overrides */
+.navbar-dark .brand-text,
+.navbar-dark .nav-link,
+.navbar-dark .mobile-menu-btn {
+  color: var(--primary-white) !important;
+}
+
+.navbar-dark .login-btn {
+  color: var(--primary-white) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.navbar-dark .login-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: var(--primary-white) !important;
+}
+
+.navbar-dark .mobile-menu {
+  background: var(--primary-blue) !important;
+  border-top-color: rgba(255,255,255,0.1) !important;
+}
+
+.navbar-dark .mobile-link {
+  color: var(--primary-white) !important;
+  border-bottom-color: rgba(255,255,255,0.1) !important;
+}
