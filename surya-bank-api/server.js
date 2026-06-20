@@ -3,6 +3,7 @@ import cors from 'cors';
 import pkg from 'pg';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+require('dotenv').config();
 const { Pool } = pkg;
 
 const app = express();
@@ -10,8 +11,20 @@ app.use(cors());
 app.use(express.json());
 
 // API Test Endpoint
-app.get('/api/test', (req, res) => {
-  res.json({ success: true, message: 'Connected to Render PostgreSQL Backend Successfully! 🚀' });
+app.get('/api/test', async (req, res) => {
+  try {
+    await pool.query('SELECT NOW()');
+
+    res.json({
+      success: true,
+      message: 'Database connected successfully'
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
 });
 
 // Database Test Connection
@@ -29,14 +42,25 @@ const JWT_SECRET = process.env.JWT_SECRET || 'surya-bank-super-secret-key-2026';
 // Note: The URI provided is an INTERNAL Render URL. 
 // It will only work if this Node.js app is also hosted on Render.
 // For local testing, we would normally use the External URL (e.g. adding .oregon-postgres.render.com)
-const RENDER_DB_URI = 'postgresql://suryabank_db_user:B3NmOwGhFkOhuKs8mqxWP164tl4bJw3B@dpg-d8r75m6rnols73f1i2o0-a/suryabank_db';
+const RENDER_DB_URI = "postgresql://surya_bank_user:8kDMiMFVvzGDi7rXdsN7Vvbq9nZNP12n@dpg-d8r8300js32c73bntid0-a.oregon-postgres.render.com/surya_bank";
 
 const pool = new Pool({
-  connectionString: RENDER_DB_URI,
+  connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false // Required for Render external connections
+    rejectUnauthorized: false
   }
 });
+
+pool.connect()
+  .then(() => {
+    console.log("✅ PostgreSQL connected successfully");
+  })
+  .catch((err) => {
+    console.error("❌ Database connection failed:", err.message);
+    pool.on('error', (err) => {
+      console.error('Unexpected PostgreSQL error:', err);
+    });
+  });
 
 const initDB = async () => {
   try {
@@ -52,7 +76,7 @@ const initDB = async () => {
       );
     `;
     await pool.query(createTableQuery);
-    
+
     const createUsersTableQuery = `
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -72,7 +96,7 @@ const initDB = async () => {
       );
     `;
     await pool.query(createUsersTableQuery);
-    
+
     console.log('âœ… PostgreSQL Database connected and tables are ready.');
   } catch (err) {
     console.error('âŒ PostgreSQL Initialization Error:');
@@ -86,7 +110,7 @@ initDB();
 app.post('/api/consultations', async (req, res) => {
   try {
     const { name, email, date, topic } = req.body;
-    
+
     // Server-side validation
     if (!name || !email || !date || !topic) {
       return res.status(400).json({ success: false, error: 'Missing required fields' });
@@ -98,11 +122,12 @@ app.post('/api/consultations', async (req, res) => {
       RETURNING *;
     `;
     const result = await pool.query(insertQuery, [name, email, date, topic]);
-    
+
     res.status(201).json({ success: true, data: result.rows[0] });
   } catch (err) {
-    console.error('Error inserting consultation:', err);
-    res.status(500).json({ success: false, error: 'Database insertion failed' });
+    console.error("❌ PostgreSQL Initialization Error:");
+    console.error("Message:", err.message);
+    console.error("Stack:", err.stack);
   }
 });
 
@@ -138,9 +163,9 @@ app.put('/api/consultations/:id', async (req, res) => {
 // Register User
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { 
-      fullName, email, password, mobileNumber, presentAddress, 
-      permanentAddress, governmentId, accountType, role, balance 
+    const {
+      fullName, email, password, mobileNumber, presentAddress,
+      permanentAddress, governmentId, accountType, role, balance
     } = req.body;
 
     // Check if user exists
@@ -165,10 +190,10 @@ app.post('/api/auth/register', async (req, res) => {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING id, full_name, email, role, account_number;
     `;
-    
+
     const values = [
       fullName, email, hashedPassword, mobileNumber, presentAddress,
-      permanentAddress, governmentId, accountType, accNo, ifsc, 
+      permanentAddress, governmentId, accountType, accNo, ifsc,
       role || 'customer', balance || 0
     ];
 
@@ -197,7 +222,7 @@ app.post('/api/auth/login', async (req, res) => {
 
     const user = result.rows[0];
     const isMatch = await bcrypt.compare(password, user.password);
-    
+
     if (!isMatch) {
       return res.status(400).json({ success: false, error: 'Invalid credentials' });
     }
@@ -206,7 +231,7 @@ app.post('/api/auth/login', async (req, res) => {
 
     // Remove password before sending
     delete user.password;
-    
+
     res.json({ success: true, token, user });
   } catch (err) {
     console.error('Login error:', err);
@@ -227,7 +252,7 @@ app.get('/api/customers', async (req, res) => {
       WHERE role = 'customer'
       ORDER BY created_at DESC
     `);
-    
+
     res.json({ success: true, data: result.rows });
   } catch (err) {
     console.error('Fetch customers error:', err);
@@ -239,3 +264,6 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`ðŸš€ Backend API Server running on http://localhost:${PORT}`);
 });
+pool.connect()
+  .then(() => console.log("✅ Database connected"))
+  .catch(err => console.error("❌ Database error:", err));
