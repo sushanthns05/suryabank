@@ -208,7 +208,12 @@ const EmployeeLayout = () => {
                     ))}
                   </div>
                   <div className="p-3 text-center border-t border-slate-100 dark:border-slate-700">
-                    <button className="text-sm text-surya-primary dark:text-surya-secondary hover:underline font-medium">View All Notifications</button>
+                    <button 
+                      onClick={() => { setIsNotificationOpen(false); navigate('/employee/notifications'); }}
+                      className="text-sm text-surya-primary dark:text-surya-secondary hover:underline font-medium w-full"
+                    >
+                      View All Notifications
+                    </button>
                   </div>
                 </div>
               )}

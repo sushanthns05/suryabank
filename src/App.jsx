@@ -17,6 +17,7 @@ import EmployeeAnalytics from './pages/employee/EmployeeAnalytics';
 import EmployeeSearchCustomer from './pages/employee/EmployeeSearchCustomer';
 import EmployeeLoanApproval from './pages/employee/EmployeeLoanApproval';
 import EmployeeProfile from './pages/employee/EmployeeProfile';
+import EmployeeNotifications from './pages/employee/EmployeeNotifications';
 
 // Public Layout Wrapper
 const PublicLayout = () => (
@@ -54,6 +55,7 @@ function App() {
             <Route path="open-account" element={<EmployeeDashboard />} />
             <Route path="loans" element={<EmployeeLoanApproval />} />
             <Route path="profile" element={<EmployeeProfile />} />
+            <Route path="notifications" element={<EmployeeNotifications />} />
           </Route>
           
           {/* Fallback to login */}
@@ -87,6 +89,7 @@ function App() {
           <Route path="open-account" element={<EmployeeDashboard />} />
           <Route path="loans" element={<EmployeeLoanApproval />} />
           <Route path="profile" element={<EmployeeProfile />} />
+          <Route path="notifications" element={<EmployeeNotifications />} />
           {/* Add more nested routes here in later phases */}
         </Route>
       </Routes>
