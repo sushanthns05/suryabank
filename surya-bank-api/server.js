@@ -4,14 +4,13 @@ const cors = require("cors");
 const app = express();
 
 app.use(cors());
-app.use(express.json());
 
-app.get("/api/test", (req, res) => {
-    res.json({
-        message: "Backend Connected Successfully"
-    });
+app.get("/", (req, res) => {
+    res.send("Surya Bank API Running");
 });
 
-app.listen(5000, () => {
-    console.log("Server running");
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
