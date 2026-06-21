@@ -1,0 +1,125 @@
+.maintenance-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.maintenance-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 40px;
+  border-radius: 20px;
+  max-width: 600px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  color: var(--text-primary);
+}
+
+.maintenance-header {
+  margin-bottom: 30px;
+}
+
+.maintenance-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.maintenance-header p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.spin-icon {
+  animation: spin 3s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.update-info {
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  padding: 24px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.update-info .badge {
+  display: inline-block;
+  background: var(--primary-gold);
+  color: #0f172a;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.update-info h3 {
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+  color: var(--primary-blue);
+}
+
+.dark .update-info h3 {
+  color: white;
+}
+
+.update-info p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.progress-container {
+  text-align: left;
+}
+
+.status-text {
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.dark .progress-bar-bg {
+  background: #334155;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--surya-primary);
+  border-radius: 4px;
+  transition: width 1s linear;
+}
+
+.countdown-info {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}

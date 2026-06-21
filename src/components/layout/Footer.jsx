@@ -1,9 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Sun, Mail, Phone, MapPin } from 'lucide-react';
 import './Footer.css';
 
 const Footer = () => {
+  const [version, setVersion] = useState('v1.0.0');
+
+  useEffect(() => {
+    const fetchVersion = async () => {
+      try {
+        const backendUrl = window.location.hostname === 'localhost' 
+          ? 'http://localhost:5000' 
+          : 'https://suryabank.onrender.com';
+        const res = await fetch(`${backendUrl}/api/updates/status`);
+        const data = await res.json();
+        if (data.success && data.latestUpdate) {
+          setVersion(data.latestUpdate.version);
+        }
+      } catch (err) {
+        // Silent fail, keep default version
+      }
+    };
+    fetchVersion();
+  }, []);
   return (
     <footer className="footer bg-gradient-blue text-white">
       <div className="container footer-content">
@@ -25,6 +44,7 @@ const Footer = () => {
           <h3>Services</h3>
           <ul>
             <li><Link to="/services">Savings Accounts</Link></li>
+            <li><Link to="/recurring-deposit">Recurring Deposits (RD)</Link></li>
             <li><Link to="/services">Business Loans</Link></li>
             <li><Link to="/services">Credit Cards</Link></li>
             <li><Link to="/services">Investments</Link></li>
@@ -51,8 +71,9 @@ const Footer = () => {
         </div>
       </div>
       <div className="footer-bottom">
-        <div className="container">
+        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <p>&copy; {new Date().getFullYear()} Surya Bank. All rights reserved.</p>
+          <span className="text-xs text-slate-400">Version: {version}</span>
         </div>
       </div>
     </footer>

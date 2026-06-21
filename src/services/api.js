@@ -1,5 +1,4 @@
 const API_BASE_URL = 'https://suryabank.onrender.com/api';
-
 const handleResponse = async (response) => {
   const data = await response.json();
   if (!response.ok || !data.success) {

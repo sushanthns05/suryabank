@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CreditCard, Shield, TrendingUp, Briefcase, HeartPulse, Landmark, Calendar, User, Mail, MessageSquare, X, CheckCircle, RefreshCw } from 'lucide-react';
 import { createConsultation } from '../services/api';
+import { sendConsultationEmail } from '../utils/emailService';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import './Services.css';
@@ -22,6 +23,8 @@ const Services = () => {
       const data = await createConsultation({
         ...formData,
       });
+
+      await sendConsultationEmail(formData.email, formData.name, formData.topic, formData.date, 'Pending');
 
       setSubmitSuccess(true);
       setTimeout(() => {

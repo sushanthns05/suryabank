@@ -3,9 +3,26 @@ import cors from 'cors';
 import pkg from 'pg';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import http from 'http';
+import { Server } from 'socket.io';
 const { Pool } = pkg;
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE']
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('Client connected:', socket.id);
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+});
+
 app.use(cors());
 app.use(express.json());
 
@@ -58,15 +75,49 @@ const initDB = async () => {
     `;
     await pool.query(createUsersTableQuery);
     
+    const createSystemUpdatesTableQuery = `
+      CREATE TABLE IF NOT EXISTS system_updates (
+        id SERIAL PRIMARY KEY,
+        version VARCHAR(50) NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        description TEXT,
+        type VARCHAR(50),
+        status VARCHAR(50) DEFAULT 'published',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+    await pool.query(createSystemUpdatesTableQuery);
+    
+    // Add scheduled_for column if it doesn't exist
+    await pool.query(`ALTER TABLE system_updates ADD COLUMN IF NOT EXISTS scheduled_for TIMESTAMP NULL`);
+    // Add duration_seconds column if it doesn't exist
+    await pool.query(`ALTER TABLE system_updates ADD COLUMN IF NOT EXISTS duration_seconds INT DEFAULT 30`);
+
+    const createNotificationsTableQuery = `
+      CREATE TABLE IF NOT EXISTS notifications (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        description TEXT,
+        type VARCHAR(50),
+        is_read BOOLEAN DEFAULT false,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+    await pool.query(createNotificationsTableQuery);
+    
     console.log('✅ PostgreSQL Database connected and tables are ready.');
   } catch (err) {
-    console.error('❌ PostgreSQL Initialization Error:');
+    console.error('❌ PostgreSQL Initialization Error:', err);
     console.error('If you are running this locally, the connection failed because the URI provided is an internal Render network address.');
     console.error('You need the External Database URL from the Render Dashboard to run it on localhost.');
   }
 };
 
 initDB();
+
+app.get('/api/test', (req, res) => {
+  res.json({ success: true, message: 'Backend is up and running!' });
+});
 
 app.post('/api/consultations', async (req, res) => {
   try {
@@ -139,8 +190,8 @@ app.post('/api/auth/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Generate bank details if customer
-    const accNo = role === 'employee' || role === 'admin' ? null : Math.floor(1000000000 + Math.random() * 9000000000).toString();
-    const ifsc = role === 'employee' || role === 'admin' ? null : 'SURY0001234';
+    const accNo = role === 'employee' || role === 'admin' ? null : Math.floor(100000000000 + Math.random() * 900000000000).toString();
+    const ifsc = role === 'employee' || role === 'admin' ? null : Math.floor(10000000 + Math.random() * 90000000).toString();
 
     const insertQuery = `
       INSERT INTO users (
@@ -148,7 +199,7 @@ app.post('/api/auth/register', async (req, res) => {
         permanent_address, government_id, account_type, account_number, 
         ifsc_code, role, balance
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-      RETURNING id, full_name, email, role, account_number;
+      RETURNING id, full_name, email, role, account_number, ifsc_code;
     `;
     
     const values = [
@@ -220,7 +271,133 @@ app.get('/api/customers', async (req, res) => {
   }
 });
 
+// --- SYSTEM UPDATES & NOTIFICATIONS ---
+
+// Global variable for maintenance mode (in memory for simplicity)
+let isMaintenanceMode = false;
+
+app.get('/api/updates/status', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM system_updates ORDER BY created_at DESC LIMIT 1');
+    const latestUpdate = result.rows[0] || null;
+    res.json({ success: true, maintenanceMode: isMaintenanceMode, latestUpdate });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to fetch status' });
+  }
+});
+
+app.post('/api/updates/publish', async (req, res) => {
+  try {
+    const { version, title, description, type, scheduledFor, durationSeconds } = req.body;
+    const duration = durationSeconds ? parseInt(durationSeconds) : 30;
+    
+    // Check if it's scheduled
+    if (scheduledFor && new Date(scheduledFor) > new Date()) {
+      const result = await pool.query(
+        'INSERT INTO system_updates (version, title, description, type, status, scheduled_for, duration_seconds) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+        [version, title, description, type, 'scheduled', new Date(scheduledFor), duration]
+      );
+      return res.json({ success: true, message: 'Update scheduled successfully', data: result.rows[0] });
+    }
+    
+    // Normal Insert Update (immediate)
+    const result = await pool.query(
+      'INSERT INTO system_updates (version, title, description, type, status, duration_seconds) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [version, title, description, type, 'published', duration]
+    );
+
+    // Insert Global Notification
+    const notifResult = await pool.query(
+      'INSERT INTO notifications (title, description, type) VALUES ($1, $2, $3) RETURNING *',
+      [title, description, type]
+    );
+    
+    // Trigger Maintenance Mode
+    isMaintenanceMode = true;
+
+    // Emit Socket Event
+    io.emit('maintenance_started', {
+      update: result.rows[0],
+      notification: notifResult.rows[0],
+      duration: duration
+    });
+
+    // Auto-disable maintenance mode based on duration
+    setTimeout(() => {
+      isMaintenanceMode = false;
+      io.emit('maintenance_completed', { version: result.rows[0].version });
+    }, duration * 1000);
+
+    res.json({ success: true, message: 'Update published successfully', data: result.rows[0] });
+  } catch (err) {
+    console.error('Publish update error:', err);
+    res.status(500).json({ success: false, error: 'Failed to publish update' });
+  }
+});
+
+app.get('/api/notifications', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM notifications ORDER BY created_at DESC LIMIT 20');
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to fetch notifications' });
+  }
+});
+
+app.put('/api/notifications/:id/read', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query('UPDATE notifications SET is_read = true WHERE id = $1', [id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to update notification' });
+  }
+});
+
+// Background Worker for Scheduled Updates
+setInterval(async () => {
+  try {
+    // Find scheduled updates whose time has come
+    const result = await pool.query(`
+      SELECT * FROM system_updates 
+      WHERE status = 'scheduled' AND scheduled_for <= CURRENT_TIMESTAMP
+    `);
+
+    for (const update of result.rows) {
+      // Mark as published
+      await pool.query('UPDATE system_updates SET status = $1 WHERE id = $2', ['published', update.id]);
+
+      // Insert Global Notification
+      const notifResult = await pool.query(
+        'INSERT INTO notifications (title, description, type) VALUES ($1, $2, $3) RETURNING *',
+        [update.title, update.description, update.type]
+      );
+      
+      // Trigger Maintenance Mode
+      isMaintenanceMode = true;
+      const duration = update.duration_seconds || 30;
+
+      // Emit Socket Event
+      io.emit('maintenance_started', {
+        update: update,
+        notification: notifResult.rows[0],
+        duration: duration
+      });
+
+      // Auto-disable maintenance mode based on duration
+      setTimeout(() => {
+        isMaintenanceMode = false;
+        io.emit('maintenance_completed', { version: update.version });
+      }, duration * 1000);
+      
+      console.log(`🚀 Executed Scheduled Update: ${update.version}`);
+    }
+  } catch (err) {
+    console.error('Error checking scheduled updates:', err);
+  }
+}, 30000); // Check every 30 seconds
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`🚀 Backend API Server running on http://localhost:${PORT}`);
 });

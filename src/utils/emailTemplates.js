@@ -205,3 +205,46 @@ export const getTransactionAlertTemplate = (name, amount, recipientName) => {
   `;
   return baseTemplate(content, 'Surya Bank Transaction Alert');
 };
+
+export const getConsultationTemplate = (name, topic, date, status) => {
+  const content = `
+    <h2>Consultation Request Received</h2>
+    <p>Dear <span class="highlight">${name}</span>,</p>
+    <p>Thank you for reaching out to Surya Bank. We have successfully received your request for a consultation.</p>
+    
+    <div class="otp-box" style="border-color: #f59e0b; background-color: #fffbeb;">
+      <p style="margin: 0; color: #f59e0b; font-size: 14px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Request Details</p>
+      <p style="font-size: 18px; margin: 15px 0 5px 0; color: #475569;">Topic: <strong style="color: #0f172a;">${topic}</strong></p>
+      <p style="font-size: 18px; margin: 5px 0; color: #475569;">Preferred Date: <strong style="color: #0f172a;">${date}</strong></p>
+      <p style="font-size: 18px; margin: 5px 0; color: #475569;">Status: <strong style="color: #f59e0b; text-transform: uppercase;">${status}</strong></p>
+    </div>
+    
+    <div class="details-box" style="border-left-color: #3b82f6; background-color: #eff6ff;">
+      <p style="color: #1d4ed8;"><strong>What happens next?</strong></p>
+      <p style="color: #1e3a8a;">One of our certified financial advisors will review your request and contact you shortly to confirm the appointment time and details.</p>
+    </div>
+    
+    <p>We look forward to assisting you in achieving your financial goals.</p>
+    <p>Warm regards,<br><strong>The Surya Bank Advisory Team</strong></p>
+  `;
+  return baseTemplate(content, 'Consultation Request Received');
+};
+
+export const getConsultationUpdateTemplate = (name, status) => {
+  const content = `
+    <h2>Consultation Status Update</h2>
+    <p>Dear <span class="highlight">${name}</span>,</p>
+    <p>There has been an update regarding your consultation request with Surya Bank.</p>
+    
+    <div class="otp-box" style="border-color: #22c55e; background-color: #f0fdf4;">
+      <p style="margin: 0; color: #16a34a; font-size: 14px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">New Status</p>
+      <p class="otp-code" style="color: #15803d; font-size: 32px; letter-spacing: 2px; margin: 10px 0; text-transform: uppercase;">${status}</p>
+    </div>
+    
+    <p>Your consultation request has been verified and processed by our team. An advisor will be assigned to your case and will be in touch with you at the scheduled time.</p>
+    
+    <p>If you have any questions or need to reschedule, please contact our support team.</p>
+    <p>Warm regards,<br><strong>The Surya Bank Advisory Team</strong></p>
+  `;
+  return baseTemplate(content, 'Consultation Status Update: ' + status);
+};

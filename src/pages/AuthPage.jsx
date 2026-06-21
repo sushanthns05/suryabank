@@ -57,13 +57,13 @@ const AuthPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [createdAccountDetails, setCreatedAccountDetails] = useState(null);
   
   // Form Data
   const [formData, setFormData] = useState({ 
     fullName: '', 
     email: '', 
     password: '',
-    mobileNumber: '',
     mobileNumber: '',
     presentAddress: '',
     permanentAddress: '',
@@ -211,7 +211,11 @@ const AuthPage = () => {
       localStorage.setItem('token', data.token);
 
       // 3. Send Welcome Email
-      await sendWelcomeEmail(formData.email, formData.fullName);
+      const accNo = user?.account_number || 'Pending';
+      const ifsc = user?.ifsc_code || 'SURY0001234';
+      await sendWelcomeEmail(formData.email, formData.fullName, accNo, ifsc);
+      
+      setCreatedAccountDetails({ accountNumber: accNo, ifscCode: ifsc });
 
       setStep(STEPS.SETUP_BIOMETRICS);
     } catch (err) {
@@ -278,6 +282,21 @@ const AuthPage = () => {
         <p style={{ color: '#64748b', margin: '8px 0', lineHeight: '1.6' }}>
           {isLoginSuccess ? 'You are securely logged into Surya Bank.' : 'Your account has been successfully created and verified!'}
         </p>
+
+        {!isLoginSuccess && createdAccountDetails && (
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', margin: '24px 0', textAlign: 'left' }}>
+            <h4 style={{ color: '#0f172a', margin: '0 0 15px 0', fontSize: '1.1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>Your Account Details</h4>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+              <span style={{ color: '#64748b', fontSize: '0.9rem' }}>Account Number:</span>
+              <strong style={{ color: '#0f172a', fontFamily: 'monospace', fontSize: '1.1rem', letterSpacing: '1px' }}>{createdAccountDetails.accountNumber}</strong>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#64748b', fontSize: '0.9rem' }}>IFSC Code:</span>
+              <strong style={{ color: '#0f172a', fontFamily: 'monospace', fontSize: '1.1rem', letterSpacing: '1px' }}>{createdAccountDetails.ifscCode}</strong>
+            </div>
+          </div>
+        )}
+
         <Button variant="primary" className="w-full" style={{ marginTop: '24px' }} onClick={() => window.location.href = isLoginSuccess ? dashboardPath : '/auth'}>
           {isLoginSuccess ? 'Go to Dashboard' : 'Back to Login'}
         </Button>

@@ -13,7 +13,7 @@ createRoot(document.getElementById('root')).render(
 async function getData() {
     try {
         const response = await fetch(
-            "https://surya-bank-api.onrender.com/api/test"
+            "https://suryabank.onrender.com/api/test"
         );
         const data = await response.json();
         console.log("Global API Test:", data);

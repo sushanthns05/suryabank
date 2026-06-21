@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { UserPlus, Mail, Lock, RefreshCw, CheckCircle, CalendarDays, Check, Phone, MapPin, CreditCard, Info, IdCard } from 'lucide-react';
 import { getConsultations, verifyConsultation, registerUser } from '../services/api';
+import { sendWelcomeEmail, sendConsultationUpdateEmail } from '../utils/emailService';
 
 const ACCOUNT_TYPES = [
   {
@@ -85,6 +86,10 @@ const EmployeeDashboard = () => {
       const data = await verifyConsultation(id);
       if (data.success) {
         setConsultations(consultations.map(c => c.id === id ? { ...c, status: 'verified' } : c));
+        const consult = consultations.find(c => c.id === id);
+        if (consult) {
+          await sendConsultationUpdateEmail(consult.email, consult.name, 'Verified');
+        }
       }
     } catch (err) {
       console.error("Error verifying consultation:", err);
@@ -116,7 +121,12 @@ const EmployeeDashboard = () => {
         balance: 1000.00
       });
 
-      setMessage(`Customer account for ${formData.fullName} successfully created! Verification email sent.`);
+      const user = data.user;
+      const accNo = user?.account_number || 'Pending';
+      const ifsc = user?.ifsc_code || 'SURY0001234';
+      await sendWelcomeEmail(formData.email, formData.fullName, accNo, ifsc);
+
+      setMessage(`Customer account for ${formData.fullName} successfully created! Acc No: ${accNo} | IFSC: ${ifsc}`);
       setFormData({ 
         fullName: '', email: '', password: '', mobileNumber: '',
         presentAddress: '', permanentAddress: '', governmentId: '', accountType: 'savings'

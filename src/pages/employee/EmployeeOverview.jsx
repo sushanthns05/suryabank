@@ -102,13 +102,13 @@ const EmployeeOverview = () => {
       
       {/* API Connection Banner */}
       {!apiStatus.loading && (
-        <div className={`p-4 rounded-xl border flex items-center gap-3 ${apiStatus.data?.message ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'}`}>
+        <div className={`p-4 rounded-xl border flex items-center gap-3 ${apiStatus.data?.success ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'}`}>
           <div className="flex-1">
-            <h4 className={`text-sm font-bold ${apiStatus.data?.message ? 'text-green-800 dark:text-green-300' : 'text-red-800 dark:text-red-300'}`}>
-              Backend API Status: {apiStatus.data?.message ? 'Connected' : 'Disconnected'}
+            <h4 className={`text-sm font-bold ${apiStatus.data?.success ? 'text-green-800 dark:text-green-300' : 'text-red-800 dark:text-red-300'}`}>
+              Backend API Status: {apiStatus.data?.success ? 'Connected' : 'Disconnected'}
             </h4>
-            <p className={`text-xs mt-1 ${apiStatus.data?.message ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-              {apiStatus.data?.message ? `Response from /api/test: "${apiStatus.data.message}"` : `Error: ${apiStatus.error}`}
+            <p className={`text-xs mt-1 ${apiStatus.data?.success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+              {apiStatus.data?.success ? `Response from /api/test: "${apiStatus.data.message}"` : (apiStatus.error ? `Error: ${apiStatus.error}` : `Error: ${apiStatus.data?.message || 'Unknown'}`)}
             </p>
           </div>
         </div>

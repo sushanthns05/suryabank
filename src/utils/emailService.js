@@ -1,5 +1,5 @@
 import emailjs from '@emailjs/browser';
-import { getOTPVerificationTemplate, getWelcomeTemplate, getTransactionAlertTemplate } from './emailTemplates';
+import { getOTPVerificationTemplate, getWelcomeTemplate, getTransactionAlertTemplate, getConsultationTemplate, getConsultationUpdateTemplate } from './emailTemplates';
 
 const EMAILJS_PUBLIC_KEY = 'Udo2BF2lwjLpzDA2o';
 const EMAILJS_SERVICE_ID = 'service_ucp4e7s';
@@ -24,7 +24,8 @@ const sendEmail = async (templateParams) => {
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
       EMAILJS_TEMPLATE_ID,
-      templateParams
+      templateParams,
+      EMAILJS_PUBLIC_KEY
     );
     return response;
   } catch (error) {
@@ -78,5 +79,29 @@ export const sendTransactionAlertEmail = (email, amount, recipientName) => {
     transaction_amount: `$${amount.toFixed(2)}`,
     subject: 'Surya Bank Transaction Alert',
     message: getTransactionAlertTemplate('Customer', amount, recipientName)
+  });
+};
+
+/**
+ * Send an email when a consultation is booked.
+ */
+export const sendConsultationEmail = (email, name, topic, date, status) => {
+  return sendEmail({
+    to_email: email,
+    to_name: name,
+    subject: 'Surya Bank Consultation Request Received',
+    message: getConsultationTemplate(name, topic, date, status)
+  });
+};
+
+/**
+ * Send an email when a consultation status is updated.
+ */
+export const sendConsultationUpdateEmail = (email, name, status) => {
+  return sendEmail({
+    to_email: email,
+    to_name: name,
+    subject: `Consultation Status Update: ${status}`,
+    message: getConsultationUpdateTemplate(name, status)
   });
 };

@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "surya-4f39a"
-  }
+  },
+  "targets": {
+    "surya-4f39a": {
+      "hosting": {
+        "suryabankupdatetrigger": [
+          "suryabankupdatetrigger"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
