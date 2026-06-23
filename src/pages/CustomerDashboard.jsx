@@ -15,6 +15,7 @@ const CustomerDashboard = () => {
   const [latestAnnouncement, setLatestAnnouncement] = useState(null);
   const [userAccount, setUserAccount] = useState(null);
   const [transactions, setTransactions] = useState([]);
+  const [isBranchOpen, setIsBranchOpen] = useState(true);
   
   // Card Application States
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
@@ -77,7 +78,18 @@ const CustomerDashboard = () => {
       }
     });
 
-    return () => unsubscribe();
+    // Fetch branch status
+    const branchStatusRef = doc(db, 'settings', 'branch_status');
+    const unsubscribeBranch = onSnapshot(branchStatusRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setIsBranchOpen(docSnap.data().isOpen);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+      unsubscribeBranch();
+    };
   }, []);
 
   const handleInputChange = (e) => {
@@ -191,9 +203,26 @@ const CustomerDashboard = () => {
       <div className="container dashboard-container">
         
         <div className="dashboard-main">
-          <div className="dashboard-header">
-            <h2>Dashboard</h2>
-            <p>Welcome to your account. Manage your funds below.</p>
+          <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+            <div>
+              <h2>Dashboard</h2>
+              <p>Welcome to your account. Manage your funds below.</p>
+            </div>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '8px', 
+              padding: '8px 16px', borderRadius: '50px',
+              backgroundColor: isBranchOpen ? '#dcfce7' : '#fee2e2',
+              color: isBranchOpen ? '#166534' : '#991b1b',
+              border: `1px solid ${isBranchOpen ? '#bbf7d0' : '#fecaca'}`,
+              fontWeight: 'bold', fontSize: '0.9rem',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+            }}>
+              <span style={{
+                width: '8px', height: '8px', borderRadius: '50%',
+                backgroundColor: isBranchOpen ? '#22c55e' : '#ef4444'
+              }}></span>
+              Offline Branch: {isBranchOpen ? 'OPEN' : 'CLOSED'}
+            </div>
           </div>
 
           {latestAnnouncement && (

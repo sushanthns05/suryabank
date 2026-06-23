@@ -34,6 +34,7 @@ const SIDEBAR_MENU = [
     items: [
       { name: 'Profile', path: '/employee/profile', icon: Settings },
       { name: 'Mark Attendance', path: '/employee/attendance', icon: UserCheck },
+      { name: 'Leave Management', path: '/employee/leave', icon: FileText },
     ]
   }
 ];
@@ -121,7 +122,10 @@ const EmployeeLayout = () => {
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-surya-surfaceDark border-r border-slate-200 dark:border-slate-700 transform transition-transform duration-300 ease-in-out flex flex-col ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0`}>
         <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-700">
-          <span className="text-2xl font-bold text-surya-primary dark:text-surya-secondary">Surya Bank</span>
+          <div className="flex items-center gap-2">
+            <img src="/logo.png" alt="Surya Bank Logo" className="w-8 h-8 object-contain" />
+            <span className="text-2xl font-bold text-surya-primary dark:text-surya-secondary">Surya Bank</span>
+          </div>
           <button className="md:hidden text-slate-500 hover:text-slate-700 dark:hover:text-slate-300" onClick={() => setIsSidebarOpen(false)}>
             <X size={24} />
           </button>

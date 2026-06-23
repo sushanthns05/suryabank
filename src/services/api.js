@@ -1,5 +1,5 @@
 const API_BASE_URL = 'https://suryabank.onrender.com/api';
-import { collection, query, where, getDocs, addDoc, doc, updateDoc, runTransaction, orderBy, deleteField, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, doc, updateDoc, runTransaction, orderBy, deleteField, deleteDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 const handleResponse = async (response) => {
   const data = await response.json();
@@ -145,6 +145,19 @@ export const getUserByAccount = async (accountNumber, ifscCode) => {
   return { success: true, user: { id: docSnap.id, ...docSnap.data() } };
 };
 
+export const updateCustomer = async (customerId, customerData) => {
+  try {
+    const userRef = doc(db, 'users', customerId);
+    await updateDoc(userRef, {
+      ...customerData,
+      updatedAt: new Date().toISOString()
+    });
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
 export const scheduleUserUpdate = async (userId, instantChanges, pendingChanges) => {
   try {
     const userRef = doc(db, 'users', userId);
@@ -262,6 +275,45 @@ export const getTransactions = async (accountNumber) => {
   return { success: true, data };
 };
 
+export const getAllTransactions = async () => {
+  try {
+    const txRef = collection(db, 'transactions');
+    const snap = await getDocs(txRef);
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+// Audit & Compliance Services
+export const createAuditLog = async (logData) => {
+  try {
+    const auditRef = collection(db, 'audit_logs');
+    const newLog = {
+      ...logData,
+      timestamp: new Date().toISOString()
+    };
+    const docRef = await addDoc(auditRef, newLog);
+    return { success: true, data: { id: docRef.id, ...newLog } };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const getAuditLogs = async () => {
+  try {
+    const auditRef = collection(db, 'audit_logs');
+    const snap = await getDocs(auditRef);
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
 // Consultation Services
 export const createConsultation = async (consultationData) => {
   try {
@@ -306,32 +358,43 @@ export const approveConsultation = async (id, details) => {
   }
 };
 
-// Mock Loan Services (until backend supports them)
-// In a real scenario, these would hit /api/loans
-export const getPendingLoans = async () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        success: true,
-        data: [
-          { id: 'L-1001', customerName: 'Rahul Sharma', type: 'Home Loan', amount: 4500000, tenure: 240, status: 'pending', date: '2026-06-18' },
-          { id: 'L-1002', customerName: 'Priya Patel', type: 'Personal Loan', amount: 500000, tenure: 36, status: 'pending', date: '2026-06-19' },
-          { id: 'L-1003', customerName: 'Amit Kumar', type: 'Car Loan', amount: 800000, tenure: 60, status: 'pending', date: '2026-06-20' },
-        ]
-      });
-    }, 800);
-  });
+// Real Loan Services
+export const createLoan = async (loanData) => {
+  try {
+    const loansRef = collection(db, 'loans');
+    const newLoan = {
+      ...loanData,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const docRef = await addDoc(loansRef, newLoan);
+    return { success: true, data: { id: docRef.id, ...newLoan } };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
 };
 
-export const updateLoanStatus = async (id, newStatus) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        success: true,
-        data: { id, status: newStatus }
-      });
-    }, 500);
-  });
+export const getLoans = async () => {
+  try {
+    const loansRef = collection(db, 'loans');
+    const snap = await getDocs(loansRef);
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const updateLoanStatus = async (id, status, updates = {}) => {
+  try {
+    const loanRef = doc(db, 'loans', id);
+    await updateDoc(loanRef, { status, updatedAt: new Date().toISOString(), ...updates });
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
 };
 
 // Card Application Services
@@ -443,6 +506,252 @@ export const getEmployeeAttendance = async (employeeName) => {
     data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     
     return { success: true, count: data.length, records: data };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const getTodayAttendance = async () => {
+  try {
+    const attRef = collection(db, 'attendance');
+    const today = new Date().toLocaleDateString('en-CA'); 
+    const q = query(attRef, where('date', '==', today));
+    const snap = await getDocs(q);
+    
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return { success: true, records: data };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+// ==========================================
+// EMPLOYEE MANAGEMENT API
+// ==========================================
+
+export const getEmployees = async () => {
+  try {
+    const employeesRef = collection(db, 'employees');
+    const q = query(employeesRef);
+    const snap = await getDocs(q);
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error fetching employees:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+export const addEmployee = async (employeeData) => {
+  try {
+    const employeesRef = collection(db, 'employees');
+    const newDoc = await addDoc(employeesRef, {
+      ...employeeData,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    return { success: true, id: newDoc.id };
+  } catch (error) {
+    console.error("Error adding employee:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+export const updateEmployee = async (employeeId, employeeData) => {
+  try {
+    const employeeRef = doc(db, 'employees', employeeId);
+    await updateDoc(employeeRef, {
+      ...employeeData,
+      updatedAt: new Date().toISOString()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating employee:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+export const deleteEmployee = async (employeeId) => {
+  try {
+    const employeeRef = doc(db, 'employees', employeeId);
+    await deleteDoc(employeeRef);
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting employee:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+// ==========================================
+// MANAGER BROADCAST SERVICES
+// ==========================================
+
+export const createBroadcast = async (broadcastData) => {
+  try {
+    const broadcastRef = collection(db, 'broadcasts');
+    const newBroadcast = {
+      ...broadcastData,
+      timestamp: new Date().toISOString()
+    };
+    const docRef = await addDoc(broadcastRef, newBroadcast);
+    return { success: true, data: { id: docRef.id, ...newBroadcast } };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const getBroadcasts = async () => {
+  try {
+    const broadcastRef = collection(db, 'broadcasts');
+    const snap = await getDocs(broadcastRef);
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    return { success: true, broadcasts: data };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+// ==========================================
+// EMPLOYEE TASKS, LEAVES, PERFORMANCE & WARNINGS
+// ==========================================
+
+export const getEmployeeTasks = async (employeeId) => {
+  try {
+    const tasksRef = collection(db, 'employee_tasks');
+    const q = query(tasksRef, where('employeeId', '==', employeeId));
+    const snap = await getDocs(q);
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const assignTask = async (taskData) => {
+  try {
+    const tasksRef = collection(db, 'employee_tasks');
+    const newTask = {
+      ...taskData,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+    const docRef = await addDoc(tasksRef, newTask);
+    return { success: true, id: docRef.id, data: newTask };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const updateTaskStatus = async (taskId, status) => {
+  try {
+    const taskRef = doc(db, 'employee_tasks', taskId);
+    await updateDoc(taskRef, { status, updatedAt: new Date().toISOString() });
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const getEmployeeLeaves = async (employeeId) => {
+  try {
+    const leavesRef = collection(db, 'employee_leaves');
+    const q = query(leavesRef, where('employeeId', '==', employeeId));
+    const snap = await getDocs(q);
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const applyLeave = async (leaveData) => {
+  try {
+    const leavesRef = collection(db, 'employee_leaves');
+    const newLeave = {
+      ...leaveData,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const docRef = await addDoc(leavesRef, newLeave);
+    return { success: true, id: docRef.id, data: newLeave };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const updateLeaveStatus = async (leaveId, status) => {
+  try {
+    const leaveRef = doc(db, 'employee_leaves', leaveId);
+    await updateDoc(leaveRef, { status, updatedAt: new Date().toISOString() });
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const getEvaluations = async (employeeId) => {
+  try {
+    const evalRef = collection(db, 'employee_evaluations');
+    const q = query(evalRef, where('employeeId', '==', employeeId));
+    const snap = await getDocs(q);
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const addEvaluation = async (evalData) => {
+  try {
+    const evalRef = collection(db, 'employee_evaluations');
+    const newEval = {
+      ...evalData,
+      createdAt: new Date().toISOString()
+    };
+    const docRef = await addDoc(evalRef, newEval);
+    return { success: true, id: docRef.id, data: newEval };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const getWarnings = async (employeeId) => {
+  try {
+    const warnRef = collection(db, 'employee_warnings');
+    const q = query(warnRef, where('employeeId', '==', employeeId));
+    const snap = await getDocs(q);
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const issueWarning = async (warningData) => {
+  try {
+    const warnRef = collection(db, 'employee_warnings');
+    const newWarning = {
+      ...warningData,
+      createdAt: new Date().toISOString()
+    };
+    const docRef = await addDoc(warnRef, newWarning);
+    return { success: true, id: docRef.id, data: newWarning };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const updateBranchStatus = async (isOpen) => {
+  try {
+    const statusRef = doc(db, 'settings', 'branch_status');
+    await setDoc(statusRef, { isOpen, updatedAt: new Date().toISOString() }, { merge: true });
+    return { success: true };
   } catch (error) {
     return { success: false, message: error.message };
   }

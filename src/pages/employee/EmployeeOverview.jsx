@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { testApiConnection } from '../../services/api';
+import { testApiConnection, getBroadcasts } from '../../services/api';
 import { 
   Users, Activity, FileText, UserPlus, IndianRupee, 
   Wallet, Briefcase, UserCheck, ArrowUpRight, ArrowDownRight, Clock
@@ -56,8 +56,16 @@ const RECENT_TXNS = [
 const EmployeeOverview = () => {
   const navigate = useNavigate();
   const [apiStatus, setApiStatus] = useState({ loading: true, data: null, error: null });
+  const [broadcasts, setBroadcasts] = useState([]);
 
   useEffect(() => {
+    const fetchBroadcasts = async () => {
+      const res = await getBroadcasts();
+      if (res.success && res.broadcasts.length > 0) {
+        setBroadcasts(res.broadcasts);
+      }
+    };
+    fetchBroadcasts();
     const checkApi = async () => {
       try {
         const response = await testApiConnection();
@@ -100,6 +108,31 @@ const EmployeeOverview = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       
+      {/* Urgent Manager Broadcasts */}
+      {broadcasts.length > 0 && (
+        <div className="space-y-3 mb-6">
+          {broadcasts.slice(0, 1).map(broadcast => (
+            <div key={broadcast.id} className={`p-4 rounded-xl border flex items-start gap-4 shadow-md ${broadcast.priority === 'urgent' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-500/50 animate-pulse-slow' : 'bg-[#F59E0B]/10 border-[#F59E0B]/30'}`}>
+              <div className={`p-2 rounded-full ${broadcast.priority === 'urgent' ? 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400' : 'bg-[#F59E0B]/20 text-[#F59E0B]'}`}>
+                <Activity size={24} />
+              </div>
+              <div className="flex-1">
+                <div className="flex justify-between items-center mb-1">
+                  <h3 className={`font-bold text-lg ${broadcast.priority === 'urgent' ? 'text-red-800 dark:text-red-300' : 'text-[#F59E0B]'}`}>
+                    {broadcast.priority === 'urgent' ? 'URGENT BROADCAST' : 'BRANCH ANNOUNCEMENT'}
+                  </h3>
+                  <span className="text-xs font-bold text-slate-500 flex items-center gap-1">
+                    <Clock size={12} /> {new Date(broadcast.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+                <p className="text-slate-800 dark:text-slate-200">{broadcast.message}</p>
+                <p className="text-xs text-slate-500 mt-2 font-bold uppercase tracking-wider">From: {broadcast.author}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* API Connection Banner */}
       {!apiStatus.loading && (
         <div className={`p-4 rounded-xl border flex items-center gap-3 ${apiStatus.data?.success ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'}`}>

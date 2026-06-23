@@ -12,6 +12,7 @@ const Navbar = () => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [selectedNotification, setSelectedNotification] = useState(null);
+  const [isBranchOpen, setIsBranchOpen] = useState(true);
   const notifRef = useRef(null);
   const location = useLocation();
 
@@ -61,10 +62,19 @@ const Navbar = () => {
       console.error("Failed to fetch notifications from Firestore:", error);
     });
     
+    // Fetch branch status
+    const branchStatusRef = doc(db, 'settings', 'branch_status');
+    const unsubscribeBranch = onSnapshot(branchStatusRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setIsBranchOpen(docSnap.data().isOpen);
+      }
+    });
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('mousedown', handleClickOutside);
       unsubscribe();
+      unsubscribeBranch();
     };
   }, []);
 
@@ -101,11 +111,15 @@ const Navbar = () => {
           <span className="brand-text">Surya<span className="brand-accent">Bank</span></span>
         </Link>
 
-        <div className="navbar-links desktop-only">
+        <div className="navbar-links desktop-only flex items-center">
           <Link to="/" className="nav-link">Home</Link>
           <Link to="/services" className="nav-link">Services</Link>
           <Link to="/about" className="nav-link">About Us</Link>
           {isAuthenticated && userRole !== 'employee' && <Link to={dashboardPath} className="nav-link">{dashboardLabel}</Link>}
+          <div className={`ml-4 px-3 py-1 rounded-full text-[10px] font-bold border flex items-center gap-1.5 ${isBranchOpen ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-red-50 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${isBranchOpen ? 'bg-emerald-500 dark:bg-emerald-400 animate-pulse' : 'bg-red-500 dark:bg-red-400'}`}></span>
+            Branch: {isBranchOpen ? 'OPEN' : 'CLOSED'}
+          </div>
         </div>
 
         <div className="navbar-actions desktop-only flex items-center">

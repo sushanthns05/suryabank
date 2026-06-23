@@ -27,7 +27,9 @@ import EmployeeLoanApproval from './pages/employee/EmployeeLoanApproval';
 import EmployeeProfile from './pages/employee/EmployeeProfile';
 import EmployeeNotifications from './pages/employee/EmployeeNotifications';
 import EmployeeAttendance from './pages/employee/EmployeeAttendance';
+import EmployeeLeaves from './pages/employee/EmployeeLeaves';
 
+import ManagerLogin from './pages/manager/ManagerLogin';
 import ManagerLayout from './components/layout/ManagerLayout';
 import ManagerDashboard from './pages/manager/ManagerDashboard';
 import ManagerBranchManagement from './pages/manager/ManagerBranchManagement';
@@ -41,6 +43,7 @@ import ManagerNotifications from './pages/manager/ManagerNotifications';
 import ManagerCommunication from './pages/manager/ManagerCommunication';
 import ManagerSettings from './pages/manager/ManagerSettings';
 import ManagerProfile from './pages/manager/ManagerProfile';
+import ManagerAttendance from './pages/manager/ManagerAttendance';
 
 // Public Layout Wrapper
 const PublicLayout = () => (
@@ -85,6 +88,7 @@ function App() {
             <Route path="profile" element={<EmployeeProfile />} />
             <Route path="notifications" element={<EmployeeNotifications />} />
             <Route path="attendance" element={<EmployeeAttendance />} />
+            <Route path="leave" element={<EmployeeLeaves />} />
           </Route>
           
           {/* Fallback to login */}
@@ -101,6 +105,7 @@ function App() {
         <Router>
           <Routes>
             <Route path="/" element={<Navigate to="/manager" replace />} />
+            <Route path="/manager-login" element={<ManagerLogin />} />
             
             {/* Manager Dashboard Routes */}
             <Route path="/manager" element={<ManagerLayout />}>
@@ -109,6 +114,7 @@ function App() {
               <Route path="customers" element={<ManagerCustomers />} />
               <Route path="loans" element={<ManagerLoans />} />
               <Route path="employees" element={<ManagerEmployees />} />
+              <Route path="attendance" element={<ManagerAttendance />} />
               <Route path="transactions" element={<ManagerTransactions />} />
               <Route path="reports" element={<ManagerReports />} />
               <Route path="audit" element={<ManagerAudit />} />
@@ -159,6 +165,7 @@ function App() {
           <Route path="profile" element={<EmployeeProfile />} />
           <Route path="notifications" element={<EmployeeNotifications />} />
           <Route path="attendance" element={<EmployeeAttendance />} />
+          <Route path="leave" element={<EmployeeLeaves />} />
           {/* Add more nested routes here in later phases */}
         </Route>
       </Routes>

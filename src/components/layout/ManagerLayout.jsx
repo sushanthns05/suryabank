@@ -20,6 +20,7 @@ const SIDEBAR_MENU = [
       { name: 'Customers', path: '/manager/customers', icon: Users },
       { name: 'Loans', path: '/manager/loans', icon: Briefcase },
       { name: 'Employees', path: '/manager/employees', icon: UserCheck },
+      { name: 'Attendance', path: '/manager/attendance', icon: ClipboardList },
       { name: 'Transactions', path: '/manager/transactions', icon: CreditCard },
     ]
   },
@@ -52,6 +53,14 @@ const ManagerLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const profileRef = useRef(null);
+
+  // Authentication Check
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem('managerAuthenticated');
+    if (isAuthenticated !== 'true') {
+      navigate('/manager-login');
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -86,7 +95,9 @@ const ManagerLayout = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('managerAuthenticated');
-    navigate('/employee-login'); // Or dedicated manager login
+    localStorage.removeItem('managerRole');
+    localStorage.removeItem('managerBranch');
+    navigate('/manager-login');
   };
 
   return (
@@ -96,10 +107,8 @@ const ManagerLayout = () => {
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 ${isDarkMode ? 'bg-[#1E293B] border-[#334155]' : 'bg-white border-slate-200'} border-r transform transition-transform duration-300 ease-in-out flex flex-col ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0`}>
         <div className="h-16 flex items-center justify-between px-4 border-b border-inherit">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#F59E0B] to-yellow-600 flex items-center justify-center">
-              <ShieldCheck size={20} className="text-white" />
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-[#F59E0B] to-yellow-500 bg-clip-text text-transparent">Surya Portal</span>
+            <img src="/logo.png" alt="Surya Bank Logo" className="w-8 h-8 object-contain" />
+            <span className="text-xl font-bold bg-gradient-to-r from-[#F59E0B] to-yellow-500 bg-clip-text text-transparent">Surya Bank</span>
           </div>
           <button className="md:hidden text-slate-400 hover:text-slate-200" onClick={() => setIsSidebarOpen(false)}>
             <X size={24} />
@@ -171,7 +180,7 @@ const ManagerLayout = () => {
                 </div>
                 <div className="hidden md:block text-left">
                   <p className="text-xs font-bold">Admin User</p>
-                  <p className="text-[10px] text-[#F59E0B]">Managing Director</p>
+                  <p className="text-[10px] text-[#F59E0B]">{localStorage.getItem('managerRole') || 'Manager'}</p>
                 </div>
               </button>
               

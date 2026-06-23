@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Briefcase, CheckCircle, XCircle, RefreshCw, AlertCircle, FileText, IndianRupee } from 'lucide-react';
-import { getPendingLoans, updateLoanStatus } from '../../services/api';
+import { getLoans, updateLoanStatus } from '../../services/api';
 
 const EmployeeLoanApproval = () => {
   const [loans, setLoans] = useState([]);
@@ -12,9 +12,10 @@ const EmployeeLoanApproval = () => {
     setLoading(true);
     setError('');
     try {
-      const data = await getPendingLoans();
+      const data = await getLoans();
       if (data.success) {
-        setLoans(data.data);
+        // Employee only sees pending loans
+        setLoans(data.data.filter(loan => loan.status === 'pending' || loan.status === 'level_1_verified' || loan.status === 'rejected'));
       } else {
         setError(data.error || 'Failed to fetch loans');
       }
@@ -99,8 +100,8 @@ const EmployeeLoanApproval = () => {
                 {loans.map((loan) => (
                   <tr key={loan.id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${loan.status !== 'pending' ? 'opacity-60 bg-slate-50 dark:bg-slate-800/30' : ''}`}>
                     <td className="p-4">
-                      <span className="font-medium text-slate-800 dark:text-slate-200">{loan.id}</span>
-                      <p className="text-xs text-slate-500 mt-1">{loan.date}</p>
+                      <span className="font-medium text-slate-800 dark:text-slate-200">{loan.id.substring(0, 8)}</span>
+                      <p className="text-xs text-slate-500 mt-1">{new Date(loan.createdAt).toLocaleDateString()}</p>
                     </td>
                     <td className="p-4">
                       <p className="font-medium text-slate-800 dark:text-white">{loan.customerName}</p>
@@ -122,29 +123,29 @@ const EmployeeLoanApproval = () => {
                     </td>
                     <td className="p-4">
                       {loan.status === 'pending' ? (
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="flex flex-col gap-2">
                           <button 
-                            onClick={() => handleStatusUpdate(loan.id, 'approved')}
+                            onClick={() => handleStatusUpdate(loan.id, 'level_1_verified')}
                             disabled={actionLoading === loan.id}
-                            className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors border border-transparent hover:border-green-200 dark:hover:border-green-800 disabled:opacity-50"
-                            title="Approve Loan"
+                            className="w-full px-3 py-1.5 text-xs font-bold bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
+                            title="Verify Documents & Forward"
                           >
-                            {actionLoading === loan.id ? <RefreshCw size={20} className="animate-spin" /> : <CheckCircle size={20} />}
+                            {actionLoading === loan.id ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+                            Verify & Forward
                           </button>
                           <button 
                             onClick={() => handleStatusUpdate(loan.id, 'rejected')}
                             disabled={actionLoading === loan.id}
-                            className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors border border-transparent hover:border-red-200 dark:hover:border-red-800 disabled:opacity-50"
-                            title="Reject Loan"
+                            className="w-full px-3 py-1.5 text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 rounded-lg transition-colors flex items-center justify-center gap-1 disabled:opacity-50"
                           >
-                            <XCircle size={20} />
+                            <XCircle size={14} /> Reject
                           </button>
                         </div>
                       ) : (
                         <div className="text-center">
-                          <span className={`inline-flex items-center gap-1.5 text-sm font-bold ${loan.status === 'approved' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                            {loan.status === 'approved' ? <CheckCircle size={16} /> : <XCircle size={16} />}
-                            {loan.status.charAt(0).toUpperCase() + loan.status.slice(1)}
+                          <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full ${loan.status === 'level_1_verified' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
+                            {loan.status === 'level_1_verified' ? <CheckCircle size={14} /> : <XCircle size={14} />}
+                            {loan.status === 'level_1_verified' ? 'Sent to Manager' : 'Rejected'}
                           </span>
                         </div>
                       )}

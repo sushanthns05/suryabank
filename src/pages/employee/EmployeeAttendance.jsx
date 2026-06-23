@@ -107,7 +107,6 @@ const EmployeeAttendance = () => {
             >
               <option value="" disabled>Select your name</option>
               {[
-                "Sushanth N S - Manager and Head of Bank",
                 "Manjunath R - Senior Personal Bankers / Banking Associates",
                 "Kumar G - Personal Bankers / Banking Associates",
                 "Ramesh R - Personal Bankers / Banking Associates",
