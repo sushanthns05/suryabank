@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { UserPlus, Mail, Lock, RefreshCw, CheckCircle, CalendarDays, Check, Phone, MapPin, CreditCard, Info, IdCard } from 'lucide-react';
-import { getConsultations, verifyConsultation, registerUser } from '../services/api';
-import { sendWelcomeEmail, sendConsultationUpdateEmail } from '../utils/emailService';
+import { UserPlus, Mail, Lock, Unlock, RefreshCw, CheckCircle, CalendarDays, Check, Phone, MapPin, CreditCard, Info, IdCard, Search, Edit, BookOpen, ArrowUpRight, ArrowDownRight, IndianRupee, History, AlertCircle, Users, Activity, TrendingUp, X } from 'lucide-react';
+import { getConsultations, verifyConsultation, registerUser, getUserByAccount, updateUserDetails, processTransaction, getTransactions, updateCustomerStatus, getCardApplications, updateCardApplicationStatus } from '../services/api';
+import { sendWelcomeEmail, sendConsultationUpdateEmail, sendBranchTransactionEmail, sendCardApprovalEmail } from '../utils/emailService';
 
 const ACCOUNT_TYPES = [
   {
@@ -47,10 +47,13 @@ const EmployeeDashboard = () => {
     email: '', 
     password: '',
     mobileNumber: '',
+    dateOfBirth: '',
+    gender: 'Male',
     presentAddress: '',
     permanentAddress: '',
     governmentId: '',
-    accountType: 'savings'
+    accountType: 'savings',
+    agreeTerms: false
   });
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -58,6 +61,33 @@ const EmployeeDashboard = () => {
 
   const [consultations, setConsultations] = useState([]);
   const [loadingConsultations, setLoadingConsultations] = useState(true);
+
+  // Card Applications
+  const [cardApplications, setCardApplications] = useState([]);
+  const [loadingCardApps, setLoadingCardApps] = useState(true);
+
+  // --- Account Management State ---
+  const [activeTab, setActiveTab] = useState('operations'); // 'operations' | 'management'
+  const [lookupData, setLookupData] = useState({ accountNumber: '', ifscCode: '' });
+  const [lookedUpUser, setLookedUpUser] = useState(null);
+  const [isLookingUp, setIsLookingUp] = useState(false);
+  const [lookupError, setLookupError] = useState('');
+  
+  // Edit Profile
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editProfileData, setEditProfileData] = useState({});
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileMsg, setProfileMsg] = useState({ type: '', text: '' });
+  
+  // Transaction Management
+  const [txData, setTxData] = useState({ type: 'credit', amount: '', description: '' });
+  const [isProcessingTx, setIsProcessingTx] = useState(false);
+  const [txMessage, setTxMessage] = useState({ type: '', text: '' });
+
+  // Passbook
+  const [userTransactions, setUserTransactions] = useState([]);
+  const [isLoadingPassbook, setIsLoadingPassbook] = useState(false);
+  // --------------------------------
 
   const fetchConsultations = async () => {
     try {
@@ -72,6 +102,19 @@ const EmployeeDashboard = () => {
     }
   };
 
+  const fetchCardApps = async () => {
+    try {
+      const data = await getCardApplications();
+      if (data.success) {
+        setCardApplications(data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching card applications:", err);
+    } finally {
+      setLoadingCardApps(false);
+    }
+  };
+
   useEffect(() => {
     const role = localStorage.getItem('userRole');
     if (role !== 'employee') {
@@ -79,6 +122,7 @@ const EmployeeDashboard = () => {
       return;
     }
     fetchConsultations();
+    fetchCardApps();
   }, []);
 
   const handleVerifyConsultation = async (id) => {
@@ -97,16 +141,64 @@ const EmployeeDashboard = () => {
     }
   };
 
+  const handleUpdateCardApp = async (id, status) => {
+    try {
+      const app = cardApplications.find(c => c.id === id);
+      let updates = {};
+      let cardNumber = null;
+
+      if (status === 'Approved' && app) {
+        // Generate 12 digit card number
+        cardNumber = Math.floor(100000000000 + Math.random() * 900000000000).toString();
+        updates.cardNumber = cardNumber;
+      }
+
+      const data = await updateCardApplicationStatus(id, status, updates);
+      if (data.success) {
+        setCardApplications(cardApplications.map(c => c.id === id ? { ...c, status, ...updates } : c));
+        
+        if (status === 'Approved' && app) {
+          let emailToUse = app.email;
+          if (!emailToUse || emailToUse.includes('N/A')) {
+             const userRes = await getUserByAccount(app.accountNumber);
+             if (userRes.success && userRes.user?.email) {
+               emailToUse = userRes.user.email;
+             }
+          }
+          if (emailToUse && !emailToUse.includes('N/A')) {
+            try {
+              await sendCardApprovalEmail(emailToUse, app.customerName || app.nameOnCard || 'Customer', app.cardType || 'Card', cardNumber);
+              alert("Card Approved and email sent successfully to " + emailToUse);
+            } catch (emailErr) {
+              console.error("EmailJS Error details:", emailErr);
+              alert("Card Approved, but failed to send email. Check console for details.");
+            }
+          } else {
+            alert("Card Approved, but no valid email address could be found for this account number.");
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error updating card application:", err);
+      alert("Failed to update card application.");
+    }
+  };
+
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    setFormData({ ...formData, [e.target.name]: value });
     setError('');
     setMessage('');
   };
 
   const handleCreateCustomer = async (e) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.email || !formData.password || !formData.mobileNumber || !formData.presentAddress || !formData.permanentAddress || !formData.governmentId || !formData.accountType) {
+    if (!formData.fullName || !formData.email || !formData.password || !formData.mobileNumber || !formData.dateOfBirth || !formData.presentAddress || !formData.permanentAddress || !formData.governmentId || !formData.accountType) {
       setError("Please fill in all fields.");
+      return;
+    }
+    if (!formData.agreeTerms) {
+      setError("Please agree to the terms and conditions.");
       return;
     }
 
@@ -123,13 +215,14 @@ const EmployeeDashboard = () => {
 
       const user = data.user;
       const accNo = user?.account_number || 'Pending';
-      const ifsc = user?.ifsc_code || 'SURY0001234';
+      const ifsc = user?.ifsc_code || 'SURY0123';
       await sendWelcomeEmail(formData.email, formData.fullName, accNo, ifsc);
 
       setMessage(`Customer account for ${formData.fullName} successfully created! Acc No: ${accNo} | IFSC: ${ifsc}`);
       setFormData({ 
         fullName: '', email: '', password: '', mobileNumber: '',
-        presentAddress: '', permanentAddress: '', governmentId: '', accountType: 'savings'
+        dateOfBirth: '', gender: 'Male',
+        presentAddress: '', permanentAddress: '', governmentId: '', accountType: 'savings', agreeTerms: false
       });
 
     } catch (err) {
@@ -140,6 +233,133 @@ const EmployeeDashboard = () => {
     }
   };
 
+  const handleLookupAccount = async (e) => {
+    e.preventDefault();
+    if (!lookupData.accountNumber || !lookupData.ifscCode) return;
+    
+    setIsLookingUp(true);
+    setLookupError('');
+    setLookedUpUser(null);
+    setProfileMsg({ type: '', text: '' });
+    setTxMessage({ type: '', text: '' });
+
+    try {
+      const res = await getUserByAccount(lookupData.accountNumber, lookupData.ifscCode);
+      if (res.success) {
+        setLookedUpUser(res.user);
+        setEditProfileData({
+          fullName: res.user.fullName || '',
+          email: res.user.email || '',
+          mobileNumber: res.user.mobileNumber || '',
+          presentAddress: res.user.presentAddress || '',
+          permanentAddress: res.user.permanentAddress || '',
+        });
+        fetchUserTransactions(lookupData.accountNumber);
+      } else {
+        setLookupError(res.message);
+      }
+    } catch (err) {
+      setLookupError(err.message || 'Error looking up account');
+    } finally {
+      setIsLookingUp(false);
+    }
+  };
+
+  const fetchUserTransactions = async (accNo) => {
+    setIsLoadingPassbook(true);
+    try {
+      const res = await getTransactions(accNo);
+      if (res.success) {
+        setUserTransactions(res.data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoadingPassbook(false);
+    }
+  };
+
+  const handleToggleBlock = async () => {
+    if (!lookedUpUser) return;
+    try {
+      const newStatus = !lookedUpUser.isBlocked;
+      await updateCustomerStatus(lookedUpUser.id, newStatus);
+      setLookedUpUser({ ...lookedUpUser, isBlocked: newStatus });
+      setProfileMsg({ type: 'success', text: `Account successfully ${newStatus ? 'blocked' : 'unblocked'}.` });
+    } catch (error) {
+      setProfileMsg({ type: 'error', text: 'Failed to update account status.' });
+    }
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setIsSavingProfile(true);
+    setProfileMsg({ type: '', text: '' });
+
+    try {
+      await updateUserDetails(lookedUpUser.id, editProfileData);
+      setLookedUpUser({ ...lookedUpUser, ...editProfileData });
+      setProfileMsg({ type: 'success', text: 'Profile updated successfully!' });
+      setIsEditingProfile(false);
+    } catch (err) {
+      setProfileMsg({ type: 'error', text: err.message || 'Failed to update profile' });
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  const handleProcessTransaction = async (e) => {
+    e.preventDefault();
+    if (!txData.amount || parseFloat(txData.amount) <= 0) {
+      setTxMessage({ type: 'error', text: 'Enter a valid amount greater than 0' });
+      return;
+    }
+
+    setIsProcessingTx(true);
+    setTxMessage({ type: '', text: '' });
+
+    try {
+      const res = await processTransaction(
+        lookedUpUser.id, 
+        lookedUpUser.account_number, 
+        txData.amount, 
+        txData.type, 
+        txData.description || (txData.type === 'credit' ? 'Deposit at Branch' : 'Withdrawal at Branch')
+      );
+
+      if (res.success) {
+        setTxMessage({ type: 'success', text: `Successfully processed ${txData.type} of ₹${parseFloat(txData.amount).toFixed(2)}` });
+        setTxData({ type: 'credit', amount: '', description: '' });
+        
+        // Refresh balance and passbook
+        const updatedUser = await getUserByAccount(lookupData.accountNumber, lookupData.ifscCode);
+        if (updatedUser.success) {
+          setLookedUpUser(updatedUser.user);
+          // Send Email Notification
+          try {
+            await sendBranchTransactionEmail(
+              updatedUser.user.email,
+              updatedUser.user.fullName,
+              txData.type,
+              txData.amount,
+              updatedUser.user.balance,
+              txData.description || (txData.type === 'credit' ? 'Deposit at Branch' : 'Withdrawal at Branch')
+            );
+          } catch (emailErr) {
+            console.error("Failed to send transaction email:", emailErr);
+          }
+        }
+        fetchUserTransactions(lookupData.accountNumber);
+      } else {
+        setTxMessage({ type: 'error', text: res.message });
+      }
+    } catch (err) {
+      setTxMessage({ type: 'error', text: err.message || 'Transaction failed' });
+    } finally {
+      setIsProcessingTx(false);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -147,9 +367,27 @@ const EmployeeDashboard = () => {
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Customer Operations</h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage offline branch operations and consultations.</p>
         </div>
+
+        <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+          <button 
+            onClick={() => setActiveTab('operations')}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'operations' ? 'bg-white dark:bg-surya-surfaceDark text-surya-primary dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
+          >
+            Branch Operations
+          </button>
+          <button 
+            onClick={() => setActiveTab('management')}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-1.5 ${activeTab === 'management' ? 'bg-white dark:bg-surya-surfaceDark text-surya-primary dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
+          >
+            <Search size={16} /> Account Management
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+
+      {activeTab === 'operations' ? (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 fade-in">
         
         {/* Create Customer Card */}
         <div className="bg-white dark:bg-surya-surfaceDark rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
@@ -190,6 +428,40 @@ const EmployeeDashboard = () => {
                     required
                     className="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-surya-primary transition-colors"
                   />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Date of Birth</label>
+                <div className="relative">
+                  <CalendarDays size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input 
+                    type="date" 
+                    name="dateOfBirth"
+                    value={formData.dateOfBirth}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-surya-primary transition-colors"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Gender</label>
+                <div className="relative">
+                  <Users size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <select 
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-surya-primary transition-colors appearance-none"
+                  >
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -300,6 +572,20 @@ const EmployeeDashboard = () => {
               <p>{ACCOUNT_TYPES.find(t => t.id === formData.accountType)?.details}</p>
             </div>
 
+            <div className="flex items-start gap-2 mt-2">
+              <input 
+                type="checkbox" 
+                name="agreeTerms" 
+                id="agreeTerms" 
+                checked={formData.agreeTerms} 
+                onChange={handleInputChange} 
+                className="mt-1 h-4 w-4 text-surya-primary focus:ring-surya-primary border-slate-300 rounded cursor-pointer" 
+              />
+              <label htmlFor="agreeTerms" className="text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
+                I agree to the terms and conditions before creating an account
+              </label>
+            </div>
+
             {error && (
               <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg border border-red-100 dark:border-red-900/30">
                 {error}
@@ -379,7 +665,269 @@ const EmployeeDashboard = () => {
           </div>
         </div>
 
+        {/* Card Applications Card */}
+        <div className="bg-white dark:bg-surya-surfaceDark rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 flex flex-col h-full md:col-span-2 xl:col-span-2">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
+              <CreditCard size={24} />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-slate-800 dark:text-white">Card Applications</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Review and process new ATM/Debit/Credit card requests.</p>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto pr-2" style={{ maxHeight: '400px' }}>
+            {loadingCardApps ? (
+              <div className="flex justify-center items-center h-32 text-slate-400">
+                <RefreshCw className="animate-spin" size={24} />
+              </div>
+            ) : cardApplications.length === 0 ? (
+              <div className="text-center py-10">
+                <CreditCard size={48} className="mx-auto text-slate-300 dark:text-slate-600 mb-3" />
+                <p className="text-slate-500 dark:text-slate-400">No card applications pending.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {cardApplications.map(app => (
+                  <div key={app.id} className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:border-slate-200 dark:hover:border-slate-700">
+                    <div>
+                      <h4 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        {app.customerName} 
+                        <span className="text-xs font-normal text-slate-500 dark:text-slate-400">({app.accountNumber})</span>
+                      </h4>
+                      <div className="mt-1 flex flex-col gap-1 text-sm text-slate-600 dark:text-slate-300">
+                        <p><span className="font-medium text-slate-400">Card Type:</span> <span className="font-bold text-surya-primary dark:text-surya-secondary">{app.cardType}</span></p>
+                        <p><span className="font-medium text-slate-400">Name on Card:</span> {app.nameOnCard}</p>
+                        <p><span className="font-medium text-slate-400">Delivery:</span> {app.deliveryAddress}</p>
+                      </div>
+                    </div>
+                    <div className="shrink-0 flex gap-2">
+                      {app.status === 'pending' ? (
+                        <>
+                          <button 
+                            onClick={() => handleUpdateCardApp(app.id, 'approved')} 
+                            className="px-3 py-1.5 bg-surya-success text-white text-xs font-medium rounded hover:bg-green-600 transition-colors shadow-sm"
+                          >
+                            Approve
+                          </button>
+                          <button 
+                            onClick={() => handleUpdateCardApp(app.id, 'rejected')} 
+                            className="px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded hover:bg-red-600 transition-colors shadow-sm"
+                          >
+                            Reject
+                          </button>
+                        </>
+                      ) : (
+                        <span className={`flex items-center gap-1.5 font-bold text-sm px-3 py-1.5 rounded-lg border ${app.status === 'approved' ? 'text-surya-success bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-900/30' : 'text-red-500 bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-900/30'}`}>
+                          {app.status === 'approved' ? <><CheckCircle size={16} /> Approved</> : <><X size={16} /> Rejected</>}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
       </div>
+      ) : (
+        <div className="fade-in space-y-6">
+          {/* Lookup Card */}
+          <div className="bg-white dark:bg-surya-surfaceDark rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+            <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+              <Search size={20} className="text-surya-primary" /> Lookup Account
+            </h2>
+            <form onSubmit={handleLookupAccount} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+              <div className="md:col-span-5 w-full">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Account Number (12 Digits)</label>
+                <input 
+                  type="text" 
+                  value={lookupData.accountNumber}
+                  onChange={(e) => setLookupData({...lookupData, accountNumber: e.target.value})}
+                  placeholder="e.g. 123456789012" 
+                  required
+                  className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-surya-primary transition-colors"
+                />
+              </div>
+              <div className="md:col-span-5 w-full">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">IFSC Code (8 Digits)</label>
+                <input 
+                  type="text" 
+                  value={lookupData.ifscCode}
+                  onChange={(e) => setLookupData({...lookupData, ifscCode: e.target.value})}
+                  placeholder="e.g. SURY0123" 
+                  required
+                  className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-surya-primary transition-colors"
+                />
+              </div>
+              <button 
+                type="submit" 
+                disabled={isLookingUp}
+                className="md:col-span-2 w-full px-6 py-2.5 bg-surya-primary text-white rounded-lg font-medium hover:bg-blue-800 transition-colors shadow-sm disabled:opacity-70 flex justify-center items-center"
+              >
+                {isLookingUp ? <RefreshCw className="animate-spin" size={20} /> : 'Search'}
+              </button>
+            </form>
+            {lookupError && (
+              <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg flex items-center gap-2">
+                <AlertCircle size={18} /> {lookupError}
+              </div>
+            )}
+          </div>
+
+          {lookedUpUser && (
+<div className="grid grid-cols-1 xl:grid-cols-3 gap-6 fade-in">
+              {/* Profile & Fund Management Column */}
+              <div className="xl:col-span-1 space-y-6">
+                
+                {/* Profile Card */}
+                <div className="bg-white dark:bg-surya-surfaceDark rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                      <UserPlus size={20} className="text-surya-primary" /> Customer Profile
+                      {lookedUpUser.isBlocked && (
+                        <span className="ml-2 bg-red-100 text-red-600 text-[10px] px-1.5 py-0.5 rounded font-bold tracking-wider uppercase">Blocked</span>
+                      )}
+                    </h2>
+                    <div className="flex gap-4">
+                      <button 
+                        onClick={handleToggleBlock}
+                        className={`text-sm font-medium flex items-center gap-1 ${lookedUpUser.isBlocked ? 'text-red-500 hover:text-red-700' : 'text-slate-400 hover:text-orange-500'}`}
+                      >
+                        {lookedUpUser.isBlocked ? <><Lock size={14} /> Unblock</> : <><Unlock size={14} /> Block</>}
+                      </button>
+                      <button 
+                        onClick={() => setIsEditingProfile(!isEditingProfile)}
+                        className="text-sm font-medium text-surya-primary hover:text-blue-700"
+                      >
+                        {isEditingProfile ? 'Cancel' : 'Edit'}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {profileMsg.text && (
+                    <div className={`mb-4 p-3 text-sm rounded-lg ${profileMsg.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                      {profileMsg.text}
+                    </div>
+                  )}
+
+                  {isEditingProfile ? (
+                    <form onSubmit={handleUpdateProfile} className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-500 mb-1">Full Name</label>
+                        <input type="text" value={editProfileData.fullName} onChange={e => setEditProfileData({...editProfileData, fullName: e.target.value})} className="w-full px-3 py-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-surya-primary transition-colors" required />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-500 mb-1">Mobile Number</label>
+                        <input type="text" value={editProfileData.mobileNumber} onChange={e => setEditProfileData({...editProfileData, mobileNumber: e.target.value})} className="w-full px-3 py-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-surya-primary transition-colors" required />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-500 mb-1">Present Address</label>
+                        <textarea value={editProfileData.presentAddress} onChange={e => setEditProfileData({...editProfileData, presentAddress: e.target.value})} className="w-full px-3 py-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-surya-primary transition-colors" required rows="2" />
+                      </div>
+                      <button type="submit" disabled={isSavingProfile} className="w-full py-2 bg-surya-primary text-white rounded font-medium text-sm">
+                        {isSavingProfile ? 'Saving...' : 'Save Changes'}
+                      </button>
+                    </form>
+                  ) : (
+                    <div className="space-y-3">
+                      <div><p className="text-xs text-slate-500">Full Name</p><p className="font-medium text-slate-800 dark:text-white">{lookedUpUser.fullName}</p></div>
+                      <div><p className="text-xs text-slate-500">Email</p><p className="font-medium text-slate-800 dark:text-white">{lookedUpUser.email}</p></div>
+                      <div><p className="text-xs text-slate-500">Mobile</p><p className="font-medium text-slate-800 dark:text-white">{lookedUpUser.mobileNumber}</p></div>
+                      <div><p className="text-xs text-slate-500">Account Type</p><p className="font-medium uppercase text-slate-800 dark:text-white">{lookedUpUser.accountType}</p></div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Fund Management Card */}
+                <div className="bg-white dark:bg-surya-surfaceDark rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                  <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2 mb-2">
+                    <IndianRupee size={20} className="text-surya-primary" /> Funds
+                  </h2>
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-lg mb-4 text-center">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Current Balance</p>
+                    <h3 className="text-3xl font-bold text-slate-800 dark:text-white">₹{parseFloat(lookedUpUser.balance || 0).toFixed(2)}</h3>
+                  </div>
+
+                  {txMessage.text && (
+                    <div className={`mb-4 p-3 text-sm rounded-lg flex items-center gap-2 ${txMessage.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                      {txMessage.type === 'success' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
+                      {txMessage.text}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleProcessTransaction} className="space-y-4">
+                    <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+                      <button type="button" onClick={() => setTxData({...txData, type: 'credit'})} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${txData.type === 'credit' ? 'bg-white text-green-600 shadow-sm' : 'text-slate-500'}`}>Credit (+)</button>
+                      <button type="button" onClick={() => setTxData({...txData, type: 'debit'})} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${txData.type === 'debit' ? 'bg-white text-red-600 shadow-sm' : 'text-slate-500'}`}>Debit (-)</button>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-slate-500 mb-1">Amount (₹)</label>
+                      <input type="number" min="0.01" step="0.01" value={txData.amount} onChange={e => setTxData({...txData, amount: e.target.value})} className="w-full px-3 py-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-surya-primary transition-colors" required />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-slate-500 mb-1">Description</label>
+                      <input type="text" value={txData.description} onChange={e => setTxData({...txData, description: e.target.value})} placeholder={txData.type === 'credit' ? 'Deposit at Branch' : 'Withdrawal at Branch'} className="w-full px-3 py-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-surya-primary transition-colors" />
+                    </div>
+                    <button type="submit" disabled={isProcessingTx} className={`w-full py-2.5 text-white rounded-lg font-medium text-sm flex justify-center items-center ${txData.type === 'credit' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}>
+                      {isProcessingTx ? <RefreshCw className="animate-spin" size={18} /> : `Process ${txData.type === 'credit' ? 'Credit' : 'Debit'}`}
+                    </button>
+                  </form>
+                </div>
+
+              </div>
+
+              {/* Passbook Column */}
+              <div className="xl:col-span-2">
+                <div className="bg-white dark:bg-surya-surfaceDark rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 h-full flex flex-col">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                      <BookOpen size={20} className="text-surya-primary" /> Electronic Passbook
+                    </h2>
+                    <button onClick={() => fetchUserTransactions(lookupData.accountNumber)} className="p-2 text-slate-400 hover:text-surya-primary rounded-lg bg-slate-50 dark:bg-slate-800">
+                      <RefreshCw size={16} className={isLoadingPassbook ? 'animate-spin' : ''} />
+                    </button>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto">
+                    {isLoadingPassbook ? (
+                      <div className="flex justify-center items-center h-40 text-slate-400">
+                        <RefreshCw className="animate-spin" size={24} />
+                      </div>
+                    ) : userTransactions.length === 0 ? (
+                      <div className="text-center py-12">
+                        <History size={48} className="mx-auto text-slate-200 dark:text-slate-700 mb-3" />
+                        <p className="text-slate-500">No transactions found for this account.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3 pr-2">
+                        {userTransactions.map(tx => (
+                          <div key={tx.id} className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className={`p-2 rounded-full ${tx.type === 'credit' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                                {tx.type === 'credit' ? <ArrowDownRight size={20} /> : <ArrowUpRight size={20} />}
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-slate-800 dark:text-white text-sm">{tx.description}</h4>
+                                <p className="text-xs text-slate-500 mt-0.5">{new Date(tx.timestamp).toLocaleString()}</p>
+                              </div>
+                            </div>
+                            <div className={`font-bold ${tx.type === 'credit' ? 'text-green-600' : 'text-slate-800 dark:text-white'}`}>
+                              {tx.type === 'credit' ? '+' : '-'}₹{parseFloat(tx.amount).toFixed(2)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

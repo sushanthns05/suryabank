@@ -20,5 +20,20 @@ service cloud.firestore {
       allow create: if true; // Public can book
       allow read, update, delete: if isAdmin() || isEmployee();
     }
+
+    match /system/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /notifications/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /transactions/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
   }
 }

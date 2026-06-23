@@ -12,6 +12,9 @@ import CustomerDashboard from './pages/CustomerDashboard';
 import AboutUs from './pages/AboutUs';
 import Services from './pages/Services';
 import RecurringDeposit from './pages/RecurringDeposit';
+import AccountOpeningForm from './pages/AccountOpeningForm';
+import OfflineAccountOpening from './pages/OfflineAccountOpening';
+import CardApplicationForm from './pages/CardApplicationForm';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUpdates from './pages/admin/AdminUpdates';
 import EmployeeDashboard from './pages/EmployeeDashboard';
@@ -60,6 +63,7 @@ function App() {
             <Route path="analytics" element={<EmployeeAnalytics />} />
             <Route path="customers" element={<EmployeeSearchCustomer />} />
             <Route path="open-account" element={<EmployeeDashboard />} />
+            <Route path="download-form" element={<OfflineAccountOpening />} />
             <Route path="loans" element={<EmployeeLoanApproval />} />
             <Route path="profile" element={<EmployeeProfile />} />
             <Route path="notifications" element={<EmployeeNotifications />} />
@@ -86,6 +90,9 @@ function App() {
           <Route path="/about" element={<AboutUs />} />
           <Route path="/services" element={<Services />} />
           <Route path="/recurring-deposit" element={<RecurringDeposit />} />
+          <Route path="/account-opening-form" element={<AccountOpeningForm />} />
+          <Route path="/offline-account-opening" element={<OfflineAccountOpening />} />
+          <Route path="/card-application-form" element={<CardApplicationForm />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/updates" element={<AdminUpdates />} />
           <Route path="/employee-login" element={<EmployeeLogin />} />
@@ -98,6 +105,7 @@ function App() {
           <Route path="analytics" element={<EmployeeAnalytics />} />
           <Route path="customers" element={<EmployeeSearchCustomer />} />
           <Route path="open-account" element={<EmployeeDashboard />} />
+          <Route path="download-form" element={<OfflineAccountOpening />} />
           <Route path="loans" element={<EmployeeLoanApproval />} />
           <Route path="profile" element={<EmployeeProfile />} />
           <Route path="notifications" element={<EmployeeNotifications />} />

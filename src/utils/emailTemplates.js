@@ -192,7 +192,7 @@ export const getTransactionAlertTemplate = (name, amount, recipientName) => {
     
     <div class="otp-box" style="border-color: #3b82f6; background-color: #eff6ff;">
       <p style="margin: 0; color: #3b82f6; font-size: 14px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Amount Transferred</p>
-      <p class="otp-code" style="color: #1e3a8a; font-size: 36px; letter-spacing: 2px; margin: 10px 0;">$${amount.toFixed(2)}</p>
+      <p class="otp-code" style="color: #1e3a8a; font-size: 36px; letter-spacing: 2px; margin: 10px 0;">₹${amount.toFixed(2)}</p>
       <p style="margin-top: 10px; color: #475569; font-size: 18px;">To: <strong>${recipientName}</strong></p>
     </div>
     
@@ -247,4 +247,81 @@ export const getConsultationUpdateTemplate = (name, status) => {
     <p>Warm regards,<br><strong>The Surya Bank Advisory Team</strong></p>
   `;
   return baseTemplate(content, 'Consultation Status Update: ' + status);
+};
+
+export const getBranchTransactionTemplate = (name, type, amount, balance, description, branchName) => {
+  const isCredit = type === 'credit';
+  const color = isCredit ? '#16a34a' : '#dc2626';
+  const bgColor = isCredit ? '#f0fdf4' : '#fef2f2';
+  const action = isCredit ? 'Credited' : 'Debited';
+  
+  const content = `
+    <h2>Transaction Successful</h2>
+    <p>Dear <span class="highlight">${name}</span>,</p>
+    <p>This email is to confirm a recent ${type} transaction on your Surya Bank account.</p>
+    
+    <div class="otp-box" style="border-color: ${color}; background-color: ${bgColor};">
+      <p style="margin: 0; color: ${color}; font-size: 14px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Amount ${action}</p>
+      <p class="otp-code" style="color: ${color}; font-size: 36px; letter-spacing: 2px; margin: 10px 0;">${isCredit ? '+' : '-'}₹${parseFloat(amount).toFixed(2)}</p>
+    </div>
+    
+    <div class="details-box" style="border-left-color: #3b82f6; background-color: #eff6ff;">
+      <p style="color: #1e3a8a;"><strong>Transaction Details:</strong></p>
+      <p><strong>Description:</strong> ${description}</p>
+      <p><strong>Branch:</strong> ${branchName}</p>
+      <p><strong>Available Balance:</strong> ₹${parseFloat(balance).toFixed(2)}</p>
+    </div>
+    
+    <p>Thank you for banking with Surya Bank.</p>
+  `;
+  return baseTemplate(content, 'Surya Bank Transaction Alert');
+};
+
+export const getCardApprovalTemplate = (name, cardType, cardNumber) => {
+  const content = `
+    <h2>Card Application Approved!</h2>
+    <p>Dear <span class="highlight">${name}</span>,</p>
+    <p>Congratulations! Your application for a Surya Bank <strong>${cardType}</strong> has been approved by our branch officers.</p>
+    
+    <div class="otp-box" style="border-color: #f59e0b; background-color: #fffbeb;">
+      <p style="margin: 0; color: #f59e0b; font-size: 14px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Your New Card Number</p>
+      <p class="otp-code" style="color: #0f172a; font-size: 32px; letter-spacing: 4px; margin: 15px 0;">${cardNumber}</p>
+    </div>
+    
+    <div class="details-box" style="border-left-color: #3b82f6; background-color: #eff6ff;">
+      <p style="color: #1e3a8a;"><strong>Next Steps:</strong></p>
+      <p>• Your physical card will be dispatched to your registered address within 5-7 business days.</p>
+      <p>• You can start using this digital card number immediately for online transactions.</p>
+      <p>• Please login to your Surya Bank dashboard to set your PIN.</p>
+    </div>
+    
+    <p>Thank you for choosing Surya Bank.</p>
+  `;
+  return baseTemplate(content, 'Surya Bank Card Approved');
+};
+
+export const getProfileUpdateTemplate = (name, changesList) => {
+  const content = `
+    <h2>Security Alert: Profile Update Scheduled</h2>
+    <p>Dear <span class="highlight">${name}</span>,</p>
+    <p>This is an automated notification to inform you that a request to update critical information on your Surya Bank profile has been initiated by an authorized bank officer.</p>
+    
+    <div class="details-box" style="border-left-color: #f59e0b; background-color: #fffbeb;">
+      <p style="color: #b45309;"><strong>Scheduled Changes:</strong></p>
+      <ul style="color: #451a03; margin-top: 5px; padding-left: 20px;">
+        ${changesList.map(change => `<li><strong>${change.field}:</strong> ${change.oldValue || 'N/A'} ➔ ${change.newValue}</li>`).join('')}
+      </ul>
+    </div>
+    
+    <div class="otp-box" style="border-color: #3b82f6; background-color: #eff6ff;">
+      <p style="margin: 0; color: #1e3a8a; font-size: 14px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Security Delay Active</p>
+      <p style="color: #1e40af; font-size: 16px; margin: 10px 0;">For your security, these changes are subject to a mandatory <strong>24-hour verification period</strong> before they are finalized.</p>
+    </div>
+    
+    <p>If you requested these changes at a branch, no further action is required.</p>
+    <p style="color: #dc2626; font-weight: bold;">If you did NOT authorize these changes, please contact our fraud department immediately.</p>
+    
+    <p>Thank you for banking with Surya Bank.</p>
+  `;
+  return baseTemplate(content, 'Surya Bank Security Alert: Profile Update Scheduled');
 };

@@ -212,7 +212,7 @@ const AuthPage = () => {
 
       // 3. Send Welcome Email
       const accNo = user?.account_number || 'Pending';
-      const ifsc = user?.ifsc_code || 'SURY0001234';
+      const ifsc = user?.ifsc_code || 'SURY0123';
       await sendWelcomeEmail(formData.email, formData.fullName, accNo, ifsc);
       
       setCreatedAccountDetails({ accountNumber: accNo, ifscCode: ifsc });

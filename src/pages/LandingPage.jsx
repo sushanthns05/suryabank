@@ -23,7 +23,7 @@ const LandingPage = () => {
               Experience the future of digital banking. Secure, fast, and personalized financial services for everyone.
             </p>
             <div className="hero-actions">
-              <Button variant="primary" size="lg" onClick={() => window.location.href = '/auth'}>Open an Account <ChevronRight size={20} className="ml-2" /></Button>
+              <Button variant="primary" size="lg" onClick={() => window.location.href = '/account-opening-form'}>Open an Account <ChevronRight size={20} className="ml-2" /></Button>
               <Button variant="glass" size="lg" onClick={scrollToFeatures}>Explore Features</Button>
             </div>
           </div>
@@ -102,7 +102,7 @@ const LandingPage = () => {
         <div className="container">
           <h2>Ready to upgrade your banking experience?</h2>
           <p>Join thousands of satisfied customers today and take control of your financial future.</p>
-          <Button variant="primary" size="lg" className="mt-4" onClick={() => window.location.href = '/auth'}>Get Started Now</Button>
+          <Button variant="primary" size="lg" className="mt-4" onClick={() => window.location.href = '/account-opening-form'}>Get Started Now</Button>
         </div>
       </section>
     </div>

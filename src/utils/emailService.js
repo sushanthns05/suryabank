@@ -1,5 +1,5 @@
 import emailjs from '@emailjs/browser';
-import { getOTPVerificationTemplate, getWelcomeTemplate, getTransactionAlertTemplate, getConsultationTemplate, getConsultationUpdateTemplate } from './emailTemplates';
+import { getOTPVerificationTemplate, getWelcomeTemplate, getTransactionAlertTemplate, getConsultationTemplate, getConsultationUpdateTemplate, getBranchTransactionTemplate, getCardApprovalTemplate, getProfileUpdateTemplate } from './emailTemplates';
 
 const EMAILJS_PUBLIC_KEY = 'Udo2BF2lwjLpzDA2o';
 const EMAILJS_SERVICE_ID = 'service_ucp4e7s';
@@ -76,7 +76,7 @@ export const sendTransactionAlertEmail = (email, amount, recipientName) => {
   return sendEmail({
     to_email: email,
     to_name: 'Customer',
-    transaction_amount: `$${amount.toFixed(2)}`,
+    transaction_amount: `₹${amount.toFixed(2)}`,
     subject: 'Surya Bank Transaction Alert',
     message: getTransactionAlertTemplate('Customer', amount, recipientName)
   });
@@ -103,5 +103,41 @@ export const sendConsultationUpdateEmail = (email, name, status) => {
     to_name: name,
     subject: `Consultation Status Update: ${status}`,
     message: getConsultationUpdateTemplate(name, status)
+  });
+};
+
+/**
+ * Send an email when a branch transaction (credit/debit) is processed.
+ */
+export const sendBranchTransactionEmail = (email, name, type, amount, balance, description, branchName = 'Surya Bank - Main Branch') => {
+  return sendEmail({
+    to_email: email,
+    to_name: name,
+    subject: `Surya Bank: Account ${type === 'credit' ? 'Credited' : 'Debited'}`,
+    message: getBranchTransactionTemplate(name, type, amount, balance, description, branchName)
+  });
+};
+
+/**
+ * Send an email when a card application is approved.
+ */
+export const sendCardApprovalEmail = (email, name, cardType, cardNumber) => {
+  return sendEmail({
+    to_email: email,
+    to_name: name,
+    subject: `Surya Bank: Your ${cardType} is Approved!`,
+    message: getCardApprovalTemplate(name, cardType, cardNumber)
+  });
+};
+
+/**
+ * Send an email when a profile update is scheduled.
+ */
+export const sendProfileUpdateEmail = (email, name, changesList) => {
+  return sendEmail({
+    to_email: email,
+    to_name: name,
+    subject: `Surya Bank Security Alert: Profile Update Scheduled`,
+    message: getProfileUpdateTemplate(name, changesList)
   });
 };

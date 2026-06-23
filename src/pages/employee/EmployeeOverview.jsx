@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { testApiConnection } from '../../services/api';
 import { 
-  Users, Activity, FileText, UserPlus, DollarSign, 
+  Users, Activity, FileText, UserPlus, IndianRupee, 
   Wallet, Briefcase, UserCheck, ArrowUpRight, ArrowDownRight, Clock
 } from 'lucide-react';
 import { 
@@ -40,7 +40,7 @@ const SUMMARY_CARDS = [
   { title: "Today's Txns", value: '1,432', trend: '+5.2%', isUp: true, icon: Activity, color: 'text-green-500', bg: 'bg-green-100 dark:bg-green-900/30' },
   { title: 'Pending Loans', value: '45', trend: '-2.4%', isUp: false, icon: FileText, color: 'text-orange-500', bg: 'bg-orange-100 dark:bg-orange-900/30' },
   { title: 'New Accounts', value: '128', trend: '+18.2%', isUp: true, icon: UserPlus, color: 'text-purple-500', bg: 'bg-purple-100 dark:bg-purple-900/30' },
-  { title: 'Cash Available', value: '₹4.2 Cr', trend: '+1.2%', isUp: true, icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
+  { title: 'Cash Available', value: '₹4.2 Cr', trend: '+1.2%', isUp: true, icon: IndianRupee, color: 'text-emerald-500', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
   { title: 'Deposits', value: '₹12.5 Cr', trend: '+8.4%', isUp: true, icon: Wallet, color: 'text-indigo-500', bg: 'bg-indigo-100 dark:bg-indigo-900/30' },
   { title: 'Active Loans', value: '842', trend: '+4.3%', isUp: true, icon: Briefcase, color: 'text-red-500', bg: 'bg-red-100 dark:bg-red-900/30' },
   { title: 'Attendance', value: '45/50', trend: '90%', isUp: true, icon: UserCheck, color: 'text-teal-500', bg: 'bg-teal-100 dark:bg-teal-900/30' },

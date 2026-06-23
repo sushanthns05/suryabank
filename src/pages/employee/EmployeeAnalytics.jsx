@@ -3,7 +3,7 @@ import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts';
-import { TrendingUp, TrendingDown, DollarSign, Users, Activity, CreditCard } from 'lucide-react';
+import { TrendingUp, TrendingDown, IndianRupee, Users, Activity, CreditCard } from 'lucide-react';
 
 const revenueData = [
   { name: 'Jan', income: 4000, expenses: 2400 },
@@ -51,7 +51,7 @@ const EmployeeAnalytics = () => {
       {/* KPI Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { title: 'Net Revenue', val: '₹14.2 Cr', trend: '+8.4%', icon: DollarSign, isUp: true },
+          { title: 'Net Revenue', val: '₹14.2 Cr', trend: '+8.4%', icon: IndianRupee, isUp: true },
           { title: 'Customer Acquisition', val: '1,240', trend: '+12.1%', icon: Users, isUp: true },
           { title: 'Transaction Success', val: '99.8%', trend: '+0.2%', icon: Activity, isUp: true },
           { title: 'NPA (Default Rate)', val: '1.2%', trend: '-0.5%', icon: CreditCard, isUp: false }, // Down is good for NPA

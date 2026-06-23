@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const SocketContext = createContext();
 
@@ -8,46 +9,81 @@ export const useSocket = () => {
 };
 
 export const SocketProvider = ({ children }) => {
-  const [socket, setSocket] = useState(null);
+  // Keeping socket as null so we don't break legacy components depending on it
+  const [socket] = useState(null);
   const [isMaintenance, setIsMaintenance] = useState(false);
   const [updateInfo, setUpdateInfo] = useState(null);
 
   useEffect(() => {
-    // Connect to the backend server
-    const backendUrl = window.location.hostname === 'localhost' 
-      ? 'http://localhost:5000' 
-      : 'https://suryabank.onrender.com';
-      
-    const newSocket = io(backendUrl);
-    setSocket(newSocket);
+    // Listen to Firebase Firestore instead of Socket.io
+    const maintenanceRef = doc(db, 'system', 'maintenance');
+    
+    const unsubscribe = onSnapshot(maintenanceRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.active) {
+          const startTime = new Date(data.timestamp).getTime();
+          const now = Date.now();
+          const timeSinceStart = now - startTime;
+          const durationMs = data.duration * 1000;
 
-    // Initial status check
-    fetch(`${backendUrl}/api/updates/status`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setIsMaintenance(data.maintenanceMode);
-          if (data.latestUpdate) setUpdateInfo(data.latestUpdate);
+          if (timeSinceStart < durationMs) {
+            const completedUpdate = localStorage.getItem('completed_update');
+            if (completedUpdate === data.timestamp) {
+              setIsMaintenance(false);
+            } else {
+              const remainingDuration = timeSinceStart < 0 ? data.duration : Math.ceil((durationMs - timeSinceStart) / 1000);
+              setUpdateInfo({ ...data.updateDetails, duration: data.duration, remainingDuration, timestamp: data.timestamp });
+              setIsMaintenance(true);
+            }
+          } else {
+            setIsMaintenance(false);
+          }
+        } else if (data.scheduledFor) {
+          // If not active yet, but scheduled for the future
+          const scheduledTime = new Date(data.scheduledFor).getTime();
+          const now = Date.now();
+          const timeUntilUpdate = scheduledTime - now;
+
+          if (timeUntilUpdate > 0) {
+            // Client-side cron job: wait until the scheduled time, then activate
+            const timer = setTimeout(() => {
+              const completedUpdate = localStorage.getItem('completed_update');
+              if (completedUpdate !== data.timestamp) {
+                setUpdateInfo({ ...data.updateDetails, duration: data.duration, remainingDuration: data.duration, timestamp: data.timestamp });
+                setIsMaintenance(true);
+              }
+            }, timeUntilUpdate);
+            
+            // Clean up the timer if the component unmounts or data changes
+            return () => clearTimeout(timer);
+          } else if (timeUntilUpdate > -data.duration * 1000) {
+            // We are currently INSIDE the scheduled window!
+            const completedUpdate = localStorage.getItem('completed_update');
+            if (completedUpdate === data.timestamp) {
+              setIsMaintenance(false);
+            } else {
+              const remainingDuration = Math.ceil((data.duration * 1000 + timeUntilUpdate) / 1000);
+              setUpdateInfo({ ...data.updateDetails, duration: data.duration, remainingDuration, timestamp: data.timestamp });
+              setIsMaintenance(true);
+            }
+          } else {
+            setIsMaintenance(false);
+          }
+        } else {
+          // Add small delay before hiding to ensure UI matches
+          setTimeout(() => {
+            setIsMaintenance(false);
+          }, 2000);
         }
-      })
-      .catch(err => console.error("Failed to fetch initial status", err));
-
-    // Listen for maintenance events
-    newSocket.on('maintenance_started', (data) => {
-      setUpdateInfo({ ...data.update, duration: data.duration });
-      setIsMaintenance(true);
-    });
-
-    newSocket.on('maintenance_completed', () => {
-      // Simulate a small delay before hiding the screen or letting the MaintenanceScreen handle the reload
-      setTimeout(() => {
+      } else {
         setIsMaintenance(false);
-      }, 2000);
+      }
+    }, (error) => {
+      console.error("Firebase maintenance listener error:", error);
     });
 
-    return () => {
-      newSocket.disconnect();
-    };
+    return () => unsubscribe();
   }, []);
 
   return (

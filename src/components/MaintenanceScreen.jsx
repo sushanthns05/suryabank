@@ -9,6 +9,9 @@ const MaintenanceScreen = () => {
   const [totalDuration, setTotalDuration] = useState(30);
   const [stage, setStage] = useState(0); // 0: Init, 1: Applying, 2: Restarting, 3: Loading, 4: Done
 
+  // Prevent lockdown on the Admin Trigger site
+  const isUpdateTriggerSite = window.location.hostname.includes('suryabankupdatetrigger');
+
   useEffect(() => {
     let timer;
     if (isMaintenance) {
@@ -17,15 +20,13 @@ const MaintenanceScreen = () => {
       // Wait, let's check SocketContext to see if it stores duration.
       // We'll check the global updateInfo for duration, or default to 30.
       let dur = 30;
+      let remaining = 30;
       if (updateInfo && updateInfo.duration) {
         dur = updateInfo.duration;
+        remaining = updateInfo.remainingDuration !== undefined ? updateInfo.remainingDuration : dur;
       }
-      // Or check if the socket context stores duration separately. 
-      // Actually, in node.js I passed it inside the emit payload: { update, notification, duration }
-      // Let's assume it's attached to updateInfo somehow, or we can just read window.__maintenanceDuration if we update SocketContext.
-      // Let's modify SocketContext to provide duration as well.
       
-      setCountdown(dur);
+      setCountdown(remaining);
       setTotalDuration(dur);
       setStage(0);
 
@@ -54,6 +55,9 @@ const MaintenanceScreen = () => {
 
   const performRefresh = async () => {
     try {
+      if (updateInfo && updateInfo.timestamp) {
+        localStorage.setItem('completed_update', updateInfo.timestamp);
+      }
       // Clear Service Worker Caches
       if ('caches' in window) {
         const keys = await caches.keys();
@@ -70,7 +74,7 @@ const MaintenanceScreen = () => {
     }
   };
 
-  if (!isMaintenance) return null;
+  if (!isMaintenance || isUpdateTriggerSite) return null;
 
   return (
     <div className="maintenance-overlay fade-in">
@@ -82,10 +86,10 @@ const MaintenanceScreen = () => {
         </div>
 
         {updateInfo && (
-          <div className="update-info">
+          <div className="update-info custom-scrollbar">
             <span className="badge">{updateInfo.type || 'Update'} {updateInfo.version && `- ${updateInfo.version}`}</span>
             <h3>{updateInfo.title}</h3>
-            <p>{updateInfo.description}</p>
+            <p className="whitespace-pre-wrap leading-relaxed">{updateInfo.description}</p>
           </div>
         )}
 

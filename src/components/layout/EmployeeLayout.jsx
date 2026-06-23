@@ -5,6 +5,7 @@ import {
   Briefcase, Building, Settings, LogOut, Menu, Search, 
   Bell, Moon, Sun, X 
 } from 'lucide-react';
+import { applyPendingUpdates } from '../../services/api';
 
 const SIDEBAR_MENU = [
   {
@@ -19,6 +20,7 @@ const SIDEBAR_MENU = [
     items: [
       { name: 'Search Customer', path: '/employee/customers', icon: Search },
       { name: 'Open Account', path: '/employee/open-account', icon: UserPlus },
+      { name: 'Download Forms', path: '/employee/download-form', icon: FileText },
     ]
   },
   {
@@ -73,6 +75,11 @@ const EmployeeLayout = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    // Check and apply any pending customer profile updates silently
+    applyPendingUpdates().catch(err => console.error('Error applying pending updates:', err));
+  }, [location.pathname]);
 
   useEffect(() => {
     // Check local storage for dark mode preference

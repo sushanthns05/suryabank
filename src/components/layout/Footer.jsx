@@ -5,6 +5,12 @@ import './Footer.css';
 
 const Footer = () => {
   const [version, setVersion] = useState('v1.0.0');
+  const [modalInfo, setModalInfo] = useState({ isOpen: false, title: '', content: '' });
+
+  const openModal = (e, title, content) => {
+    e.preventDefault();
+    setModalInfo({ isOpen: true, title, content });
+  };
 
   useEffect(() => {
     const fetchVersion = async () => {
@@ -55,9 +61,9 @@ const Footer = () => {
           <h3>Company</h3>
           <ul>
             <li><Link to="/about">About Us</Link></li>
-            <li><Link to="/careers">Careers</Link></li>
-            <li><Link to="/security">Security</Link></li>
-            <li><Link to="/legal">Terms & Privacy</Link></li>
+            <li><a href="#" onClick={(e) => openModal(e, 'Careers', 'Join the Surya Bank team! We are currently looking for innovative minds to shape the future of digital banking. Send your resume to careers@suryabank.com')}>Careers</a></li>
+            <li><a href="#" onClick={(e) => openModal(e, 'Security', 'High end security with regular security updates.')}>Security</a></li>
+            <li><a href="#" onClick={(e) => openModal(e, 'Terms & Privacy', 'Verified by government official terms.')}>Terms & Privacy</a></li>
           </ul>
         </div>
 
@@ -76,6 +82,30 @@ const Footer = () => {
           <span className="text-xs text-slate-400">Version: {version}</span>
         </div>
       </div>
+
+      {/* Info Modal */}
+      {modalInfo.isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+              <h2 className="text-xl font-bold text-slate-800 dark:text-white">{modalInfo.title}</h2>
+            </div>
+            <div className="p-6">
+              <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-left">
+                {modalInfo.content}
+              </p>
+            </div>
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 flex justify-end">
+              <button 
+                onClick={() => setModalInfo({ isOpen: false, title: '', content: '' })}
+                className="px-6 py-2.5 bg-surya-primary hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm"
+              >
+                Understood
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </footer>
   );
 };

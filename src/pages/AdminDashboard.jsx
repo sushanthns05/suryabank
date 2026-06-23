@@ -94,7 +94,7 @@ const AdminDashboard = () => {
                           {user.role || 'customer'}
                         </span>
                       </td>
-                      <td style={{ padding: '12px' }}>${parseFloat(user.balance || 0).toFixed(2)}</td>
+                      <td style={{ padding: '12px' }}>₹{parseFloat(user.balance || 0).toFixed(2)}</td>
                       <td style={{ padding: '12px' }}>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</td>
                       <td style={{ padding: '12px' }}>
                         <CheckCircle size={18} color="#22c55e" />

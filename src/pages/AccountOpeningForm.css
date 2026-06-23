@@ -1,0 +1,384 @@
+.account-form-page {
+  min-height: 100vh;
+  background: #eef2f7;
+  padding: 120px 20px 48px;
+  color: #111827;
+}
+
+.aof-toolbar {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 0 auto 24px;
+  max-width: 980px;
+}
+
+.aof-kicker {
+  color: #0f766e;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.aof-toolbar h1 {
+  color: #0f172a;
+  font-size: 1.9rem;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.aof-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.aof-action-btn {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #0f172a;
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 700;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
+.aof-action-btn.primary {
+  background: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.aof-sheet {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.14);
+  margin: 0 auto;
+  max-width: 980px;
+  padding: 26px;
+}
+
+.aof-header {
+  align-items: stretch;
+  border: 2px solid #0f172a;
+  display: grid;
+  grid-template-columns: 1.05fr 1.7fr 148px;
+  min-height: 132px;
+}
+
+.aof-brand,
+.aof-title,
+.aof-photo-box {
+  padding: 14px;
+}
+
+.aof-brand {
+  align-items: center;
+  border-right: 2px solid #0f172a;
+  display: flex;
+  gap: 12px;
+}
+
+.aof-brand img {
+  height: 54px;
+  object-fit: contain;
+  width: 54px;
+}
+
+.aof-brand strong {
+  color: #0f172a;
+  display: block;
+  font-size: 1.35rem;
+}
+
+.aof-brand span {
+  color: #475569;
+  display: block;
+  font-size: 0.78rem;
+  margin-top: 2px;
+}
+
+.aof-title {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.aof-title p {
+  color: #334155;
+  font-size: 0.72rem;
+  font-weight: 800;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+.aof-title h2 {
+  color: #0f172a;
+  font-size: 1.35rem;
+  line-height: 1.25;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.aof-photo-box {
+  align-items: center;
+  border-left: 2px solid #0f172a;
+  color: #64748b;
+  display: flex;
+  font-size: 0.76rem;
+  font-weight: 700;
+  justify-content: center;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.aof-branch-row,
+.aof-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.aof-branch-row {
+  margin-top: 14px;
+}
+
+.aof-field {
+  border: 1px solid #94a3b8;
+  min-height: 46px;
+  position: relative;
+}
+
+.aof-field.wide {
+  grid-column: span 4;
+}
+
+.aof-field.small {
+  grid-column: span 1;
+}
+
+.aof-field span {
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.72rem;
+  font-weight: 700;
+  left: 9px;
+  line-height: 1;
+  padding: 0 4px;
+  position: absolute;
+  top: -6px;
+}
+
+.aof-section {
+  border: 1px solid #0f172a;
+  margin-top: 14px;
+  padding: 14px;
+}
+
+.aof-section-title {
+  align-items: center;
+  background: #0f172a;
+  color: #ffffff;
+  display: flex;
+  gap: 10px;
+  margin: -14px -14px 14px;
+  min-height: 34px;
+  padding: 7px 12px;
+}
+
+.aof-section-title span {
+  align-items: center;
+  background: #f59e0b;
+  border-radius: 999px;
+  color: #0f172a;
+  display: inline-flex;
+  font-size: 0.8rem;
+  font-weight: 900;
+  height: 22px;
+  justify-content: center;
+  width: 22px;
+}
+
+.aof-section-title h2 {
+  font-size: 0.92rem;
+  letter-spacing: 0;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.aof-check-grid {
+  display: grid;
+  gap: 10px 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 12px;
+}
+
+.aof-check-grid.compact {
+  margin-bottom: 0;
+}
+
+.aof-check-grid.documents {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.aof-check {
+  align-items: center;
+  color: #1e293b;
+  display: flex;
+  font-size: 0.82rem;
+  font-weight: 650;
+  gap: 8px;
+  line-height: 1.3;
+  min-height: 24px;
+}
+
+.aof-box {
+  border: 1.8px solid #0f172a;
+  display: inline-block;
+  flex: 0 0 15px;
+  height: 15px;
+  width: 15px;
+}
+
+.aof-declaration {
+  color: #1f2937;
+  font-size: 0.83rem;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+.aof-signature-row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 1fr 0.7fr;
+}
+
+.aof-signature-row.branch {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.aof-signature-row div {
+  border: 1px solid #94a3b8;
+  min-height: 72px;
+  position: relative;
+}
+
+.aof-signature-row span {
+  bottom: 8px;
+  color: #334155;
+  font-size: 0.72rem;
+  font-weight: 700;
+  left: 10px;
+  position: absolute;
+}
+
+.aof-footer {
+  align-items: center;
+  border-top: 1px solid #cbd5e1;
+  color: #475569;
+  display: flex;
+  font-size: 0.76rem;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+}
+
+@media (max-width: 780px) {
+  .account-form-page {
+    padding: 96px 10px 32px;
+  }
+
+  .aof-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .aof-actions {
+    width: 100%;
+  }
+
+  .aof-action-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 0 12px;
+  }
+
+  .aof-sheet {
+    overflow-x: auto;
+    padding: 14px;
+  }
+
+  .aof-header {
+    grid-template-columns: 1fr;
+  }
+
+  .aof-brand,
+  .aof-photo-box {
+    border: 0;
+  }
+
+  .aof-brand,
+  .aof-title {
+    border-bottom: 2px solid #0f172a;
+  }
+
+  .aof-photo-box {
+    min-height: 110px;
+  }
+
+  .aof-branch-row,
+  .aof-grid,
+  .aof-check-grid,
+  .aof-check-grid.documents,
+  .aof-signature-row,
+  .aof-signature-row.branch {
+    grid-template-columns: 1fr;
+  }
+
+  .aof-field.wide,
+  .aof-field.small {
+    grid-column: span 1;
+  }
+}
+
+@media print {
+  @page {
+    margin: 10mm;
+    size: A4;
+  }
+
+  body {
+    background: #ffffff;
+  }
+
+  .navbar,
+  .footer,
+  .aof-toolbar {
+    display: none !important;
+  }
+
+  .account-form-page {
+    background: #ffffff;
+    padding: 0;
+  }
+
+  .aof-sheet {
+    border: 0;
+    box-shadow: none;
+    max-width: none;
+    padding: 0;
+  }
+
+  .aof-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
