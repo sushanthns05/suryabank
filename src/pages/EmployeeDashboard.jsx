@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { UserPlus, Mail, Lock, Unlock, RefreshCw, CheckCircle, CalendarDays, Check, Phone, MapPin, CreditCard, Info, IdCard, Search, Edit, BookOpen, ArrowUpRight, ArrowDownRight, IndianRupee, History, AlertCircle, Users, Activity, TrendingUp, X } from 'lucide-react';
-import { getConsultations, verifyConsultation, registerUser, getUserByAccount, updateUserDetails, processTransaction, getTransactions, updateCustomerStatus, getCardApplications, updateCardApplicationStatus } from '../services/api';
-import { sendWelcomeEmail, sendConsultationUpdateEmail, sendBranchTransactionEmail, sendCardApprovalEmail } from '../utils/emailService';
+import { getConsultations, approveConsultation, registerUser, getUserByAccount, updateUserDetails, processTransaction, getTransactions, updateCustomerStatus, getCardApplications, updateCardApplicationStatus, wipeAllCardApplications } from '../services/api';
+import { sendWelcomeEmail, sendConsultationApprovalEmail, sendBranchTransactionEmail, sendCardApprovalEmail } from '../utils/emailService';
 
 const ACCOUNT_TYPES = [
   {
@@ -61,6 +61,13 @@ const EmployeeDashboard = () => {
 
   const [consultations, setConsultations] = useState([]);
   const [loadingConsultations, setLoadingConsultations] = useState(true);
+  const [approvingConsultation, setApprovingConsultation] = useState(null);
+  const [approvalData, setApprovalData] = useState({
+    assignedEmployee: localStorage.getItem('employeeName') || '',
+    appointmentDate: '',
+    appointmentTime: ''
+  });
+  const [isApproving, setIsApproving] = useState(false);
 
   // Card Applications
   const [cardApplications, setCardApplications] = useState([]);
@@ -125,19 +132,41 @@ const EmployeeDashboard = () => {
     fetchCardApps();
   }, []);
 
-  const handleVerifyConsultation = async (id) => {
+  const handleApproveConsultationSubmit = async (e) => {
+    e.preventDefault();
+    if (!approvingConsultation) return;
+
+    setIsApproving(true);
     try {
-      const data = await verifyConsultation(id);
+      const data = await approveConsultation(approvingConsultation.id, approvalData);
       if (data.success) {
-        setConsultations(consultations.map(c => c.id === id ? { ...c, status: 'verified' } : c));
-        const consult = consultations.find(c => c.id === id);
-        if (consult) {
-          await sendConsultationUpdateEmail(consult.email, consult.name, 'Verified');
-        }
+        setConsultations(consultations.map(c => 
+          c.id === approvingConsultation.id 
+            ? { ...c, status: 'approved', ...approvalData } 
+            : c
+        ));
+        
+        // Send email
+        await sendConsultationApprovalEmail(
+          approvingConsultation.email, 
+          approvingConsultation.name, 
+          approvingConsultation.topic,
+          approvalData.assignedEmployee,
+          approvalData.appointmentDate,
+          approvalData.appointmentTime
+        );
+        
+        alert("Consultation approved and customer notified successfully.");
+        setApprovingConsultation(null);
+        setApprovalData({ assignedEmployee: localStorage.getItem('employeeName') || '', appointmentDate: '', appointmentTime: '' });
+      } else {
+        alert("Failed to approve consultation: " + data.message);
       }
     } catch (err) {
-      console.error("Error verifying consultation:", err);
-      alert("Failed to verify consultation.");
+      console.error("Error approving consultation:", err);
+      alert("Failed to approve consultation.");
+    } finally {
+      setIsApproving(false);
     }
   };
 
@@ -147,9 +176,9 @@ const EmployeeDashboard = () => {
       let updates = {};
       let cardNumber = null;
 
-      if (status === 'Approved' && app) {
-        // Generate 12 digit card number
-        cardNumber = Math.floor(100000000000 + Math.random() * 900000000000).toString();
+      if (status.toLowerCase() === 'approved' && app) {
+        // Generate 12 digit card number formatted with spaces
+        cardNumber = Math.floor(100000000000 + Math.random() * 900000000000).toString().replace(/(.{4})/g, '$1 ').trim();
         updates.cardNumber = cardNumber;
       }
 
@@ -157,7 +186,7 @@ const EmployeeDashboard = () => {
       if (data.success) {
         setCardApplications(cardApplications.map(c => c.id === id ? { ...c, status, ...updates } : c));
         
-        if (status === 'Approved' && app) {
+        if (status.toLowerCase() === 'approved' && app) {
           let emailToUse = app.email;
           if (!emailToUse || emailToUse.includes('N/A')) {
              const userRes = await getUserByAccount(app.accountNumber);
@@ -181,6 +210,25 @@ const EmployeeDashboard = () => {
     } catch (err) {
       console.error("Error updating card application:", err);
       alert("Failed to update card application.");
+    }
+  };
+
+  const handleClearAllCards = async () => {
+    if (window.confirm("Are you sure you want to permanently delete ALL card application data? This action cannot be undone.")) {
+      try {
+        setLoadingCardApps(true);
+        const res = await wipeAllCardApplications();
+        if (res.success) {
+          setCardApplications([]);
+          alert("All card applications have been deleted successfully.");
+        } else {
+          alert("Failed to delete card applications: " + res.message);
+        }
+      } catch (err) {
+        alert("An error occurred while deleting.");
+      } finally {
+        setLoadingCardApps(false);
+      }
     }
   };
 
@@ -386,7 +434,7 @@ const EmployeeDashboard = () => {
 
 
 
-      {activeTab === 'operations' ? (
+      {activeTab === 'operations' && (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 fade-in">
         
         {/* Create Customer Card */}
@@ -644,18 +692,25 @@ const EmployeeDashboard = () => {
                         <p><span className="font-medium text-slate-400">Date:</span> <span className="text-surya-primary dark:text-surya-secondary font-medium">{consult.date}</span></p>
                       </div>
                     </div>
-                    <div className="shrink-0">
+                    <div className="shrink-0 flex items-center justify-end">
                       {consult.status === 'pending' ? (
                         <button 
-                          onClick={() => handleVerifyConsultation(consult.id)} 
+                          onClick={() => setApprovingConsultation(consult)} 
                           className="px-4 py-2 bg-surya-success text-white text-sm font-medium rounded-lg hover:bg-green-600 transition-colors flex items-center shadow-sm w-full sm:w-auto justify-center"
                         >
-                          <Check size={16} className="mr-1.5" /> Verify
+                          <Check size={16} className="mr-1.5" /> Approve
                         </button>
                       ) : (
-                        <span className="flex items-center gap-1.5 text-surya-success font-bold text-sm bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-lg border border-green-100 dark:border-green-900/30">
-                          <CheckCircle size={16} /> Verified
-                        </span>
+                        <div className="text-right">
+                          <span className="inline-flex items-center gap-1.5 text-surya-success font-bold text-sm bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-lg border border-green-100 dark:border-green-900/30 mb-2">
+                            <CheckCircle size={16} /> Approved
+                          </span>
+                          <div className="text-xs text-slate-500 dark:text-slate-400">
+                            <p><strong>Date:</strong> {consult.appointmentDate}</p>
+                            <p><strong>Time:</strong> {consult.appointmentTime}</p>
+                            <p><strong>Assigned:</strong> {consult.assignedEmployee}</p>
+                          </div>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -667,14 +722,24 @@ const EmployeeDashboard = () => {
 
         {/* Card Applications Card */}
         <div className="bg-white dark:bg-surya-surfaceDark rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 flex flex-col h-full md:col-span-2 xl:col-span-2">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
-              <CreditCard size={24} />
+          <div className="flex items-center justify-between gap-3 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                <CreditCard size={24} />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-slate-800 dark:text-white">Card Applications</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Review and process new ATM/Debit/Credit card requests.</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-800 dark:text-white">Card Applications</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Review and process new ATM/Debit/Credit card requests.</p>
-            </div>
+            {cardApplications.length > 0 && (
+              <button 
+                onClick={handleClearAllCards}
+                className="px-4 py-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 rounded-lg text-sm font-bold hover:bg-red-200 transition-colors"
+              >
+                Clear All Data
+              </button>
+            )}
           </div>
 
           <div className="flex-1 overflow-y-auto pr-2" style={{ maxHeight: '400px' }}>
@@ -698,6 +763,7 @@ const EmployeeDashboard = () => {
                       </h4>
                       <div className="mt-1 flex flex-col gap-1 text-sm text-slate-600 dark:text-slate-300">
                         <p><span className="font-medium text-slate-400">Card Type:</span> <span className="font-bold text-surya-primary dark:text-surya-secondary">{app.cardType}</span></p>
+                        {app.cardNumber && <p><span className="font-medium text-slate-400">Card Number:</span> <span className="font-mono text-slate-800 dark:text-white font-bold tracking-wider">{app.cardNumber}</span></p>}
                         <p><span className="font-medium text-slate-400">Name on Card:</span> {app.nameOnCard}</p>
                         <p><span className="font-medium text-slate-400">Delivery:</span> {app.deliveryAddress}</p>
                       </div>
@@ -732,7 +798,8 @@ const EmployeeDashboard = () => {
         </div>
 
       </div>
-      ) : (
+      )}
+      {activeTab === 'management' && (
         <div className="fade-in space-y-6">
           {/* Lookup Card */}
           <div className="bg-white dark:bg-surya-surfaceDark rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
@@ -926,6 +993,112 @@ const EmployeeDashboard = () => {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Consultation Approval Modal */}
+      {approvingConsultation && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-surya-surfaceDark rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <CalendarDays size={20} className="text-surya-primary" /> 
+                Approve Consultation
+              </h3>
+              <button 
+                onClick={() => setApprovingConsultation(null)}
+                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-md transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleApproveConsultationSubmit} className="p-4 space-y-4">
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg text-sm text-slate-600 dark:text-slate-300">
+                <p><strong>Customer:</strong> {approvingConsultation.name}</p>
+                <p><strong>Topic:</strong> {approvingConsultation.topic}</p>
+                <p><strong>Requested Date:</strong> {approvingConsultation.date}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Assigned Employee</label>
+                <select 
+                  value={approvalData.assignedEmployee}
+                  onChange={e => setApprovalData({...approvalData, assignedEmployee: e.target.value})}
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-surya-primary"
+                  required
+                >
+                  <option value="" disabled>Select an employee</option>
+                  {[
+                    "Sushanth N S - Manager and Head of Bank",
+                    "Manjunath R - Senior Personal Bankers / Banking Associates",
+                    "Kumar G - Personal Bankers / Banking Associates",
+                    "Ramesh R - Personal Bankers / Banking Associates",
+                    "Satish H - Personal Bankers / Banking Associates",
+                    "Manish Shetty - Personal Bankers / Banking Associates",
+                    "Srinath J - Senior Bank Clerks / Tellers",
+                    "Jagdish R - Bank Clerks / Tellers",
+                    "Ramnath Kumar - Bank Clerks / Tellers",
+                    "Kushal R - Bank Clerks / Tellers",
+                    "Gagan S - Bank Clerks / Tellers",
+                    "Suresh S - Senior Relationship Manager",
+                    "Daranth S - Relationship Manager",
+                    "Krishna J - Relationship Manager",
+                    "Kushal N - Relationship Manager",
+                    "Likith Gowda - Relationship Manager",
+                    "Hemanth Patil - Senior Loan Officer",
+                    "Manjunath S R - Loan Officer",
+                    "Krishna Kumar - Loan Officer",
+                    "T Nagappa - Loan Officer",
+                    "Jagan Nath - Loan Officer",
+                    "Girish Yadav J - System Manager"
+                  ].map(emp => (
+                    <option key={emp} value={emp}>{emp}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Appointment Date</label>
+                  <input 
+                    type="date" 
+                    value={approvalData.appointmentDate}
+                    onChange={e => setApprovalData({...approvalData, appointmentDate: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-surya-primary"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Appointment Time</label>
+                  <input 
+                    type="time" 
+                    value={approvalData.appointmentTime}
+                    onChange={e => setApprovalData({...approvalData, appointmentTime: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-surya-primary"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 flex gap-3">
+                <button 
+                  type="button"
+                  onClick={() => setApprovingConsultation(null)}
+                  className="flex-1 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  disabled={isApproving}
+                  className="flex-1 py-2 bg-surya-success text-white font-medium rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+                >
+                  {isApproving ? <RefreshCw className="animate-spin" size={18} /> : <><Check size={18} /> Confirm & Notify</>}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

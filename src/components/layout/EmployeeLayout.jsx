@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, UserPlus, FileText, CreditCard, 
   Briefcase, Building, Settings, LogOut, Menu, Search, 
-  Bell, Moon, Sun, X 
+  Bell, Moon, Sun, X, UserCheck
 } from 'lucide-react';
 import { applyPendingUpdates } from '../../services/api';
 
@@ -33,6 +33,7 @@ const SIDEBAR_MENU = [
     title: 'Settings',
     items: [
       { name: 'Profile', path: '/employee/profile', icon: Settings },
+      { name: 'Mark Attendance', path: '/employee/attendance', icon: UserCheck },
     ]
   }
 ];

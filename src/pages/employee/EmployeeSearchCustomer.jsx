@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, User, Mail, Phone, CreditCard, RefreshCw, Eye, Lock, Unlock, X, Edit2, Save } from 'lucide-react';
-import { getCustomers, updateCustomerStatus, scheduleUserUpdate } from '../../services/api';
+import { Search, User, Mail, Phone, CreditCard, RefreshCw, Eye, Lock, Unlock, X, Edit2, Save, Trash2, AlertTriangle } from 'lucide-react';
+import { getCustomers, updateCustomerStatus, scheduleUserUpdate, deleteCustomer } from '../../services/api';
 import { sendProfileUpdateEmail } from '../../utils/emailService';
 
 const EmployeeSearchCustomer = () => {
@@ -11,6 +11,8 @@ const EmployeeSearchCustomer = () => {
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [editFormData, setEditFormData] = useState({});
   const [isSaving, setIsSaving] = useState(false);
+  const [deletingCustomer, setDeletingCustomer] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchCustomers = async () => {
     setLoading(true);
@@ -99,6 +101,25 @@ const EmployeeSearchCustomer = () => {
     } catch (error) {
       console.error('Error updating status:', error);
       alert('Failed to update customer status.');
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingCustomer) return;
+    setIsDeleting(true);
+    try {
+      const res = await deleteCustomer(deletingCustomer.id);
+      if (res.success) {
+        setCustomers(customers.filter(c => c.id !== deletingCustomer.id));
+        setDeletingCustomer(null);
+      } else {
+        alert('Failed to delete customer: ' + res.message);
+      }
+    } catch (error) {
+      console.error('Error deleting customer:', error);
+      alert('Failed to delete customer.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -236,6 +257,13 @@ const EmployeeSearchCustomer = () => {
                           title="View Details"
                         >
                           <Eye size={18} />
+                        </button>
+                        <button 
+                          onClick={() => setDeletingCustomer(customer)}
+                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          title="Delete Customer"
+                        >
+                          <Trash2 size={18} />
                         </button>
                       </div>
                     </td>
@@ -425,6 +453,51 @@ const EmployeeSearchCustomer = () => {
               >
                 <Save size={16} />
                 {isSaving ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingCustomer && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-red-50 dark:bg-red-900/10">
+              <h3 className="text-lg font-bold text-red-700 dark:text-red-400 flex items-center gap-2">
+                <AlertTriangle size={20} /> Delete Customer
+              </h3>
+              <button 
+                onClick={() => setDeletingCustomer(null)}
+                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-md transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-slate-600 dark:text-slate-300 mb-4">
+                Are you sure you want to delete the customer <strong>{deletingCustomer.fullName}</strong>?
+              </p>
+              <div className="bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-400 p-3 rounded-lg text-sm border border-amber-200 dark:border-amber-800/50 flex items-start gap-2">
+                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+                <p>This action is <strong>irreversible</strong>. The customer's profile will be permanently removed from the system.</p>
+              </div>
+            </div>
+            <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex gap-3">
+              <button 
+                onClick={() => setDeletingCustomer(null)}
+                className="flex-1 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDelete}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors flex justify-center items-center gap-2 disabled:opacity-70"
+              >
+                {isDeleting ? <RefreshCw className="animate-spin" size={18} /> : <Trash2 size={18} />}
+                {isDeleting ? 'Deleting...' : 'Delete Customer'}
               </button>
             </div>
           </div>

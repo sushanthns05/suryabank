@@ -7,6 +7,9 @@
       "hosting": {
         "suryabankupdatetrigger": [
           "suryabankupdatetrigger"
+        ],
+        "manager-suryabank": [
+          "manager-suryabank"
         ]
       }
     }

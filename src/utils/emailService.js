@@ -1,5 +1,5 @@
 import emailjs from '@emailjs/browser';
-import { getOTPVerificationTemplate, getWelcomeTemplate, getTransactionAlertTemplate, getConsultationTemplate, getConsultationUpdateTemplate, getBranchTransactionTemplate, getCardApprovalTemplate, getProfileUpdateTemplate } from './emailTemplates';
+import { getOTPVerificationTemplate, getWelcomeTemplate, getTransactionAlertTemplate, getConsultationTemplate, getConsultationUpdateTemplate, getBranchTransactionTemplate, getCardApprovalTemplate, getProfileUpdateTemplate, getConsultationApprovalTemplate } from './emailTemplates';
 
 const EMAILJS_PUBLIC_KEY = 'Udo2BF2lwjLpzDA2o';
 const EMAILJS_SERVICE_ID = 'service_ucp4e7s';
@@ -133,11 +133,23 @@ export const sendCardApprovalEmail = (email, name, cardType, cardNumber) => {
 /**
  * Send an email when a profile update is scheduled.
  */
-export const sendProfileUpdateEmail = (email, name, changesList) => {
+export const sendProfileUpdateEmail = (email, name, updatedFields) => {
   return sendEmail({
     to_email: email,
     to_name: name,
-    subject: `Surya Bank Security Alert: Profile Update Scheduled`,
-    message: getProfileUpdateTemplate(name, changesList)
+    subject: 'Surya Bank Security Alert: Profile Update Scheduled',
+    message: getProfileUpdateTemplate(name, updatedFields)
+  });
+};
+
+/**
+ * Send an email with assigned appointment details when a consultation is approved.
+ */
+export const sendConsultationApprovalEmail = (email, name, topic, assignedEmployee, appointmentDate, appointmentTime) => {
+  return sendEmail({
+    to_email: email,
+    to_name: name,
+    subject: 'Consultation Scheduled - Surya Bank',
+    message: getConsultationApprovalTemplate(name, topic, assignedEmployee, appointmentDate, appointmentTime)
   });
 };

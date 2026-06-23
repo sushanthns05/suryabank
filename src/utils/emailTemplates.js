@@ -325,3 +325,21 @@ export const getProfileUpdateTemplate = (name, changesList) => {
   `;
   return baseTemplate(content, 'Surya Bank Security Alert: Profile Update Scheduled');
 };
+
+export const getConsultationApprovalTemplate = (name, topic, assignedEmployee, appointmentDate, appointmentTime) => {
+  const content = `
+    <h2>Consultation Approved & Scheduled</h2>
+    <p>Dear <span class="highlight">${name}</span>,</p>
+    <p>Great news! Your consultation request for <span class="highlight">${topic}</span> has been approved and scheduled. Below are your appointment details:</p>
+    
+    <div class="details-box" style="border-left-color: #10B981;">
+      <p><strong>Date:</strong> ${appointmentDate}</p>
+      <p><strong>Time:</strong> ${appointmentTime}</p>
+      <p><strong>Advisor Assigned:</strong> ${assignedEmployee}</p>
+    </div>
+    
+    <p>Your dedicated advisor will be preparing for your meeting to ensure you get the best financial guidance tailored to your needs.</p>
+    <p>We look forward to speaking with you!</p>
+  `;
+  return baseTemplate(content, 'Consultation Scheduled - Surya Bank');
+};

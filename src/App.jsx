@@ -8,6 +8,7 @@ import MaintenanceScreen from './components/MaintenanceScreen';
 
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
+import NetbankingLogin from './pages/NetbankingLogin';
 import CustomerDashboard from './pages/CustomerDashboard';
 import AboutUs from './pages/AboutUs';
 import Services from './pages/Services';
@@ -25,6 +26,21 @@ import EmployeeSearchCustomer from './pages/employee/EmployeeSearchCustomer';
 import EmployeeLoanApproval from './pages/employee/EmployeeLoanApproval';
 import EmployeeProfile from './pages/employee/EmployeeProfile';
 import EmployeeNotifications from './pages/employee/EmployeeNotifications';
+import EmployeeAttendance from './pages/employee/EmployeeAttendance';
+
+import ManagerLayout from './components/layout/ManagerLayout';
+import ManagerDashboard from './pages/manager/ManagerDashboard';
+import ManagerBranchManagement from './pages/manager/ManagerBranchManagement';
+import ManagerCustomers from './pages/manager/ManagerCustomers';
+import ManagerLoans from './pages/manager/ManagerLoans';
+import ManagerEmployees from './pages/manager/ManagerEmployees';
+import ManagerTransactions from './pages/manager/ManagerTransactions';
+import ManagerReports from './pages/manager/ManagerReports';
+import ManagerAudit from './pages/manager/ManagerAudit';
+import ManagerNotifications from './pages/manager/ManagerNotifications';
+import ManagerCommunication from './pages/manager/ManagerCommunication';
+import ManagerSettings from './pages/manager/ManagerSettings';
+import ManagerProfile from './pages/manager/ManagerProfile';
 
 // Public Layout Wrapper
 const PublicLayout = () => (
@@ -40,6 +56,7 @@ const PublicLayout = () => (
 
 function App() {
   const isEmployeeSite = window.location.hostname.includes('employee-suryabank');
+  const isManagerSite = window.location.hostname.includes('manager-suryabank');
   const isUpdateTriggerSite = window.location.hostname.includes('suryabankupdatetrigger');
 
   if (isEmployeeSite) {
@@ -67,12 +84,43 @@ function App() {
             <Route path="loans" element={<EmployeeLoanApproval />} />
             <Route path="profile" element={<EmployeeProfile />} />
             <Route path="notifications" element={<EmployeeNotifications />} />
+            <Route path="attendance" element={<EmployeeAttendance />} />
           </Route>
           
           {/* Fallback to login */}
           <Route path="*" element={<Navigate to="/employee-login" replace />} />
         </Routes>
       </Router>
+      </SocketProvider>
+    );
+  }
+
+  if (isManagerSite) {
+    return (
+      <SocketProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Navigate to="/manager" replace />} />
+            
+            {/* Manager Dashboard Routes */}
+            <Route path="/manager" element={<ManagerLayout />}>
+              <Route index element={<ManagerDashboard />} />
+              <Route path="branches" element={<ManagerBranchManagement />} />
+              <Route path="customers" element={<ManagerCustomers />} />
+              <Route path="loans" element={<ManagerLoans />} />
+              <Route path="employees" element={<ManagerEmployees />} />
+              <Route path="transactions" element={<ManagerTransactions />} />
+              <Route path="reports" element={<ManagerReports />} />
+              <Route path="audit" element={<ManagerAudit />} />
+              <Route path="notifications" element={<ManagerNotifications />} />
+              <Route path="communication" element={<ManagerCommunication />} />
+              <Route path="settings" element={<ManagerSettings />} />
+              <Route path="profile" element={<ManagerProfile />} />
+            </Route>
+            
+            <Route path="*" element={<Navigate to="/manager" replace />} />
+          </Routes>
+        </Router>
       </SocketProvider>
     );
   }
@@ -86,6 +134,7 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={isUpdateTriggerSite ? <Navigate to="/admin/updates" replace /> : <LandingPage />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/netbanking-login" element={<NetbankingLogin />} />
           <Route path="/dashboard" element={<CustomerDashboard />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/services" element={<Services />} />
@@ -109,6 +158,7 @@ function App() {
           <Route path="loans" element={<EmployeeLoanApproval />} />
           <Route path="profile" element={<EmployeeProfile />} />
           <Route path="notifications" element={<EmployeeNotifications />} />
+          <Route path="attendance" element={<EmployeeAttendance />} />
           {/* Add more nested routes here in later phases */}
         </Route>
       </Routes>

@@ -29,7 +29,7 @@ const LandingPage = () => {
           </div>
           <div className="hero-image">
             {/* Mockup of mobile app or credit card using CSS */}
-            <div className="mockup-card glass">
+            <div className="mockup-card glass-dark">
               <div className="mockup-chip"></div>
               <div className="mockup-logo">SuryaBank</div>
               <div className="mockup-number">**** **** **** 1234</div>

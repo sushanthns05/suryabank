@@ -1,5 +1,5 @@
 const API_BASE_URL = 'https://suryabank.onrender.com/api';
-import { collection, query, where, getDocs, addDoc, doc, updateDoc, runTransaction, orderBy, deleteField } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, doc, updateDoc, runTransaction, orderBy, deleteField, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 const handleResponse = async (response) => {
   const data = await response.json();
@@ -201,6 +201,16 @@ export const updateCustomerStatus = async (userId, isBlocked) => {
   return { success: true };
 };
 
+export const deleteCustomer = async (userId) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    await deleteDoc(userRef);
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
 export const processTransaction = async (userId, accountNumber, amount, type, description) => {
   const userRef = doc(db, 'users', userId);
   const transactionsRef = collection(db, 'transactions');
@@ -254,26 +264,46 @@ export const getTransactions = async (accountNumber) => {
 
 // Consultation Services
 export const createConsultation = async (consultationData) => {
-  const response = await fetch(`${API_BASE_URL}/consultations`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(consultationData)
-  });
-  return handleResponse(response);
+  try {
+    const consultRef = collection(db, 'consultations');
+    const newConsultation = {
+      ...consultationData,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+    const docRef = await addDoc(consultRef, newConsultation);
+    return { success: true, data: { id: docRef.id, ...newConsultation } };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
 };
 
 export const getConsultations = async () => {
-  const response = await fetch(`${API_BASE_URL}/consultations`);
-  return handleResponse(response);
+  try {
+    const consultRef = collection(db, 'consultations');
+    const snap = await getDocs(consultRef);
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
 };
 
-export const verifyConsultation = async (id) => {
-  const response = await fetch(`${API_BASE_URL}/consultations/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status: 'verified' })
-  });
-  return handleResponse(response);
+export const approveConsultation = async (id, details) => {
+  try {
+    const consultRef = doc(db, 'consultations', id);
+    await updateDoc(consultRef, { 
+      status: 'approved', 
+      assignedEmployee: details.assignedEmployee,
+      appointmentDate: details.appointmentDate,
+      appointmentTime: details.appointmentTime,
+      updatedAt: new Date().toISOString() 
+    });
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
 };
 
 // Mock Loan Services (until backend supports them)
@@ -308,6 +338,18 @@ export const updateLoanStatus = async (id, newStatus) => {
 export const createCardApplication = async (applicationData) => {
   try {
     const cardsRef = collection(db, 'card_applications');
+    
+    // Check if an active application already exists for this account
+    const q = query(cardsRef, where('accountNumber', '==', applicationData.accountNumber));
+    const existingSnap = await getDocs(q);
+    
+    if (!existingSnap.empty) {
+      const activeApp = existingSnap.docs.find(d => d.data().status !== 'rejected');
+      if (activeApp) {
+        return { success: false, message: 'An active card application already exists for this account number.' };
+      }
+    }
+
     const newApp = {
       ...applicationData,
       status: 'pending',
@@ -337,6 +379,70 @@ export const updateCardApplicationStatus = async (id, status, updates = {}) => {
     const cardRef = doc(db, 'card_applications', id);
     await updateDoc(cardRef, { status, updatedAt: new Date().toISOString(), ...updates });
     return { success: true };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const wipeAllCardApplications = async () => {
+  try {
+    const cardsRef = collection(db, 'card_applications');
+    const snap = await getDocs(cardsRef);
+    for (const document of snap.docs) {
+      await deleteDoc(doc(db, 'card_applications', document.id));
+    }
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+// Attendance Services
+export const markAttendance = async (employeeName, locationCoords) => {
+  try {
+    const attRef = collection(db, 'attendance');
+    
+    // Get today's date string (YYYY-MM-DD) in local time
+    const today = new Date().toLocaleDateString('en-CA'); 
+
+    // Check if attendance already marked today
+    const q = query(
+      attRef, 
+      where('employeeName', '==', employeeName),
+      where('date', '==', today)
+    );
+    
+    const existingSnap = await getDocs(q);
+    
+    if (!existingSnap.empty) {
+      return { success: false, message: 'Attendance already marked for today.' };
+    }
+
+    const newRecord = {
+      employeeName,
+      date: today,
+      timestamp: new Date().toISOString(),
+      location: locationCoords,
+      status: 'Present'
+    };
+    
+    const docRef = await addDoc(attRef, newRecord);
+    return { success: true, data: { id: docRef.id, ...newRecord } };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const getEmployeeAttendance = async (employeeName) => {
+  try {
+    const attRef = collection(db, 'attendance');
+    const q = query(attRef, where('employeeName', '==', employeeName));
+    const snap = await getDocs(q);
+    
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    return { success: true, count: data.length, records: data };
   } catch (error) {
     return { success: false, message: error.message };
   }
