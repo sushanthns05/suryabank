@@ -1,9 +1,9 @@
 import React from 'react';
 import { 
   Users, Building2, CreditCard, TrendingUp, 
-  AlertTriangle, CheckCircle, ShieldAlert, ArrowUpRight, Megaphone, Send
+  AlertTriangle, CheckCircle, ShieldAlert, ArrowUpRight, Megaphone, Send, Trash2
 } from 'lucide-react';
-import { createBroadcast } from '../../services/api';
+import { createBroadcast, getBroadcasts, deleteBroadcast } from '../../services/api';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Legend
@@ -38,10 +38,25 @@ const ManagerDashboard = () => {
   const [broadcastPriority, setBroadcastPriority] = React.useState('standard');
   const [isBroadcasting, setIsBroadcasting] = React.useState(false);
   const [broadcastStatus, setBroadcastStatus] = React.useState(null);
+  const [broadcasts, setBroadcasts] = React.useState([]);
+  const [loadingBroadcasts, setLoadingBroadcasts] = React.useState(true);
 
-  const role = localStorage.getItem('managerRole') || 'Manager';
-  const branch = localStorage.getItem('managerBranch') || 'Head Office';
+  const role = sessionStorage.getItem('managerRole') || 'Manager';
+  const branch = sessionStorage.getItem('managerBranch') || 'Head Office';
   const isBranchManager = role === 'Branch Manager';
+
+  const fetchBroadcasts = React.useCallback(async () => {
+    setLoadingBroadcasts(true);
+    const res = await getBroadcasts();
+    if (res.success) {
+      setBroadcasts(res.broadcasts);
+    }
+    setLoadingBroadcasts(false);
+  }, []);
+
+  React.useEffect(() => {
+    fetchBroadcasts();
+  }, [fetchBroadcasts]);
 
   const handleBroadcast = async (e) => {
     e.preventDefault();
@@ -57,11 +72,27 @@ const ManagerDashboard = () => {
     if (res.success) {
       setBroadcastStatus('success');
       setBroadcastMessage('');
+      fetchBroadcasts();
     } else {
       setBroadcastStatus('error');
     }
     setIsBroadcasting(false);
     
+    setTimeout(() => setBroadcastStatus(null), 3000);
+  };
+
+  const handleDeleteBroadcast = async (broadcastId) => {
+    const confirmed = window.confirm('Delete this broadcast permanently?');
+    if (!confirmed) return;
+
+    const res = await deleteBroadcast(broadcastId);
+    if (res.success) {
+      setBroadcasts(prev => prev.filter((broadcast) => broadcast.id !== broadcastId));
+      setBroadcastStatus('deleted');
+    } else {
+      setBroadcastStatus('error');
+    }
+
     setTimeout(() => setBroadcastStatus(null), 3000);
   };
 
@@ -209,7 +240,8 @@ const ManagerDashboard = () => {
               
               <div className="flex items-center gap-4 w-full sm:w-auto">
                 {broadcastStatus === 'success' && <span className="text-sm font-bold text-emerald-400">Broadcast Sent!</span>}
-                {broadcastStatus === 'error' && <span className="text-sm font-bold text-red-400">Failed to send.</span>}
+                {broadcastStatus === 'deleted' && <span className="text-sm font-bold text-amber-400">Broadcast Deleted.</span>}
+                {broadcastStatus === 'error' && <span className="text-sm font-bold text-red-400">Action failed.</span>}
                 
                 <button 
                   type="submit"
@@ -222,6 +254,45 @@ const ManagerDashboard = () => {
               </div>
             </div>
           </form>
+
+          <div className="mt-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-wide text-slate-400">Broadcast History</h3>
+                <p className="text-xs text-slate-500 mt-1">All sent branch announcements are tracked here.</p>
+              </div>
+              <span className="text-xs text-slate-400">{broadcasts.length} broadcasts</span>
+            </div>
+
+            {loadingBroadcasts ? (
+              <p className="text-sm text-slate-400">Loading broadcast history...</p>
+            ) : broadcasts.length === 0 ? (
+              <p className="text-sm text-slate-500">No broadcasts have been sent yet.</p>
+            ) : (
+              <div className="space-y-3 max-h-[420px] overflow-y-auto pr-2 custom-scrollbar">
+                {broadcasts.map((broadcast) => (
+                  <div key={broadcast.id} className="bg-slate-900/80 border border-slate-700 rounded-3xl p-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2 text-xs">
+                        <span className={`inline-flex items-center rounded-full px-2.5 py-1 font-semibold ${broadcast.priority === 'urgent' ? 'bg-red-500/10 text-red-300' : 'bg-yellow-500/10 text-amber-300'}`}>
+                          {broadcast.priority === 'urgent' ? 'Urgent' : 'Standard'}
+                        </span>
+                        <span className="text-slate-500">{new Date(broadcast.timestamp).toLocaleString()}</span>
+                        <span className="text-slate-500">Author: {broadcast.author || 'Manager'}</span>
+                      </div>
+                      <p className="text-slate-200">{broadcast.message}</p>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteBroadcast(broadcast.id)}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-300 transition hover:bg-red-500/20"
+                    >
+                      <Trash2 size={16} /> Delete
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

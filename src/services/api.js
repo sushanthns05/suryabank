@@ -259,6 +259,17 @@ export const processTransaction = async (userId, accountNumber, amount, type, de
         timestamp: new Date().toISOString()
       });
     });
+
+    // Add Notification trigger for high-value transactions
+    if (parseFloat(amount) > 1000000) {
+      await addNotification({
+        type: 'alert',
+        title: 'High-Value Transfer Flagged',
+        message: `A ${type} transaction of ₹${parseFloat(amount).toLocaleString()} on Account ${accountNumber} has occurred.`,
+        targetRole: 'manager'
+      });
+    }
+
     return { success: true, message: 'Transaction successful' };
   } catch (error) {
     return { success: false, message: error.message };
@@ -369,6 +380,14 @@ export const createLoan = async (loanData) => {
       updatedAt: new Date().toISOString()
     };
     const docRef = await addDoc(loansRef, newLoan);
+
+    await addNotification({
+      type: 'task',
+      title: 'New Loan Application',
+      message: `A new loan application (${loanData.loanType || 'Personal'}) for ₹${parseFloat(loanData.amount).toLocaleString()} requires verification.`,
+      targetRole: 'manager'
+    });
+
     return { success: true, data: { id: docRef.id, ...newLoan } };
   } catch (error) {
     return { success: false, message: error.message };
@@ -603,10 +622,20 @@ export const createBroadcast = async (broadcastData) => {
 export const getBroadcasts = async () => {
   try {
     const broadcastRef = collection(db, 'broadcasts');
-    const snap = await getDocs(broadcastRef);
+    const q = query(broadcastRef, orderBy('timestamp', 'desc'));
+    const snap = await getDocs(q);
     const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     return { success: true, broadcasts: data };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const deleteBroadcast = async (broadcastId) => {
+  try {
+    const broadcastRef = doc(db, 'broadcasts', broadcastId);
+    await deleteDoc(broadcastRef);
+    return { success: true };
   } catch (error) {
     return { success: false, message: error.message };
   }
@@ -677,6 +706,14 @@ export const applyLeave = async (leaveData) => {
       updatedAt: new Date().toISOString()
     };
     const docRef = await addDoc(leavesRef, newLeave);
+
+    await addNotification({
+      type: 'task',
+      title: 'New Leave Request',
+      message: `A new leave request is pending approval.`,
+      targetRole: 'manager'
+    });
+
     return { success: true, id: docRef.id, data: newLeave };
   } catch (error) {
     return { success: false, message: error.message };
@@ -751,6 +788,80 @@ export const updateBranchStatus = async (isOpen) => {
   try {
     const statusRef = doc(db, 'settings', 'branch_status');
     await setDoc(statusRef, { isOpen, updatedAt: new Date().toISOString() }, { merge: true });
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+// ==========================================
+// NOTIFICATIONS API
+// ==========================================
+
+export const getManagerNotifications = async () => {
+  try {
+    const notifRef = collection(db, 'notifications');
+    const q = query(notifRef, where('targetRole', '==', 'manager'));
+    const snap = await getDocs(q);
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const addNotification = async (notificationData) => {
+  try {
+    const notifRef = collection(db, 'notifications');
+    const newNotif = {
+      ...notificationData,
+      unread: true,
+      timestamp: new Date().toISOString()
+    };
+    const docRef = await addDoc(notifRef, newNotif);
+    return { success: true, id: docRef.id, data: newNotif };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const markNotificationAsRead = async (id) => {
+  try {
+    const notifRef = doc(db, 'notifications', id);
+    await updateDoc(notifRef, { unread: false });
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const markAllNotificationsAsRead = async (targetRole) => {
+  try {
+    const notifRef = collection(db, 'notifications');
+    const q = query(notifRef, where('targetRole', '==', targetRole), where('unread', '==', true));
+    const snap = await getDocs(q);
+    
+    const updatePromises = snap.docs.map(document => 
+      updateDoc(doc(db, 'notifications', document.id), { unread: false })
+    );
+    await Promise.all(updatePromises);
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const clearAllNotifications = async (targetRole) => {
+  try {
+    const notifRef = collection(db, 'notifications');
+    const q = query(notifRef, where('targetRole', '==', targetRole));
+    const snap = await getDocs(q);
+    
+    const deletePromises = snap.docs.map(document => 
+      deleteDoc(doc(db, 'notifications', document.id))
+    );
+    await Promise.all(deletePromises);
     return { success: true };
   } catch (error) {
     return { success: false, message: error.message };

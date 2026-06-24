@@ -4,74 +4,46 @@ import {
   MessageSquare, Circle, CheckCheck, Trash2, Clock
 } from 'lucide-react';
 
-const INITIAL_NOTIFICATIONS = [
-  {
-    id: 1,
-    type: 'alert',
-    title: 'High-Value Transfer Flagged',
-    message: 'An outward RTGS transfer of ₹15,00,000 on Account 948201847563 has been paused for manager verification.',
-    time: '10 mins ago',
-    unread: true,
-  },
-  {
-    id: 2,
-    type: 'task',
-    title: 'Pending Loan Approval',
-    message: 'Loan Application L-1045 has passed Level 1 Employee Verification and is awaiting your final signature.',
-    time: '45 mins ago',
-    unread: true,
-  },
-  {
-    id: 3,
-    type: 'message',
-    title: 'New Message from Head Office',
-    message: 'Please submit the monthly branch performance audit by Friday COB.',
-    time: '2 hours ago',
-    unread: true,
-  },
-  {
-    id: 4,
-    type: 'system',
-    title: 'Server Maintenance Scheduled',
-    message: 'Surya Bank core banking servers will undergo maintenance on Sunday from 02:00 AM to 04:00 AM.',
-    time: 'Yesterday',
-    unread: false,
-  },
-  {
-    id: 5,
-    type: 'task',
-    title: 'Customer KYC Expiring',
-    message: '3 High-Net-Worth individuals require KYC renewal within the next 7 days. Please assign an officer.',
-    time: 'Yesterday',
-    unread: false,
-  },
-  {
-    id: 6,
-    type: 'alert',
-    title: 'Multiple Failed Logins',
-    message: 'Employee ID EMP-102 has locked their account after 5 failed login attempts.',
-    time: '2 days ago',
-    unread: false,
-  }
-];
+import { 
+  getManagerNotifications, 
+  markNotificationAsRead as apiMarkNotificationAsRead, 
+  markAllNotificationsAsRead as apiMarkAllNotificationsAsRead, 
+  clearAllNotifications as apiClearAllNotifications 
+} from '../../services/api';
 
 const ManagerNotifications = () => {
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState([]);
   const [filter, setFilter] = useState('all'); // 'all', 'unread'
+  const [loading, setLoading] = useState(true);
 
-  const markAsRead = (id) => {
+  React.useEffect(() => {
+    const fetchNotifs = async () => {
+      setLoading(true);
+      const res = await getManagerNotifications();
+      if (res.success) {
+        setNotifications(res.data);
+      }
+      setLoading(false);
+    };
+    fetchNotifs();
+  }, []);
+
+  const markAsRead = async (id) => {
     setNotifications(notifications.map(n => 
       n.id === id ? { ...n, unread: false } : n
     ));
+    await apiMarkNotificationAsRead(id);
   };
 
-  const markAllAsRead = () => {
+  const markAllAsRead = async () => {
     setNotifications(notifications.map(n => ({ ...n, unread: false })));
+    await apiMarkAllNotificationsAsRead('manager');
   };
 
-  const clearAll = () => {
+  const clearAll = async () => {
     if (window.confirm('Are you sure you want to clear all notifications?')) {
       setNotifications([]);
+      await apiClearAllNotifications('manager');
     }
   };
 
@@ -162,7 +134,12 @@ const ManagerNotifications = () => {
 
         {/* List */}
         <div className="divide-y divide-slate-700/50 min-h-[400px]">
-          {filteredNotifications.length === 0 ? (
+          {loading ? (
+            <div className="h-full flex flex-col items-center justify-center p-16 text-slate-500">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F59E0B] mb-4"></div>
+              <p>Loading notifications...</p>
+            </div>
+          ) : filteredNotifications.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center p-16 text-slate-500 opacity-60">
               <Bell size={64} className="mb-4 text-slate-600" />
               <h2 className="text-xl font-bold text-slate-400">You're all caught up!</h2>
@@ -187,7 +164,7 @@ const ManagerNotifications = () => {
                       {notification.title}
                     </h3>
                     <span className="flex items-center gap-1 text-xs text-slate-500 whitespace-nowrap shrink-0 mt-0.5">
-                      <Clock size={12} /> {notification.time}
+                      <Clock size={12} /> {new Date(notification.timestamp).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
                   

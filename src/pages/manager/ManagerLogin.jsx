@@ -18,9 +18,9 @@ const ManagerLogin = () => {
     
     // Check credentials (specifically the one provided for KSTown Manager)
     if (formData.userId.trim() === 'kstownmanager' && formData.password.trim() === 'manager@kstown') {
-      localStorage.setItem('managerAuthenticated', 'true');
-      localStorage.setItem('managerRole', 'Branch Manager');
-      localStorage.setItem('managerBranch', 'Kengeri Satellite Town');
+      sessionStorage.setItem('managerAuthenticated', 'true');
+      sessionStorage.setItem('managerRole', 'Branch Manager');
+      sessionStorage.setItem('managerBranch', 'Kengeri Satellite Town');
       window.location.href = '/manager';
     } else {
       setError('Invalid Manager ID or Password. Access Denied.');

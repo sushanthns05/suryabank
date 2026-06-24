@@ -21,6 +21,32 @@ const EmployeeLeaves = () => {
 
   const [statusMessage, setStatusMessage] = useState(null);
 
+  const currentYearLeaves = leaveHistory.filter(l => {
+    const leaveYear = new Date(l.startDate).getFullYear();
+    const currentYear = new Date().getFullYear();
+    return leaveYear === currentYear && (l.status === 'approved' || l.status === 'pending');
+  });
+
+  const totalLeaveDaysTaken = currentYearLeaves.reduce((total, l) => {
+    const start = new Date(l.startDate);
+    const end = new Date(l.endDate);
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    return total + diffDays;
+  }, 0);
+
+  const getNewLeaveDays = () => {
+    if (!formData.startDate || !formData.endDate) return 0;
+    const start = new Date(formData.startDate);
+    const end = new Date(formData.endDate);
+    if (end < start) return 0;
+    const diffTime = Math.abs(end - start);
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  };
+
+  const newLeaveDays = getNewLeaveDays();
+  const willExceedLimit = totalLeaveDaysTaken + newLeaveDays > 18;
+
   // Fetch employees for the dropdown
   useEffect(() => {
     const fetchEmps = async () => {
@@ -133,6 +159,23 @@ const EmployeeLeaves = () => {
               </div>
             )}
 
+            {selectedEmployeeId && (
+              <div className="mb-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex flex-col gap-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Annual Leave Usage</span>
+                  <span className={`text-sm font-bold ${totalLeaveDaysTaken > 18 ? 'text-red-500' : 'text-surya-primary dark:text-surya-secondary'}`}>
+                    {totalLeaveDaysTaken} / 18 Days
+                  </span>
+                </div>
+                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                  <div 
+                    className={`h-2 rounded-full ${totalLeaveDaysTaken > 18 ? 'bg-red-500' : 'bg-surya-primary dark:bg-surya-secondary'}`}
+                    style={{ width: `${Math.min((totalLeaveDaysTaken / 18) * 100, 100)}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -169,6 +212,15 @@ const EmployeeLeaves = () => {
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-white focus:outline-none focus:border-surya-primary dark:focus:border-surya-secondary focus:ring-1 focus:ring-surya-primary dark:focus:ring-surya-secondary min-h-[120px] resize-none"
                 />
               </div>
+
+              {willExceedLimit && newLeaveDays > 0 && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3 text-red-700 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-400">
+                  <AlertTriangle size={18} className="shrink-0 mt-0.5" />
+                  <p className="text-sm">
+                    <strong>Warning: Limit Exceeded.</strong> This request puts your total leave usage at {totalLeaveDaysTaken + newLeaveDays} days, exceeding the 18-day limit. Proceeding will result in a 2% deduction to your base salary.
+                  </p>
+                </div>
+              )}
 
               <button 
                 type="submit" 

@@ -11,8 +11,8 @@ const firebaseConfig = {
     projectId: "surya-4f39a",
     storageBucket: "surya-4f39a.firebasestorage.app",
     messagingSenderId: "790995386990",
-    appId: "1:790995386990:web:49083727d0aa4d377a9c7f",
-    measurementId: "G-WQYL1LR26C"
+    appId: "1:790995386990:web:7f2b74cd833bdf2a7a9c7f",
+    measurementId: "G-BHZYRN3VD0"
 };
 
 const app = initializeApp(firebaseConfig);

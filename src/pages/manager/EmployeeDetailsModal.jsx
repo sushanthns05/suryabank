@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { 
   X, User, CheckCircle, Clock, FileText, 
-  AlertTriangle, Star, Activity, RefreshCw, Send, Check
+  AlertTriangle, Star, Activity, RefreshCw, Send, Check, TrendingUp
 } from 'lucide-react';
 import { 
   getEmployeeTasks, assignTask, updateTaskStatus,
   getEmployeeLeaves, updateLeaveStatus,
   getEvaluations, addEvaluation,
-  getWarnings, issueWarning
+  getWarnings, issueWarning,
+  updateEmployee
 } from '../../services/api';
 
 const EmployeeDetailsModal = ({ employee, onClose }) => {
@@ -25,6 +26,11 @@ const EmployeeDetailsModal = ({ employee, onClose }) => {
   const [newEval, setNewEval] = useState({ rating: 5, comments: '', recommendPromotion: false });
   const [newWarning, setNewWarning] = useState({ reason: '', severity: 'Low' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Hike State
+  const [localEmployee, setLocalEmployee] = useState(employee);
+  const [isApplyingHike, setIsApplyingHike] = useState(false);
+  const [hikeApplied, setHikeApplied] = useState(false);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -104,6 +110,42 @@ const EmployeeDetailsModal = ({ employee, onClose }) => {
     </button>
   );
 
+  const currentYearLeaves = leaves.filter(l => {
+    const leaveYear = new Date(l.startDate).getFullYear();
+    const currentYear = new Date().getFullYear();
+    return leaveYear === currentYear && (l.status === 'approved' || l.status === 'pending');
+  });
+
+  const totalLeaveDays = currentYearLeaves.reduce((total, l) => {
+    const start = new Date(l.startDate);
+    const end = new Date(l.endDate);
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    return total + diffDays;
+  }, 0);
+
+  const baseSalary = Number(localEmployee.salary || 0);
+  const effectiveSalary = totalLeaveDays > 18 ? baseSalary * 0.98 : baseSalary;
+
+  // Hike Eligibility Logic
+  const hasCompletedTask = tasks.filter(t => t.status === 'completed').length > 0;
+  const hasGoodRating = evaluations.length > 0 && evaluations[0].rating >= 4;
+  const hasNoWarnings = warnings.length === 0;
+  const hasHikeThisYear = localEmployee.lastHikeYear === new Date().getFullYear() || hikeApplied;
+  const isEligibleForHike = hasCompletedTask && hasGoodRating && hasNoWarnings && !hasHikeThisYear;
+
+  const handleApplyHike = async () => {
+    setIsApplyingHike(true);
+    const newSalary = Math.round(baseSalary * 1.05); // 5% increase
+    const currentYear = new Date().getFullYear();
+    const res = await updateEmployee(localEmployee.id, { salary: newSalary, lastHikeYear: currentYear });
+    if (res.success) {
+      setLocalEmployee({ ...localEmployee, salary: newSalary, lastHikeYear: currentYear });
+      setHikeApplied(true);
+    }
+    setIsApplyingHike(false);
+  };
+
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-[#1E293B] border border-slate-700 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
@@ -112,11 +154,11 @@ const EmployeeDetailsModal = ({ employee, onClose }) => {
         <div className="p-6 border-b border-slate-700/50 bg-[#0F172A]/80 flex justify-between items-start">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 text-[#F59E0B] flex items-center justify-center font-bold text-2xl shadow-inner border border-slate-600">
-              {employee.fullName?.charAt(0) || 'E'}
+              {localEmployee.fullName?.charAt(0) || 'E'}
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white">{employee.fullName}</h2>
-              <p className="text-slate-400">{employee.designation} • <span className="text-[#F59E0B]">{employee.employeeId}</span></p>
+              <h2 className="text-2xl font-bold text-white">{localEmployee.fullName}</h2>
+              <p className="text-slate-400">{localEmployee.designation} • <span className="text-[#F59E0B]">{localEmployee.employeeId}</span></p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors">
@@ -152,15 +194,32 @@ const EmployeeDetailsModal = ({ employee, onClose }) => {
                       <div className="space-y-3 text-sm">
                         <div className="flex justify-between border-b border-slate-700/50 pb-2">
                           <span className="text-slate-400">Status</span>
-                          <span className={`font-bold ${employee.status === 'Active' ? 'text-emerald-400' : 'text-red-400'}`}>{employee.status}</span>
+                          <span className={`font-bold ${localEmployee.status === 'Active' ? 'text-emerald-400' : 'text-red-400'}`}>{localEmployee.status}</span>
                         </div>
                         <div className="flex justify-between border-b border-slate-700/50 pb-2">
                           <span className="text-slate-400">Branch</span>
-                          <span className="text-slate-200 font-bold">{employee.branch}</span>
+                          <span className="text-slate-200 font-bold">{localEmployee.branch}</span>
                         </div>
                         <div className="flex justify-between border-b border-slate-700/50 pb-2">
                           <span className="text-slate-400">System ID</span>
-                          <span className="text-slate-200 font-mono">{employee.employeeId}</span>
+                          <span className="text-slate-200 font-mono">{localEmployee.employeeId}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-slate-700/50 pb-2">
+                          <span className="text-slate-400">Base Salary</span>
+                          <span className="text-slate-200 font-bold">₹{baseSalary.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between pb-2">
+                          <span className="text-slate-400 flex items-center gap-1">
+                            Effective Salary
+                            {totalLeaveDays > 18 && (
+                              <span title="2% deduction applied due to exceeding 18 days of leave" className="text-red-400 cursor-help">
+                                <AlertTriangle size={14} />
+                              </span>
+                            )}
+                          </span>
+                          <span className={`font-bold ${totalLeaveDays > 18 ? 'text-red-400' : 'text-emerald-400'}`}>
+                            ₹{effectiveSalary.toLocaleString()}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -273,6 +332,57 @@ const EmployeeDetailsModal = ({ employee, onClose }) => {
               {/* PERFORMANCE TAB */}
               {activeTab === 'performance' && (
                 <div className="space-y-6">
+
+                  {/* ANNUAL REVIEW SECTION */}
+                  <div className="bg-[#1E293B] border border-slate-700 p-5 rounded-xl">
+                    <h3 className="font-bold text-slate-200 mb-4 flex items-center gap-2"><TrendingUp size={18} className="text-[#F59E0B]"/> Annual Salary Review</h3>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                      <div className="text-sm">
+                        <p className="text-slate-400 mb-2">Eligibility Criteria:</p>
+                        <ul className="space-y-1">
+                          <li className="flex items-center gap-2">
+                            {hasGoodRating ? <CheckCircle size={14} className="text-emerald-400"/> : <X size={14} className="text-red-400"/>}
+                            <span className={hasGoodRating ? 'text-slate-300' : 'text-slate-500'}>Latest Rating 4+ Stars</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            {hasNoWarnings ? <CheckCircle size={14} className="text-emerald-400"/> : <X size={14} className="text-red-400"/>}
+                            <span className={hasNoWarnings ? 'text-slate-300' : 'text-slate-500'}>Zero Active Warnings</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            {hasCompletedTask ? <CheckCircle size={14} className="text-emerald-400"/> : <X size={14} className="text-red-400"/>}
+                            <span className={hasCompletedTask ? 'text-slate-300' : 'text-slate-500'}>Completed Tasks</span>
+                          </li>
+                        </ul>
+                      </div>
+                      
+                      <div className="bg-[#0F172A] p-4 rounded-xl border border-slate-700/50 flex flex-col items-center min-w-[200px]">
+                        {hasHikeThisYear ? (
+                          <div className="flex flex-col items-center text-emerald-400">
+                            <CheckCircle size={28} className="mb-2"/>
+                            <span className="font-bold text-sm text-center">Hike Applied<br/>for {new Date().getFullYear()}</span>
+                          </div>
+                        ) : (
+                          <>
+                            <p className="text-slate-400 text-xs mb-2">Current Base: ₹{baseSalary.toLocaleString()}</p>
+                            <button 
+                              onClick={handleApplyHike}
+                              disabled={!isEligibleForHike || isApplyingHike}
+                              className={`w-full py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all ${
+                                isEligibleForHike 
+                                ? 'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white shadow-lg shadow-emerald-500/20' 
+                                : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                              }`}
+                            >
+                              {isApplyingHike ? <RefreshCw size={16} className="animate-spin"/> : <TrendingUp size={16}/>}
+                              Apply 5% Hike
+                            </button>
+                            {!isEligibleForHike && <p className="text-[10px] text-slate-500 mt-2 text-center">Does not meet criteria</p>}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="bg-[#1E293B] border border-slate-700 p-5 rounded-xl">
                     <h3 className="font-bold text-slate-200 mb-4 flex items-center gap-2"><Star size={18} className="text-[#F59E0B]"/> Submit Evaluation</h3>
                     <form onSubmit={handleAddEvaluation} className="space-y-4">

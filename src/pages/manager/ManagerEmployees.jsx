@@ -44,7 +44,7 @@ const ManagerEmployees = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
   const [currentEmployee, setCurrentEmployee] = useState(null);
-  const [formData, setFormData] = useState({ fullName: '', designation: '', branch: 'Kengeri Satellite Town', status: 'Active' });
+  const [formData, setFormData] = useState({ fullName: '', designation: '', branch: 'Kengeri Satellite Town', status: 'Active', salary: '' });
   const [isSaving, setIsSaving] = useState(false);
   
   const [deleteCandidate, setDeleteCandidate] = useState(null);
@@ -74,7 +74,8 @@ const ManagerEmployees = () => {
         fullName: name,
         designation: designation,
         branch: 'Kengeri Satellite Town',
-        status: 'Active'
+        status: 'Active',
+        salary: 50000
       });
     });
     
@@ -95,11 +96,12 @@ const ManagerEmployees = () => {
         fullName: employee.fullName,
         designation: employee.designation,
         branch: employee.branch || 'Kengeri Satellite Town',
-        status: employee.status || 'Active'
+        status: employee.status || 'Active',
+        salary: employee.salary || ''
       });
     } else {
       setCurrentEmployee(null);
-      setFormData({ fullName: '', designation: '', branch: 'Kengeri Satellite Town', status: 'Active' });
+      setFormData({ fullName: '', designation: '', branch: 'Kengeri Satellite Town', status: 'Active', salary: '' });
     }
     setShowModal(true);
   };
@@ -189,6 +191,7 @@ const ManagerEmployees = () => {
               <tr className="bg-[#0F172A]/50 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-700/50">
                 <th className="p-4 font-medium whitespace-nowrap">Employee Info</th>
                 <th className="p-4 font-medium whitespace-nowrap">Designation</th>
+                <th className="p-4 font-medium whitespace-nowrap">Salary</th>
                 <th className="p-4 font-medium whitespace-nowrap">Branch</th>
                 <th className="p-4 font-medium whitespace-nowrap">Status</th>
                 <th className="p-4 font-medium text-right whitespace-nowrap">Actions</th>
@@ -225,6 +228,9 @@ const ManagerEmployees = () => {
                     </td>
                     <td className="p-4">
                       <span className="text-slate-300 font-medium">{emp.designation}</span>
+                    </td>
+                    <td className="p-4">
+                      <span className="text-slate-300 font-medium text-sm">₹{emp.salary || '0'}</span>
                     </td>
                     <td className="p-4">
                       <div className="flex items-center text-slate-400 text-xs gap-1.5">
@@ -304,6 +310,16 @@ const ManagerEmployees = () => {
                   type="text" 
                   value={formData.designation} 
                   onChange={(e) => setFormData({...formData, designation: e.target.value})} 
+                  className="w-full p-2.5 bg-[#0F172A] border border-slate-700 rounded-lg text-white focus:outline-none focus:border-[#F59E0B] focus:ring-1 focus:ring-[#F59E0B]"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Base Salary (₹)</label>
+                <input 
+                  type="number" 
+                  value={formData.salary} 
+                  onChange={(e) => setFormData({...formData, salary: e.target.value})} 
                   className="w-full p-2.5 bg-[#0F172A] border border-slate-700 rounded-lg text-white focus:outline-none focus:border-[#F59E0B] focus:ring-1 focus:ring-[#F59E0B]"
                   required
                 />

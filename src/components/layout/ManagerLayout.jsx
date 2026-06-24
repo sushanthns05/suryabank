@@ -5,6 +5,7 @@ import {
   Briefcase, Settings, LogOut, Menu, Search, ShieldCheck,
   Bell, Moon, Sun, X, MessageSquare, ClipboardList, UserCheck
 } from 'lucide-react';
+import { getManagerNotifications } from '../../services/api';
 
 const SIDEBAR_MENU = [
   {
@@ -53,14 +54,31 @@ const ManagerLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const profileRef = useRef(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // Authentication Check
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem('managerAuthenticated');
+    const isAuthenticated = sessionStorage.getItem('managerAuthenticated');
     if (isAuthenticated !== 'true') {
       navigate('/manager-login');
     }
   }, [navigate]);
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      const res = await getManagerNotifications();
+      if (res.success) {
+        const unread = res.data.filter(n => n.unread).length;
+        setUnreadCount(unread);
+      }
+    };
+    
+    if (sessionStorage.getItem('managerAuthenticated') === 'true') {
+      fetchUnreadCount();
+      const interval = setInterval(fetchUnreadCount, 30000); // Check every 30s
+      return () => clearInterval(interval);
+    }
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -94,9 +112,9 @@ const ManagerLayout = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('managerAuthenticated');
-    localStorage.removeItem('managerRole');
-    localStorage.removeItem('managerBranch');
+    sessionStorage.removeItem('managerAuthenticated');
+    sessionStorage.removeItem('managerRole');
+    sessionStorage.removeItem('managerBranch');
     navigate('/manager-login');
   };
 
@@ -128,8 +146,13 @@ const ManagerLayout = () => {
                         onClick={() => { navigate(item.path); if (window.innerWidth < 768) setIsSidebarOpen(false); }}
                         className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all ${isActive ? 'bg-gradient-to-r from-[#F59E0B]/20 to-transparent text-[#F59E0B] border-l-2 border-[#F59E0B]' : isDarkMode ? 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border-l-2 border-transparent' : 'text-slate-600 hover:bg-slate-100 border-l-2 border-transparent'}`}
                       >
-                        <item.icon size={18} className={`mr-3 ${isActive ? 'text-[#F59E0B]' : 'opacity-70'}`} />
-                        {item.name}
+                        <item.icon size={18} className={`mr-3 shrink-0 ${isActive ? 'text-[#F59E0B]' : 'opacity-70'}`} />
+                        <span className="flex-1 text-left whitespace-nowrap">{item.name}</span>
+                        {item.name === 'Notifications' && unreadCount > 0 && (
+                          <span className="ml-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
+                            {unreadCount}
+                          </span>
+                        )}
                       </button>
                     </li>
                   )
