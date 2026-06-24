@@ -1,5 +1,5 @@
 import emailjs from '@emailjs/browser';
-import { getOTPVerificationTemplate, getWelcomeTemplate, getTransactionAlertTemplate, getConsultationTemplate, getConsultationUpdateTemplate, getBranchTransactionTemplate, getCardApprovalTemplate, getProfileUpdateTemplate, getConsultationApprovalTemplate } from './emailTemplates';
+import { getOTPVerificationTemplate, getWelcomeTemplate, getTransactionAlertTemplate, getConsultationTemplate, getConsultationUpdateTemplate, getBranchTransactionTemplate, getCardApprovalTemplate, getProfileUpdateTemplate, getConsultationApprovalTemplate, getCustomMessageTemplate } from './emailTemplates';
 
 const EMAILJS_PUBLIC_KEY = 'Udo2BF2lwjLpzDA2o';
 const EMAILJS_SERVICE_ID = 'service_ucp4e7s';
@@ -153,3 +153,16 @@ export const sendConsultationApprovalEmail = (email, name, topic, assignedEmploy
     message: getConsultationApprovalTemplate(name, topic, assignedEmployee, appointmentDate, appointmentTime)
   });
 };
+
+/**
+ * Send a custom email directly to a customer.
+ */
+export const sendCustomCustomerEmail = (email, name, subject, customMessage, senderRole) => {
+  return sendEmail({
+    to_email: email,
+    to_name: name,
+    subject: subject,
+    message: getCustomMessageTemplate(name, subject, customMessage, senderRole)
+  });
+};
+

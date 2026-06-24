@@ -343,3 +343,21 @@ export const getConsultationApprovalTemplate = (name, topic, assignedEmployee, a
   `;
   return baseTemplate(content, 'Consultation Scheduled - Surya Bank');
 };
+
+export const getCustomMessageTemplate = (name, subject, customMessage, senderRole) => {
+  // Format message lines with <p> tags
+  const formattedMessage = customMessage.split('\n').filter(line => line.trim() !== '').map(line => `<p>${line}</p>`).join('');
+  
+  const content = `
+    <h2>${subject}</h2>
+    <p>Dear <span class="highlight">${name}</span>,</p>
+    <div style="margin: 20px 0; padding: 20px; background-color: #f8fafc; border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0;">
+      ${formattedMessage}
+    </div>
+    
+    <p>If you have any questions, please reply to this email or contact our support team.</p>
+    <p>Best regards,<br><strong>${senderRole}</strong><br>Surya Bank</p>
+  `;
+  return baseTemplate(content, subject);
+};
+

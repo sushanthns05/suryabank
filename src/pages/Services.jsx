@@ -170,7 +170,7 @@ const Services = () => {
           ))}
         </div>
         
-        <div className="services-cta mt-5 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="services-cta mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           <Card className="glass-dark text-center p-5 flex flex-col h-full justify-between">
             <div>
               <h2 style={{ color: 'var(--primary-gold)', marginBottom: '15px' }}>Not sure where to start?</h2>
@@ -205,6 +205,58 @@ const Services = () => {
               </p>
             </div>
             <Button variant="primary" size="lg" onClick={() => window.open('/card-application-form', '_blank')}>Download Card Form</Button>
+          </Card>
+
+          <Card className="glass-dark text-center p-5 flex flex-col h-full justify-between border border-[var(--primary-blue)] shadow-[0_0_15px_rgba(37,99,235,0.2)]">
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(37, 99, 235, 0.2)', color: '#60a5fa', padding: '12px', borderRadius: '50%', marginBottom: '15px' }}>
+                <FileText size={24} />
+              </div>
+              <h2 style={{ color: '#fff', marginBottom: '15px' }}>Link Aadhaar Offline</h2>
+              <p style={{ color: '#cbd5e1', marginBottom: '25px', maxWidth: '600px', margin: '0 auto 25px auto' }}>
+                Download the Aadhaar seeding consent form and submit it at the branch with your original Aadhaar card and 2 xerox copies.
+              </p>
+            </div>
+            <Button variant="primary" size="lg" onClick={() => window.open('/aadhaar-seeding-form', '_blank')}>Download Aadhaar Form</Button>
+          </Card>
+
+          <Card className="glass-dark text-center p-5 flex flex-col h-full justify-between border border-[var(--primary-gold)] shadow-[0_0_15px_rgba(234,179,8,0.2)]">
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(234, 179, 8, 0.2)', color: 'var(--primary-gold)', padding: '12px', borderRadius: '50%', marginBottom: '15px' }}>
+                <FileText size={24} />
+              </div>
+              <h2 style={{ color: '#fff', marginBottom: '15px' }}>Cash Deposit Slip</h2>
+              <p style={{ color: '#cbd5e1', marginBottom: '25px', maxWidth: '600px', margin: '0 auto 25px auto' }}>
+                Print the deposit pay-in slip, write the account and cash details, and submit it at the branch with the cash amount.
+              </p>
+            </div>
+            <Button variant="primary" size="lg" onClick={() => window.open('/deposit-pay-in-slip', '_blank')}>Download Deposit Slip</Button>
+          </Card>
+
+          <Card className="glass-dark text-center p-5 flex flex-col h-full justify-between border border-[var(--primary-blue)] shadow-[0_0_15px_rgba(37,99,235,0.2)]">
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(37, 99, 235, 0.2)', color: '#60a5fa', padding: '12px', borderRadius: '50%', marginBottom: '15px' }}>
+                <FileText size={24} />
+              </div>
+              <h2 style={{ color: '#fff', marginBottom: '15px' }}>Cheque Book Request</h2>
+              <p style={{ color: '#cbd5e1', marginBottom: '25px', maxWidth: '600px', margin: '0 auto 25px auto' }}>
+                Print the cheque book requisition form, fill account and leaf details, and submit it at the branch for manager verification.
+              </p>
+            </div>
+            <Button variant="primary" size="lg" onClick={() => window.open('/cheque-book-requisition-form', '_blank')}>Download Cheque Form</Button>
+          </Card>
+
+          <Card className="glass-dark text-center p-5 flex flex-col h-full justify-between border border-[var(--primary-gold)] shadow-[0_0_15px_rgba(234,179,8,0.2)]">
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(234, 179, 8, 0.2)', color: 'var(--primary-gold)', padding: '12px', borderRadius: '50%', marginBottom: '15px' }}>
+                <FileText size={24} />
+              </div>
+              <h2 style={{ color: '#fff', marginBottom: '15px' }}>Internet Banking Permission</h2>
+              <p style={{ color: '#cbd5e1', marginBottom: '25px', maxWidth: '600px', margin: '0 auto 25px auto' }}>
+                Print the internet banking permission form, fill customer and facility details, and submit it offline for manager approval.
+              </p>
+            </div>
+            <Button variant="primary" size="lg" onClick={() => window.open('/internet-banking-permission-form', '_blank')}>Download NetBanking Form</Button>
           </Card>
         </div>
       </div>

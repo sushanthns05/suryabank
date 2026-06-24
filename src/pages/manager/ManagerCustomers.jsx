@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Search, User, Mail, Phone, CreditCard, RefreshCw, Eye, Lock, Unlock, X, ShieldAlert, Plus, Edit2, Trash2, AlertTriangle } from 'lucide-react';
 import { getCustomers, updateCustomerStatus, registerUser, updateCustomer, deleteCustomer } from '../../services/api';
+import { sendCustomCustomerEmail } from '../../utils/emailService';
+
 
 const ManagerCustomers = () => {
   const [customers, setCustomers] = useState([]);
@@ -23,6 +25,12 @@ const ManagerCustomers = () => {
   const [deleteCandidate, setDeleteCandidate] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Email Modal State
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [emailData, setEmailData] = useState({ name: '', email: '', subject: '', message: '' });
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+
+
   const fetchCustomers = async () => {
     setLoading(true);
     try {
@@ -35,6 +43,28 @@ const ManagerCustomers = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSendCustomEmail = async (e) => {
+    e.preventDefault();
+    setIsSendingEmail(true);
+    try {
+      const role = 'Surya Bank Manager';
+      await sendCustomCustomerEmail(emailData.email, emailData.name, emailData.subject, emailData.message, role);
+      alert('Email sent successfully!');
+      setIsEmailModalOpen(false);
+      setEmailData({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+      alert('Failed to send email. Check console.');
+      console.error(error);
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
+  const openEmailModal = (name, email) => {
+    setEmailData({ name, email, subject: '', message: '' });
+    setIsEmailModalOpen(true);
   };
 
   useEffect(() => {
@@ -259,6 +289,13 @@ const ManagerCustomers = () => {
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex justify-end items-center gap-2">
+                        <button 
+                          onClick={() => openEmailModal(customer.fullName, customer.email)}
+                          className="p-2 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                          title="Send Email"
+                        >
+                          <Mail size={18} />
+                        </button>
                         <button 
                           onClick={() => handleToggleBlock(customer.id, customer.isBlocked)}
                           className={`p-2 rounded-lg transition-colors ${customer.isBlocked ? 'text-red-400 hover:bg-red-500/10' : 'text-slate-400 hover:text-orange-400 hover:bg-orange-500/10'}`}
@@ -495,6 +532,75 @@ const ManagerCustomers = () => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Compose Email Modal */}
+      {isEmailModalOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#1E293B] border border-slate-700 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-5 border-b border-slate-700/50 flex justify-between items-center bg-[#0F172A]/50">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <Mail size={18} className="text-[#F59E0B]" />
+                Compose Email to Customer
+              </h2>
+              <button 
+                onClick={() => setIsEmailModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSendCustomEmail}>
+              <div className="p-6 space-y-4 bg-[#0F172A]/30">
+                <div className="bg-[#1E293B] p-3 rounded-lg border border-slate-700 text-sm text-slate-300">
+                  <p><strong>To:</strong> {emailData.name} &lt;{emailData.email}&gt;</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Subject</label>
+                  <input 
+                    type="text" 
+                    value={emailData.subject}
+                    onChange={e => setEmailData({...emailData, subject: e.target.value})}
+                    className="w-full p-2.5 bg-[#0F172A] border border-slate-700 rounded-lg text-white focus:border-[#F59E0B] focus:outline-none transition-colors"
+                    required
+                    placeholder="Email Subject"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Message</label>
+                  <textarea 
+                    value={emailData.message}
+                    onChange={e => setEmailData({...emailData, message: e.target.value})}
+                    className="w-full p-2.5 bg-[#0F172A] border border-slate-700 rounded-lg text-white focus:border-[#F59E0B] focus:outline-none transition-colors resize-none"
+                    required
+                    rows="6"
+                    placeholder="Type your message here..."
+                  />
+                </div>
+              </div>
+              <div className="p-5 border-t border-slate-700/50 bg-[#0F172A]/50 flex gap-3">
+                <button 
+                  type="button" 
+                  onClick={() => setIsEmailModalOpen(false)} 
+                  className="flex-1 px-4 py-2.5 bg-transparent border border-slate-600 text-slate-300 font-medium rounded-lg hover:bg-slate-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={isSendingEmail} 
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#F59E0B] to-yellow-600 text-white font-bold rounded-lg shadow-lg hover:opacity-90 disabled:opacity-50 flex justify-center items-center gap-2"
+                >
+                  {isSendingEmail && <RefreshCw size={16} className="animate-spin" />}
+                  {isSendingEmail ? 'Sending...' : 'Send Email'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

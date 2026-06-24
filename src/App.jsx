@@ -16,6 +16,10 @@ import RecurringDeposit from './pages/RecurringDeposit';
 import AccountOpeningForm from './pages/AccountOpeningForm';
 import OfflineAccountOpening from './pages/OfflineAccountOpening';
 import CardApplicationForm from './pages/CardApplicationForm';
+import AadhaarSeedingForm from './pages/AadhaarSeedingForm';
+import DepositPayInSlip from './pages/DepositPayInSlip';
+import ChequeBookRequisitionForm from './pages/ChequeBookRequisitionForm';
+import InternetBankingPermissionForm from './pages/InternetBankingPermissionForm';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUpdates from './pages/admin/AdminUpdates';
 import EmployeeDashboard from './pages/EmployeeDashboard';
@@ -148,6 +152,10 @@ function App() {
           <Route path="/account-opening-form" element={<AccountOpeningForm />} />
           <Route path="/offline-account-opening" element={<OfflineAccountOpening />} />
           <Route path="/card-application-form" element={<CardApplicationForm />} />
+          <Route path="/aadhaar-seeding-form" element={<AadhaarSeedingForm />} />
+          <Route path="/deposit-pay-in-slip" element={<DepositPayInSlip />} />
+          <Route path="/cheque-book-requisition-form" element={<ChequeBookRequisitionForm />} />
+          <Route path="/internet-banking-permission-form" element={<InternetBankingPermissionForm />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/updates" element={<AdminUpdates />} />
           <Route path="/employee-login" element={<EmployeeLogin />} />

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Send, RefreshCw, CheckCircle, AlertCircle, Wallet, PiggyBank, ArrowUpRight, ArrowDownRight, Bell, History, CreditCard, X } from 'lucide-react';
+import { Send, RefreshCw, CheckCircle, AlertCircle, Wallet, PiggyBank, ArrowUpRight, ArrowDownRight, Bell, History, CreditCard, X, Banknote } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import { sendTransactionAlertEmail } from '../utils/emailService';
 import { collection, onSnapshot, query, orderBy, limit, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { processTransaction, getTransactions, createCardApplication } from '../services/api';
+import { processTransaction, getTransactions, createCardApplication, createLoan } from '../services/api';
 import './CustomerDashboard.css';
 
 const CustomerDashboard = () => {
@@ -26,6 +26,16 @@ const CustomerDashboard = () => {
   });
   const [isSubmittingCard, setIsSubmittingCard] = useState(false);
   const [cardStatus, setCardStatus] = useState({ type: '', message: '' });
+
+  // Loan Application States
+  const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
+  const [loanFormData, setLoanFormData] = useState({
+    type: 'Personal Loan',
+    amount: '',
+    tenure: ''
+  });
+  const [isSubmittingLoan, setIsSubmittingLoan] = useState(false);
+  const [loanStatus, setLoanStatus] = useState({ type: '', message: '' });
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
@@ -196,6 +206,66 @@ const CustomerDashboard = () => {
     });
     setCardStatus({ type: '', message: '' });
     setIsCardModalOpen(true);
+  };
+
+  const handleLoanInputChange = (e) => {
+    setLoanFormData({ ...loanFormData, [e.target.name]: e.target.value });
+    setLoanStatus({ type: '', message: '' });
+  };
+
+  const handleApplyLoan = async (e) => {
+    e.preventDefault();
+    if (!loanFormData.amount || !loanFormData.tenure) {
+      setLoanStatus({ type: 'error', message: 'Please fill in all fields.' });
+      return;
+    }
+
+    setIsSubmittingLoan(true);
+    setLoanStatus({ type: '', message: '' });
+
+    try {
+      // Mock values for riskScore and CIBIL as required by the manager dashboard
+      const riskScore = Math.floor(Math.random() * (95 - 60 + 1)) + 60;
+      const cibil = Math.floor(Math.random() * (850 - 650 + 1)) + 650;
+
+      const appData = {
+        userId: userAccount.id,
+        accountNumber: userAccount.account_number,
+        customerName: userAccount.fullName || userAccount.email,
+        email: userAccount.email,
+        type: loanFormData.type,
+        amount: parseFloat(loanFormData.amount),
+        tenure: parseInt(loanFormData.tenure),
+        riskScore,
+        cibil
+      };
+      
+      const res = await createLoan(appData);
+      if (res.success) {
+        setLoanStatus({ type: 'success', message: 'Loan application submitted successfully! Pending verification.' });
+        setTimeout(() => {
+          setIsLoanModalOpen(false);
+          setLoanStatus({ type: '', message: '' });
+          setLoanFormData({ type: 'Personal Loan', amount: '', tenure: '' });
+        }, 3000);
+      } else {
+        setLoanStatus({ type: 'error', message: res.message || 'Failed to submit application.' });
+      }
+    } catch (err) {
+      setLoanStatus({ type: 'error', message: err.message || 'An error occurred.' });
+    } finally {
+      setIsSubmittingLoan(false);
+    }
+  };
+
+  const openLoanModal = () => {
+    setLoanFormData({
+      type: 'Personal Loan',
+      amount: '',
+      tenure: ''
+    });
+    setLoanStatus({ type: '', message: '' });
+    setIsLoanModalOpen(true);
   };
 
   return (
@@ -395,6 +465,21 @@ const CustomerDashboard = () => {
                 </Button>
               </Card>
             </div>
+
+            {/* Loan Services */}
+            <div className="loan-services-section">
+              <Card>
+                <h3 style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary-blue)' }}>
+                  <Banknote size={20} style={{ color: 'var(--primary-gold)' }} /> Loan Services
+                </h3>
+                <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '20px' }}>
+                  Apply for a Personal, Home, or Car loan with quick approval and low interest rates.
+                </p>
+                <Button variant="outline" onClick={openLoanModal} style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                  <Banknote size={18} /> Apply for Loan
+                </Button>
+              </Card>
+            </div>
           </div>
 
           {/* Passbook Section */}
@@ -527,6 +612,103 @@ const CustomerDashboard = () => {
 
               <Button variant="primary" type="submit" className="w-full" disabled={isSubmittingCard}>
                 {isSubmittingCard ? <RefreshCw className="spin" size={20} /> : 'Submit Application'}
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isLoanModalOpen && (
+        <div className="modal-overlay fade-in" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div className="modal-content glass" style={{ background: 'var(--bg-card)', padding: '30px', borderRadius: '16px', maxWidth: '500px', width: '100%', position: 'relative', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+            <button 
+              onClick={() => setIsLoanModalOpen(false)}
+              style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
+            >
+              <X size={24} />
+            </button>
+            
+            <h3 style={{ marginBottom: '5px', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Banknote size={24} style={{ color: 'var(--primary-gold)' }} /> Apply for Loan
+            </h3>
+            <p style={{ color: '#64748b', marginBottom: '25px', fontSize: '0.95rem' }}>Fill in the details to request a new loan.</p>
+            
+            <form onSubmit={handleApplyLoan} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div className="form-group" style={{ textAlign: 'left' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--primary-blue)' }}>Linked Account</label>
+                <input 
+                  type="text" 
+                  value={userAccount?.account_number || ''}
+                  disabled
+                  style={{ width: '100%', padding: '10px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#e2e8f0', color: '#64748b', cursor: 'not-allowed' }}
+                />
+              </div>
+
+              <div className="form-group" style={{ textAlign: 'left' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--primary-blue)' }}>Loan Type</label>
+                <select 
+                  name="type" 
+                  value={loanFormData.type}
+                  onChange={handleLoanInputChange}
+                  required
+                  style={{ width: '100%', padding: '10px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#0f172a' }}
+                >
+                  <option value="Personal Loan">Personal Loan</option>
+                  <option value="Home Loan">Home Loan</option>
+                  <option value="Car Loan">Car Loan</option>
+                  <option value="Education Loan">Education Loan</option>
+                  <option value="Business Loan">Business Loan</option>
+                </select>
+              </div>
+              
+              <div className="form-group" style={{ textAlign: 'left' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--primary-blue)' }}>Amount Requested (₹)</label>
+                <input 
+                  type="number" 
+                  name="amount"
+                  value={loanFormData.amount}
+                  onChange={handleLoanInputChange}
+                  required 
+                  min="1000"
+                  step="500"
+                  style={{ width: '100%', padding: '10px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc' }}
+                  placeholder="e.g. 50000"
+                />
+              </div>
+
+              <div className="form-group" style={{ textAlign: 'left', marginBottom: '10px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--primary-blue)' }}>Tenure (Months)</label>
+                <input 
+                  type="number" 
+                  name="tenure"
+                  value={loanFormData.tenure}
+                  onChange={handleLoanInputChange}
+                  required 
+                  min="6"
+                  max="360"
+                  style={{ width: '100%', padding: '10px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc' }}
+                  placeholder="e.g. 24"
+                />
+              </div>
+
+              {loanStatus.message && (
+                <div style={{ 
+                  padding: '12px', 
+                  borderRadius: '8px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '8px',
+                  backgroundColor: loanStatus.type === 'success' ? '#dcfce7' : '#fef2f2',
+                  color: loanStatus.type === 'success' ? '#166534' : '#ef4444',
+                  fontSize: '0.9rem'
+                }}>
+                  {loanStatus.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+                  {loanStatus.message}
+                </div>
+              )}
+
+              <Button variant="primary" type="submit" className="w-full" disabled={isSubmittingLoan}>
+                {isSubmittingLoan ? <RefreshCw className="spin" size={20} /> : 'Submit Application'}
               </Button>
             </form>
           </div>
