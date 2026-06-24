@@ -1,5 +1,5 @@
 import emailjs from '@emailjs/browser';
-import { getOTPVerificationTemplate, getWelcomeTemplate, getTransactionAlertTemplate, getConsultationTemplate, getConsultationUpdateTemplate, getBranchTransactionTemplate, getCardApprovalTemplate, getProfileUpdateTemplate, getConsultationApprovalTemplate, getCustomMessageTemplate } from './emailTemplates';
+import { getOTPVerificationTemplate, getWelcomeTemplate, getTransactionAlertTemplate, getConsultationTemplate, getConsultationUpdateTemplate, getBranchTransactionTemplate, getCardApprovalTemplate, getProfileUpdateTemplate, getConsultationApprovalTemplate, getCustomMessageTemplate, getLoanApplicationTemplate, getLoanLevel1Template, getLoanFinalTemplate } from './emailTemplates';
 
 const EMAILJS_PUBLIC_KEY = 'Udo2BF2lwjLpzDA2o';
 const EMAILJS_SERVICE_ID = 'service_ucp4e7s';
@@ -163,6 +163,42 @@ export const sendCustomCustomerEmail = (email, name, subject, customMessage, sen
     to_name: name,
     subject: subject,
     message: getCustomMessageTemplate(name, subject, customMessage, senderRole)
+  });
+};
+
+/**
+ * Send an email when a loan application is received.
+ */
+export const sendLoanApplicationEmail = (email, name, loanType, amount) => {
+  return sendEmail({
+    to_email: email,
+    to_name: name,
+    subject: `Surya Bank: Loan Application Received`,
+    message: getLoanApplicationTemplate(name, loanType, amount)
+  });
+};
+
+/**
+ * Send an email when a loan application passes round 1 verification.
+ */
+export const sendLoanLevel1Email = (email, name, loanType) => {
+  return sendEmail({
+    to_email: email,
+    to_name: name,
+    subject: `Surya Bank: Loan Verification Update`,
+    message: getLoanLevel1Template(name, loanType)
+  });
+};
+
+/**
+ * Send an email when a loan application gets final approval or rejection.
+ */
+export const sendLoanFinalEmail = (email, name, loanType, status) => {
+  return sendEmail({
+    to_email: email,
+    to_name: name,
+    subject: `Surya Bank: Loan Application ${status === 'approved' ? 'Approved' : 'Rejected'}`,
+    message: getLoanFinalTemplate(name, loanType, status)
   });
 };
 

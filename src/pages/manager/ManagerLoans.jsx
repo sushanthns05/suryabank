@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Briefcase, CheckCircle, XCircle, RefreshCw, AlertCircle, FileText, IndianRupee, ShieldAlert, TrendingUp } from 'lucide-react';
 import { getLoans, updateLoanStatus, createLoan } from '../../services/api';
+import { sendLoanFinalEmail } from '../../utils/emailService';
 
 const ManagerLoans = () => {
   const [loans, setLoans] = useState([]);
@@ -65,6 +66,15 @@ const ManagerLoans = () => {
       const data = await updateLoanStatus(id, status);
       if (data.success) {
         setLoans(loans.map(loan => loan.id === id ? { ...loan, status } : loan));
+        
+        // Find loan to send email
+        const targetLoan = loans.find(l => l.id === id);
+        if (targetLoan && targetLoan.email && targetLoan.email !== 'N/A (Guest from Services)') {
+          if (status === 'approved' || status === 'rejected') {
+            sendLoanFinalEmail(targetLoan.email, targetLoan.customerName, targetLoan.type, status).catch(err => console.error("EmailJS Error:", err));
+          }
+        }
+        
         if (selectedLoan && selectedLoan.id === id) {
           setSelectedLoan(null); // close modal after action
         }

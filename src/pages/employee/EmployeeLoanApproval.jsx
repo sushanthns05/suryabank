@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Briefcase, CheckCircle, XCircle, RefreshCw, AlertCircle, FileText, IndianRupee } from 'lucide-react';
 import { getLoans, updateLoanStatus } from '../../services/api';
+import { sendLoanLevel1Email, sendLoanFinalEmail } from '../../utils/emailService';
 
 const EmployeeLoanApproval = () => {
   const [loans, setLoans] = useState([]);
@@ -36,6 +37,16 @@ const EmployeeLoanApproval = () => {
       const data = await updateLoanStatus(id, status);
       if (data.success) {
         setLoans(loans.map(loan => loan.id === id ? { ...loan, status } : loan));
+        
+        // Find loan to send email
+        const targetLoan = loans.find(l => l.id === id);
+        if (targetLoan && targetLoan.email && targetLoan.email !== 'N/A (Guest from Services)') {
+          if (status === 'level_1_verified') {
+            sendLoanLevel1Email(targetLoan.email, targetLoan.customerName, targetLoan.type).catch(err => console.error("EmailJS Error:", err));
+          } else if (status === 'rejected') {
+            sendLoanFinalEmail(targetLoan.email, targetLoan.customerName, targetLoan.type, 'rejected').catch(err => console.error("EmailJS Error:", err));
+          }
+        }
       }
     } catch (err) {
       alert('Failed to update loan status.');

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Send, RefreshCw, CheckCircle, AlertCircle, Wallet, PiggyBank, ArrowUpRight, ArrowDownRight, Bell, History, CreditCard, X, Banknote } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
-import { sendTransactionAlertEmail } from '../utils/emailService';
+import { sendTransactionAlertEmail, sendLoanApplicationEmail } from '../utils/emailService';
 import { collection, onSnapshot, query, orderBy, limit, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { processTransaction, getTransactions, createCardApplication, createLoan } from '../services/api';
@@ -242,6 +242,9 @@ const CustomerDashboard = () => {
       
       const res = await createLoan(appData);
       if (res.success) {
+        // Send email notification asynchronously
+        sendLoanApplicationEmail(appData.email, appData.customerName, appData.type, appData.amount).catch(err => console.error("EmailJS Error:", err));
+        
         setLoanStatus({ type: 'success', message: 'Loan application submitted successfully! Pending verification.' });
         setTimeout(() => {
           setIsLoanModalOpen(false);

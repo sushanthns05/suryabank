@@ -361,3 +361,72 @@ export const getCustomMessageTemplate = (name, subject, customMessage, senderRol
   return baseTemplate(content, subject);
 };
 
+export const getLoanApplicationTemplate = (name, loanType, amount) => {
+  const content = `
+    <h2>Loan Application Received</h2>
+    <p>Dear <span class="highlight">${name}</span>,</p>
+    <p>We have successfully received your application for a <strong>${loanType}</strong>.</p>
+    
+    <div class="otp-box" style="border-color: #3b82f6; background-color: #eff6ff;">
+      <p style="margin: 0; color: #1e3a8a; font-size: 14px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Amount Requested</p>
+      <p class="otp-code" style="color: #1e40af; font-size: 32px; letter-spacing: 2px; margin: 10px 0;">₹${parseFloat(amount).toFixed(2)}</p>
+    </div>
+    
+    <div class="details-box" style="border-left-color: #f59e0b; background-color: #fffbeb;">
+      <p style="color: #b45309;"><strong>What's Next?</strong></p>
+      <p>Your application is currently pending initial verification. Our team is reviewing your details, and you will receive an update once the first round of verification is complete.</p>
+    </div>
+    
+    <p>Thank you for choosing Surya Bank for your financial needs.</p>
+  `;
+  return baseTemplate(content, 'Surya Bank: Loan Application Received');
+};
+
+export const getLoanLevel1Template = (name, loanType) => {
+  const content = `
+    <h2>Loan Update: Round 1 Verification Passed</h2>
+    <p>Dear <span class="highlight">${name}</span>,</p>
+    <p>Good news! Your application for a <strong>${loanType}</strong> has successfully passed the initial employee verification.</p>
+    
+    <div class="otp-box" style="border-color: #f59e0b; background-color: #fffbeb;">
+      <p style="margin: 0; color: #b45309; font-size: 14px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Status</p>
+      <p class="otp-code" style="color: #d97706; font-size: 28px; letter-spacing: 1px; margin: 10px 0;">Awaiting Manager Approval</p>
+    </div>
+    
+    <div class="details-box" style="border-left-color: #3b82f6; background-color: #eff6ff;">
+      <p style="color: #1e3a8a;"><strong>Final Step:</strong></p>
+      <p>Your application has been forwarded to the branch manager for final executive approval. We will notify you immediately once a final decision is made.</p>
+    </div>
+    
+    <p>We appreciate your patience.</p>
+  `;
+  return baseTemplate(content, 'Surya Bank: Loan Verification Update');
+};
+
+export const getLoanFinalTemplate = (name, loanType, status) => {
+  const isApproved = status === 'approved';
+  const color = isApproved ? '#16a34a' : '#dc2626';
+  const bgColor = isApproved ? '#f0fdf4' : '#fef2f2';
+  const statusText = isApproved ? 'Approved' : 'Rejected';
+  
+  const content = `
+    <h2>Loan Application ${statusText}</h2>
+    <p>Dear <span class="highlight">${name}</span>,</p>
+    <p>An executive decision has been made regarding your application for a <strong>${loanType}</strong>.</p>
+    
+    <div class="otp-box" style="border-color: ${color}; background-color: ${bgColor};">
+      <p style="margin: 0; color: ${color}; font-size: 14px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Final Decision</p>
+      <p class="otp-code" style="color: ${color}; font-size: 32px; letter-spacing: 2px; margin: 10px 0;">${statusText}</p>
+    </div>
+    
+    <div class="details-box" style="border-left-color: #3b82f6; background-color: #eff6ff;">
+      ${isApproved 
+        ? `<p style="color: #1e3a8a;"><strong>Congratulations!</strong></p><p>Your loan has been approved. The requested amount will be disbursed to your account shortly. You can monitor your active loans from your dashboard.</p>` 
+        : `<p style="color: #1e3a8a;"><strong>Update:</strong></p><p>Unfortunately, we could not approve your loan application at this time. If you have questions, please reach out to an advisor for more details.</p>`}
+    </div>
+    
+    <p>Thank you for choosing Surya Bank.</p>
+  `;
+  return baseTemplate(content, `Surya Bank: Loan Application ${statusText}`);
+};
+

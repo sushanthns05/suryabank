@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CreditCard, Shield, TrendingUp, Briefcase, HeartPulse, Landmark, Calendar, User, Mail, MessageSquare, X, CheckCircle, RefreshCw, FileText, AlertCircle, BookOpen, Banknote } from 'lucide-react';
 import { createConsultation, createCardApplication, createLoan } from '../services/api';
-import { sendConsultationEmail } from '../utils/emailService';
+import { sendConsultationEmail, sendLoanApplicationEmail } from '../utils/emailService';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import './Services.css';
@@ -144,6 +144,9 @@ const Services = () => {
       
       const res = await createLoan(appData);
       if (res.success) {
+        // Send email notification asynchronously
+        sendLoanApplicationEmail(appData.email, appData.customerName, appData.type, appData.amount).catch(err => console.error("EmailJS Error:", err));
+
         setLoanStatus({ type: 'success', message: 'Loan application submitted successfully! Pending verification.' });
         setTimeout(() => {
           setIsLoanModalOpen(false);
