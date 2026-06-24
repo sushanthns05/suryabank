@@ -32,6 +32,8 @@ const Services = () => {
   const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
   const [loanFormData, setLoanFormData] = useState({
     accountNumber: '',
+    customerName: '',
+    email: '',
     type: 'Personal Loan',
     amount: '',
     tenure: ''
@@ -118,7 +120,7 @@ const Services = () => {
 
   const handleApplyLoan = async (e) => {
     e.preventDefault();
-    if (!loanFormData.accountNumber || !loanFormData.amount || !loanFormData.tenure) {
+    if (!loanFormData.accountNumber || !loanFormData.customerName || !loanFormData.email || !loanFormData.amount || !loanFormData.tenure) {
       setLoanStatus({ type: 'error', message: 'Please fill in all fields.' });
       return;
     }
@@ -133,8 +135,8 @@ const Services = () => {
       const appData = {
         userId: 'guest',
         accountNumber: loanFormData.accountNumber,
-        customerName: 'Guest Customer',
-        email: 'N/A (Guest from Services)',
+        customerName: loanFormData.customerName,
+        email: loanFormData.email,
         type: loanFormData.type,
         amount: parseFloat(loanFormData.amount),
         tenure: parseInt(loanFormData.tenure),
@@ -549,6 +551,32 @@ const Services = () => {
                   onChange={handleLoanInputChange}
                   required
                   placeholder="e.g. 123456789012"
+                  style={{ width: '100%', padding: '10px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#0f172a' }}
+                />
+              </div>
+
+              <div className="form-group" style={{ textAlign: 'left' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: '#cbd5e1' }}>Full Name</label>
+                <input 
+                  type="text" 
+                  name="customerName"
+                  value={loanFormData.customerName}
+                  onChange={handleLoanInputChange}
+                  required
+                  placeholder="John Doe"
+                  style={{ width: '100%', padding: '10px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#0f172a' }}
+                />
+              </div>
+
+              <div className="form-group" style={{ textAlign: 'left' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: '#cbd5e1' }}>Email Address</label>
+                <input 
+                  type="email" 
+                  name="email"
+                  value={loanFormData.email}
+                  onChange={handleLoanInputChange}
+                  required
+                  placeholder="john@example.com"
                   style={{ width: '100%', padding: '10px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#0f172a' }}
                 />
               </div>
