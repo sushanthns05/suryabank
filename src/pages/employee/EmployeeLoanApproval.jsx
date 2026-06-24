@@ -8,6 +8,7 @@ const EmployeeLoanApproval = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionLoading, setActionLoading] = useState(null);
+  const [selectedLoan, setSelectedLoan] = useState(null);
 
   const fetchLoans = async () => {
     setLoading(true);
@@ -116,7 +117,10 @@ const EmployeeLoanApproval = () => {
                     </td>
                     <td className="p-4">
                       <p className="font-medium text-slate-800 dark:text-white">{loan.customerName}</p>
-                      <button className="text-xs text-surya-primary dark:text-surya-secondary hover:underline mt-1 flex items-center gap-1">
+                      <button 
+                        onClick={() => setSelectedLoan(loan)}
+                        className="text-xs text-surya-primary dark:text-surya-secondary hover:underline mt-1 flex items-center gap-1"
+                      >
                         <FileText size={12} /> View Profile
                       </button>
                     </td>
@@ -168,6 +172,80 @@ const EmployeeLoanApproval = () => {
           </div>
         )}
       </div>
+      
+      {/* Loan Details Modal */}
+      {selectedLoan && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+              <div>
+                <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                  Loan Application Profile
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">ID: {selectedLoan.id}</p>
+              </div>
+              <button 
+                onClick={() => setSelectedLoan(null)}
+                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors"
+              >
+                <XCircle size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-slate-800 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2">Applicant Details</h4>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between"><span className="text-slate-500">Full Name</span><span className="font-medium text-slate-800 dark:text-slate-200">{selectedLoan.customerName}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-500">Email</span><span className="font-medium text-slate-800 dark:text-slate-200">{selectedLoan.email || 'N/A'}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-500">Account No.</span><span className="font-mono text-slate-800 dark:text-slate-200">{selectedLoan.accountNumber}</span></div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-slate-800 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2">Loan Request</h4>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between"><span className="text-slate-500">Type</span><span className="font-medium text-blue-600 dark:text-blue-400">{selectedLoan.type}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-500">Amount</span><span className="font-bold text-surya-success flex items-center"><IndianRupee size={12}/> {formatCurrency(selectedLoan.amount).replace('₹', '')}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-500">Tenure</span><span className="font-medium text-slate-800 dark:text-slate-200">{selectedLoan.tenure} Months</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 border border-slate-100 dark:border-slate-700">
+                <h4 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                  <AlertCircle size={18} className="text-blue-500" />
+                  Risk Assessment
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white dark:bg-slate-900 p-4 rounded-lg border border-slate-100 dark:border-slate-800 text-center shadow-sm">
+                    <p className="text-xs text-slate-500 mb-1 uppercase tracking-wider font-semibold">CIBIL Score</p>
+                    <p className={`text-2xl font-bold ${selectedLoan.cibil >= 750 ? 'text-green-500' : selectedLoan.cibil >= 650 ? 'text-amber-500' : 'text-red-500'}`}>
+                      {selectedLoan.cibil || 'N/A'}
+                    </p>
+                  </div>
+                  <div className="bg-white dark:bg-slate-900 p-4 rounded-lg border border-slate-100 dark:border-slate-800 text-center shadow-sm">
+                    <p className="text-xs text-slate-500 mb-1 uppercase tracking-wider font-semibold">Internal Risk Score</p>
+                    <p className={`text-2xl font-bold ${selectedLoan.riskScore >= 80 ? 'text-green-500' : selectedLoan.riskScore >= 60 ? 'text-amber-500' : 'text-red-500'}`}>
+                      {selectedLoan.riskScore || 'N/A'}/100
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex justify-end gap-3">
+              <button 
+                onClick={() => setSelectedLoan(null)}
+                className="px-6 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                Close Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
