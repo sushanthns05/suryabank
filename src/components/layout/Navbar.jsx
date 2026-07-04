@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Sun, Bell, CheckCircle, Info, Clock } from 'lucide-react';
+import { Menu, X, Sun, Bell, CheckCircle, Info, Clock, Download } from 'lucide-react';
 import Button from '../ui/Button';
+import CustomerAnnouncementBanner from '../shared/CustomerAnnouncementBanner';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import './Navbar.css';
@@ -13,6 +14,8 @@ const Navbar = () => {
   const [notifications, setNotifications] = useState([]);
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [isBranchOpen, setIsBranchOpen] = useState(true);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isInstallable, setIsInstallable] = useState(false);
   const notifRef = useRef(null);
   const location = useLocation();
 
@@ -78,6 +81,29 @@ const Navbar = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+      setIsInstallable(false);
+    }
+  };
+
   const markAsRead = async (id) => {
     try {
       const notifRef = doc(db, 'notifications', id);
@@ -104,6 +130,8 @@ const Navbar = () => {
   const isDarkBg = !hasLightBg && !isScrolled;
 
   return (
+    <>
+    <CustomerAnnouncementBanner />
     <nav className={`navbar ${isScrolled ? 'scrolled glass' : ''} ${isDarkBg ? 'navbar-dark' : ''}`}>
       <div className="container navbar-content">
         <Link to="/" className="navbar-brand">
@@ -116,6 +144,11 @@ const Navbar = () => {
           <Link to="/services" className="nav-link">Services</Link>
           <Link to="/about" className="nav-link">About Us</Link>
           {isAuthenticated && userRole !== 'employee' && <Link to={dashboardPath} className="nav-link">{dashboardLabel}</Link>}
+          {isInstallable && (
+            <button onClick={handleInstallClick} className="nav-link text-surya-primary flex items-center font-bold">
+              <Download size={16} className="mr-1" /> Install App
+            </button>
+          )}
           <div className={`ml-4 px-3 py-1 rounded-full text-[10px] font-bold border flex items-center gap-1.5 ${isBranchOpen ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-red-50 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${isBranchOpen ? 'bg-emerald-500 dark:bg-emerald-400 animate-pulse' : 'bg-red-500 dark:bg-red-400'}`}></span>
             Branch: {isBranchOpen ? 'OPEN' : 'CLOSED'}
@@ -225,6 +258,11 @@ const Navbar = () => {
           <Link to="/services" className="mobile-link" onClick={() => setMobileMenuOpen(false)}>Services</Link>
           <Link to="/about" className="mobile-link" onClick={() => setMobileMenuOpen(false)}>About Us</Link>
           {isAuthenticated && userRole !== 'employee' && <Link to={dashboardPath} className="mobile-link" onClick={() => setMobileMenuOpen(false)}>{dashboardLabel}</Link>}
+          {isInstallable && (
+            <button onClick={() => { setMobileMenuOpen(false); handleInstallClick(); }} className="mobile-link text-surya-primary flex items-center w-full text-left font-bold">
+              <Download size={18} className="mr-2" /> Install Surya Bank App
+            </button>
+          )}
           <div className="mobile-actions">
             {isAuthenticated ? (
               <Button variant="outline" className="w-full mb-2" onClick={() => { setMobileMenuOpen(false); handleLogout(); }}>Logout</Button>
@@ -283,6 +321,7 @@ const Navbar = () => {
         </div>
       )}
     </nav>
+    </>
   );
 };
 

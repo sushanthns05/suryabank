@@ -1,14 +1,19 @@
 import React from 'react';
 import { 
   Users, Building2, CreditCard, TrendingUp, 
-  AlertTriangle, CheckCircle, ShieldAlert, ArrowUpRight, Megaphone, Send, Trash2
+  AlertTriangle, CheckCircle, ShieldAlert, ArrowUpRight, Megaphone, Send, Trash2, Download,
+  CheckCircle2, Clock
 } from 'lucide-react';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
 import { createBroadcast, getBroadcasts, deleteBroadcast } from '../../services/api';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Legend
 } from 'recharts';
 import { generateDashboardPDF } from '../../utils/pdfGenerator';
+import CeoDirectiveBanner from '../../components/shared/CeoDirectiveBanner';
+import CeoTaskInbox from '../../components/shared/CeoTaskInbox';
 
 const revenueData = [
   { name: 'Jan', revenue: 4000, target: 2400 },
@@ -40,6 +45,8 @@ const ManagerDashboard = () => {
   const [broadcastStatus, setBroadcastStatus] = React.useState(null);
   const [broadcasts, setBroadcasts] = React.useState([]);
   const [loadingBroadcasts, setLoadingBroadcasts] = React.useState(true);
+  
+  const [ceoTasks, setCeoTasks] = React.useState([]);
 
   const role = sessionStorage.getItem('managerRole') || 'Manager';
   const branch = sessionStorage.getItem('managerBranch') || 'Head Office';
@@ -56,7 +63,30 @@ const ManagerDashboard = () => {
 
   React.useEffect(() => {
     fetchBroadcasts();
-  }, [fetchBroadcasts]);
+
+    // Listen to CEO tasks
+    const qTasks = query(collection(db, 'ceo_tasks'), orderBy('timestamp', 'desc'));
+    const unsubTasks = onSnapshot(qTasks, (snapshot) => {
+      const list = [];
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        if (data.status !== 'archived' && (data.audience === 'managers' || data.audience === 'all_staff' || data.department === branch)) {
+          list.push({ id: docSnap.id, ...data });
+        }
+      });
+      setCeoTasks(list);
+    });
+
+    return () => unsubTasks();
+  }, [fetchBroadcasts, branch]);
+
+  const handleApproveTask = async (id) => {
+    try {
+      await updateDoc(doc(db, 'ceo_tasks', id), { status: 'Manager Approved' });
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleBroadcast = async (e) => {
     e.preventDefault();
@@ -102,14 +132,20 @@ const ManagerDashboard = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      
+
+      <CeoDirectiveBanner portal="managers" variant="manager" limit={2} />
+      <CeoTaskInbox portal="managers" />
+
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">{title}</h1>
           <p className="text-slate-400 text-sm mt-1">{subtitle}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <a href="/surya-bank-setup.zip" download className="px-4 py-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 rounded-lg text-sm font-bold hover:bg-indigo-500/20 transition-colors shadow-[0_0_15px_rgba(99,102,241,0.15)] flex items-center gap-2 cursor-pointer">
+            <Download size={16} /> Download App
+          </a>
           <button onClick={() => generateDashboardPDF(title, summaryCards)} className="px-4 py-2 bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/30 rounded-lg text-sm font-bold hover:bg-[#F59E0B]/20 transition-colors shadow-[0_0_15px_rgba(245,158,11,0.15)]">
             {isBranchManager ? 'Generate Branch Report' : 'Generate Executive Report'}
           </button>
@@ -138,6 +174,46 @@ const ManagerDashboard = () => {
           </div>
         ))}
       </div>
+
+      {/* CEO Task Inbox */}
+      {ceoTasks.length > 0 && (
+        <div className="bg-[#1E293B]/60 backdrop-blur-md rounded-xl border border-[#F59E0B]/30 shadow-xl overflow-hidden mt-6 mb-6">
+          <div className="p-4 bg-gradient-to-r from-[#F59E0B]/20 to-transparent border-b border-[#F59E0B]/20 flex items-center gap-3">
+            <CheckCircle2 size={20} className="text-[#F59E0B]" />
+            <h2 className="text-lg font-bold text-[#F59E0B]">CEO Task Inbox</h2>
+          </div>
+          <div className="p-4 space-y-3">
+            {ceoTasks.map(task => (
+              <div key={task.id} className="bg-slate-900/60 p-4 rounded-lg border border-slate-700 flex flex-col md:flex-row justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-800 text-[#F59E0B] border border-[#F59E0B]/30">{task.status}</span>
+                    {task.deadline && <span className="text-xs text-slate-400 flex items-center gap-1"><Clock size={12} /> {task.deadline}</span>}
+                  </div>
+                  <h4 className="text-white font-bold">{task.title}</h4>
+                  <p className="text-sm text-slate-400">{task.description}</p>
+                </div>
+                <div className="flex flex-col items-end gap-2 shrink-0">
+                  <div className="text-xs text-slate-400 w-32 text-right">
+                    Progress: {task.progress || 0}%
+                    <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden mt-1">
+                      <div className="h-full bg-emerald-500" style={{ width: `${task.progress || 0}%` }} />
+                    </div>
+                  </div>
+                  {task.status === 'Completed' && (
+                    <button
+                      onClick={() => handleApproveTask(task.id)}
+                      className="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 rounded font-bold text-xs flex items-center gap-1"
+                    >
+                      <CheckCircle2 size={14} /> Mark Manager Approved
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

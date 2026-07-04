@@ -35,5 +35,15 @@ service cloud.firestore {
       allow read: if true;
       allow write: if true;
     }
+
+    match /ceo_directives/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /ceo_tasks/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
   }
 }

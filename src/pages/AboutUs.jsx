@@ -73,7 +73,7 @@ const AboutUs = () => {
           
           <div className="about-text-content">
             <p>
-              <strong>Surya Bank (SB)</strong>, a Fortune 500 company, is an Indian Multinational, Public Sector Banking and Financial services statutory body headquartered in Mumbai. The rich heritage and legacy of over 200 years, accredits SB as the most trusted Bank by Indians through generations.
+              <strong>Surya Bank (SB)</strong>, a Fortune 500 company, is an Indian Multinational, Public Sector Banking and Financial services statutory body headquartered in Bengaluru. The rich heritage and legacy of over 200 years, accredits SB as the most trusted Bank by Indians through generations.
             </p>
 
             <div className="stats-grid">

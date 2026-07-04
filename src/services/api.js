@@ -544,6 +544,60 @@ export const getTodayAttendance = async () => {
   }
 };
 
+export const getAttendanceByDate = async (dateStr) => {
+  try {
+    const attRef = collection(db, 'attendance');
+    const q = query(attRef, where('date', '==', dateStr));
+    const snap = await getDocs(q);
+    
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return { success: true, records: data };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const markAllAttendance = async (status, dateStr) => {
+  try {
+    const employeesRef = collection(db, 'employees');
+    const empSnap = await getDocs(employeesRef);
+    const employees = empSnap.docs.map(doc => doc.data().fullName);
+
+    const attRef = collection(db, 'attendance');
+    const targetDate = dateStr || new Date().toLocaleDateString('en-CA');
+    
+    const q = query(attRef, where('date', '==', targetDate));
+    const attSnap = await getDocs(q);
+    
+    const existingRecords = {};
+    attSnap.docs.forEach(document => {
+      existingRecords[document.data().employeeName] = document.id;
+    });
+
+    const promises = employees.map(empName => {
+      if (existingRecords[empName]) {
+        return updateDoc(doc(db, 'attendance', existingRecords[empName]), { 
+          status, 
+          timestamp: new Date().toISOString() 
+        });
+      } else {
+        return addDoc(attRef, {
+          employeeName: empName,
+          date: targetDate,
+          timestamp: new Date().toISOString(),
+          location: { lat: 0, lng: 0 },
+          status: status
+        });
+      }
+    });
+    
+    await Promise.all(promises);
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
 // ==========================================
 // EMPLOYEE MANAGEMENT API
 // ==========================================

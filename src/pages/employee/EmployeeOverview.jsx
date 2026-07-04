@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { testApiConnection, getBroadcasts } from '../../services/api';
 import { 
   Users, Activity, FileText, UserPlus, IndianRupee, 
-  Wallet, Briefcase, UserCheck, ArrowUpRight, ArrowDownRight, Clock
+  Wallet, Briefcase, UserCheck, ArrowUpRight, ArrowDownRight, Clock, Download
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Legend, PieChart, Pie, Cell
 } from 'recharts';
+import CeoDirectiveBanner from '../../components/shared/CeoDirectiveBanner';
+import CeoTaskInbox from '../../components/shared/CeoTaskInbox';
 
 // Dummy Data for charts
 const performanceData = [
@@ -107,7 +109,10 @@ const EmployeeOverview = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      
+
+      <CeoDirectiveBanner portal="employees" variant="employee" limit={2} />
+      <CeoTaskInbox portal="employees" />
+
       {/* Urgent Manager Broadcasts */}
       {broadcasts.length > 0 && (
         <div className="space-y-3 mb-6">
@@ -154,6 +159,12 @@ const EmployeeOverview = () => {
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Welcome back, here's what's happening today.</p>
         </div>
         <div className="flex gap-2">
+          <a 
+            href="/surya-bank-setup.zip" download
+            className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 rounded-lg text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
+          >
+            <Download size={16} /> Download App
+          </a>
           <button 
             onClick={handleDownloadReport}
             className="px-4 py-2 bg-white dark:bg-surya-surfaceDark border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm"

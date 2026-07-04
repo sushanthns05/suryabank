@@ -4,10 +4,12 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/',
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'auto',
       manifest: {
         name: 'Surya Bank',
         short_name: 'Surya Bank',
@@ -16,6 +18,12 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         icons: [
+          {
+            src: '/logo.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
           {
             src: '/logo.png',
             sizes: '512x512',

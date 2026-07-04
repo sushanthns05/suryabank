@@ -82,7 +82,10 @@ const MaintenanceScreen = () => {
         <div className="maintenance-header">
           <Settings className="spin-icon text-surya-primary" size={64} />
           <h2>System Maintenance in Progress</h2>
-          <p>Surya Bank is currently updating our services.</p>
+          <p className="max-w-2xl mx-auto text-center mt-4 text-slate-600 dark:text-slate-400">
+            Surya Bank is currently monitoring, updating, and servicing technology hardware, software, and networks. 
+            Its primary goal is to prevent unexpected failures, optimize performance, fix bugs, and ensure your systems remain secure and efficient over their entire lifespan.
+          </p>
         </div>
 
         {updateInfo && (

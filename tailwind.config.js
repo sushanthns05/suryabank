@@ -18,10 +18,18 @@ export default {
           bgDark: '#0f172a',
           surfaceLight: '#ffffff',
           surfaceDark: '#1e293b',
+        },
+        ceo: {
+          navy: '#071A35',
+          'navy-light': '#0d284f',
+          gold: '#D4AF37',
+          'gold-hover': '#C19D2F',
+          dark: '#030c1a',
         }
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'], // Professional clean typography
+        serif: ['Georgia', 'serif'],
       }
     },
   },

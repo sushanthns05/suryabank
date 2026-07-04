@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Bell, CheckCircle2, AlertTriangle, FileText, Settings, 
-  MessageSquare, Circle, CheckCheck, Trash2, Clock
+  MessageSquare, Circle, CheckCheck, Trash2, Clock, Crown
 } from 'lucide-react';
 
 import { 
@@ -10,11 +10,13 @@ import {
   markAllNotificationsAsRead as apiMarkAllNotificationsAsRead, 
   clearAllNotifications as apiClearAllNotifications 
 } from '../../services/api';
+import { useCeoDirectives } from '../../hooks/useCeoDirectives';
 
 const ManagerNotifications = () => {
   const [notifications, setNotifications] = useState([]);
-  const [filter, setFilter] = useState('all'); // 'all', 'unread'
+  const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
+  const { directives: ceoDirectives, loading: ceoLoading } = useCeoDirectives('managers');
 
   React.useEffect(() => {
     const fetchNotifs = async () => {
@@ -65,7 +67,7 @@ const ManagerNotifications = () => {
   };
 
   const getBgColor = (type, unread) => {
-    if (!unread) return 'bg-[#1E293B]/40 border-slate-700/30'; // Read state
+    if (!unread) return 'bg-[#1E293B]/40 border-slate-700/30';
     
     switch(type) {
       case 'alert': return 'bg-red-500/10 border-red-500/30';
@@ -76,51 +78,59 @@ const ManagerNotifications = () => {
     }
   };
 
+  const getCeoPriorityStyles = (priority) => {
+    if (priority === 'critical') return 'bg-red-500/10 border-red-500/30 border-l-red-500';
+    if (priority === 'urgent') return 'bg-amber-500/10 border-amber-500/30 border-l-amber-500';
+    return 'bg-[#D4AF37]/10 border-[#D4AF37]/30 border-l-[#D4AF37]';
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-10 max-w-5xl mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent flex items-center gap-3">
             Notification Center
-            {unreadCount > 0 && (
+            {filter !== 'ceo_office' && unreadCount > 0 && (
               <span className="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-lg shadow-red-500/20">
                 {unreadCount} New
               </span>
             )}
           </h1>
-          <p className="text-slate-400 text-sm mt-1">Manage your branch alerts and system updates.</p>
+          <p className="text-slate-400 text-sm mt-1">Manage your branch alerts, system updates, and CEO directives.</p>
         </div>
         
-        <div className="flex gap-3">
-          <button 
-            onClick={markAllAsRead}
-            disabled={unreadCount === 0}
-            className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${unreadCount > 0 ? 'bg-slate-800 text-white hover:bg-slate-700' : 'bg-[#0F172A] text-slate-500 cursor-not-allowed border border-slate-700/50'}`}
-          >
-            <CheckCheck size={16} /> Mark All as Read
-          </button>
-          <button 
-            onClick={clearAll}
-            className="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-sm font-bold flex items-center gap-2 transition-all"
-          >
-            <Trash2 size={16} /> Clear All
-          </button>
-        </div>
+        {filter !== 'ceo_office' && (
+          <div className="flex gap-3">
+            <button 
+              onClick={markAllAsRead}
+              disabled={unreadCount === 0}
+              className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${unreadCount > 0 ? 'bg-slate-800 text-white hover:bg-slate-700' : 'bg-[#0F172A] text-slate-500 cursor-not-allowed border border-slate-700/50'}`}
+            >
+              <CheckCheck size={16} /> Mark All as Read
+            </button>
+            <button 
+              onClick={clearAll}
+              className="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-sm font-bold flex items-center gap-2 transition-all"
+            >
+              <Trash2 size={16} /> Clear All
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="bg-[#1E293B]/60 backdrop-blur-md rounded-2xl border border-slate-700/50 shadow-xl overflow-hidden">
         {/* Tabs */}
-        <div className="flex border-b border-slate-700/50 bg-[#0F172A]/80">
+        <div className="flex border-b border-slate-700/50 bg-[#0F172A]/80 overflow-x-auto">
           <button 
             onClick={() => setFilter('all')}
-            className={`px-6 py-4 text-sm font-bold transition-all relative ${filter === 'all' ? 'text-white' : 'text-slate-400 hover:text-slate-300'}`}
+            className={`px-6 py-4 text-sm font-bold transition-all relative shrink-0 ${filter === 'all' ? 'text-white' : 'text-slate-400 hover:text-slate-300'}`}
           >
             All Notifications
             {filter === 'all' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#F59E0B]"></span>}
           </button>
           <button 
             onClick={() => setFilter('unread')}
-            className={`px-6 py-4 text-sm font-bold transition-all relative flex items-center gap-2 ${filter === 'unread' ? 'text-white' : 'text-slate-400 hover:text-slate-300'}`}
+            className={`px-6 py-4 text-sm font-bold transition-all relative flex items-center gap-2 shrink-0 ${filter === 'unread' ? 'text-white' : 'text-slate-400 hover:text-slate-300'}`}
           >
             Unread
             {unreadCount > 0 && (
@@ -130,11 +140,64 @@ const ManagerNotifications = () => {
             )}
             {filter === 'unread' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#F59E0B]"></span>}
           </button>
+          <button 
+            onClick={() => setFilter('ceo_office')}
+            className={`px-6 py-4 text-sm font-bold transition-all relative flex items-center gap-2 shrink-0 ${filter === 'ceo_office' ? 'text-white' : 'text-slate-400 hover:text-slate-300'}`}
+          >
+            <Crown size={14} className="text-[#D4AF37]" /> CEO Office
+            {ceoDirectives.length > 0 && (
+              <span className={`px-2 py-0.5 rounded-full text-[10px] ${filter === 'ceo_office' ? 'bg-[#D4AF37] text-ceo-navy' : 'bg-slate-700 text-slate-300'}`}>
+                {ceoDirectives.length}
+              </span>
+            )}
+            {filter === 'ceo_office' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#D4AF37]"></span>}
+          </button>
         </div>
 
         {/* List */}
         <div className="divide-y divide-slate-700/50 min-h-[400px]">
-          {loading ? (
+          {filter === 'ceo_office' ? (
+            ceoLoading ? (
+              <div className="h-full flex flex-col items-center justify-center p-16 text-slate-500">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4AF37] mb-4"></div>
+                <p>Loading CEO directives...</p>
+              </div>
+            ) : ceoDirectives.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center p-16 text-slate-500 opacity-60">
+                <Crown size={64} className="mb-4 text-[#D4AF37]/40" />
+                <h2 className="text-xl font-bold text-slate-400">No CEO directives</h2>
+                <p className="mt-1">Executive office broadcasts will appear here.</p>
+              </div>
+            ) : (
+              ceoDirectives.map((directive) => (
+                <div
+                  key={directive.id}
+                  className={`p-5 flex gap-4 border-l-4 ${getCeoPriorityStyles(directive.priority)}`}
+                >
+                  <div className="mt-1">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#0F172A] border border-[#D4AF37]/30 shadow-lg">
+                      <Crown size={20} className="text-[#D4AF37]" />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start gap-4">
+                      <h3 className="font-bold text-white truncate">{directive.title}</h3>
+                      <span className="flex items-center gap-1 text-xs text-slate-500 whitespace-nowrap shrink-0 mt-0.5">
+                        <Clock size={12} />
+                        {new Date(directive.timestamp).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm text-slate-300 whitespace-pre-wrap">{directive.message}</p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#D4AF37]">{directive.author}</span>
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">{directive.type}</span>
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">{directive.priority}</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )
+          ) : loading ? (
             <div className="h-full flex flex-col items-center justify-center p-16 text-slate-500">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F59E0B] mb-4"></div>
               <p>Loading notifications...</p>

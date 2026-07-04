@@ -95,8 +95,20 @@ const ManagerProfile = () => {
             <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-br from-[#0F172A] to-[#1E293B] border-b border-slate-700"></div>
             
             <div className="relative z-10">
-              <div className="w-24 h-24 mx-auto rounded-2xl bg-gradient-to-br from-[#F59E0B] to-yellow-600 p-1 shadow-lg mb-4 mt-4">
-                <div className="w-full h-full bg-[#0F172A] rounded-xl flex items-center justify-center">
+              <div className="w-24 h-24 mx-auto rounded-2xl bg-gradient-to-br from-[#F59E0B] to-yellow-600 p-1 shadow-lg mb-4 mt-4 overflow-hidden relative flex items-center justify-center">
+                {profile.fullName?.toLowerCase().includes('sushanth') ? (
+                  <img 
+                    src="/sns.jpg" 
+                    alt={profile.fullName} 
+                    className="w-full h-full object-cover object-top rounded-xl"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      const fallback = document.getElementById('manager-avatar-fallback');
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div id="manager-avatar-fallback" className={`${profile.fullName?.toLowerCase().includes('sushanth') ? 'hidden' : 'flex'} w-full h-full bg-[#0F172A] rounded-xl items-center justify-center`}>
                   <User size={40} className="text-[#F59E0B]" />
                 </div>
               </div>

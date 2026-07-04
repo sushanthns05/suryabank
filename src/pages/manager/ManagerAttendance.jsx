@@ -3,19 +3,63 @@ import {
   MapPin, CheckCircle, AlertCircle, RefreshCw, Clock, 
   Users, CheckSquare, XSquare, Calendar as CalendarIcon, Filter
 } from 'lucide-react';
-import { markAttendance, getEmployeeAttendance, getEmployees, getTodayAttendance } from '../../services/api';
+import { markAttendance, getEmployeeAttendance, getEmployees, getTodayAttendance, markAllAttendance, getAttendanceByDate } from '../../services/api';
 
 const ManagerAttendance = () => {
   const [isMarkingAttendance, setIsMarkingAttendance] = useState(false);
   const [attendanceMsg, setAttendanceMsg] = useState({ type: '', text: '' });
   const [managerAttendanceCount, setManagerAttendanceCount] = useState(0);
   const [filter, setFilter] = useState('all');
+  const [isMarkingAll, setIsMarkingAll] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('en-CA'));
 
   const MANAGER_NAME = "Sushanth N S - Manager and Head of Bank";
   const BRANCH_COORDS = { lat: 12.9176, lng: 77.4838 };
   const ALLOWED_RADIUS_METERS = 1000;
 
   const [roster, setRoster] = useState([]);
+
+  const fetchRosterData = async (dateStr) => {
+    const targetDate = dateStr || selectedDate;
+    const [empRes, attRes] = await Promise.all([getEmployees(), getAttendanceByDate(targetDate)]);
+    if (empRes.success && attRes.success) {
+      const todayAtt = attRes.records;
+      
+      const formattedRoster = empRes.data.map(emp => {
+        const attRecord = todayAtt.find(r => r.employeeName && r.employeeName.includes(emp.fullName));
+        let status = 'Absent';
+        let checkIn = '-';
+        let workTime = '-';
+
+        if (attRecord) {
+          status = attRecord.status === 'Absent' ? 'Absent' : 'Present';
+          if (status === 'Present') {
+            const checkInDate = new Date(attRecord.timestamp);
+            checkIn = checkInDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            if (targetDate === new Date().toLocaleDateString('en-CA')) {
+              const diffMs = new Date() - checkInDate;
+              const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+              const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+              workTime = `${diffHrs}h ${diffMins}m`;
+            } else {
+              workTime = 'Completed';
+            }
+          }
+        }
+
+        return {
+          id: emp.id,
+          name: emp.fullName,
+          role: emp.role || 'Employee',
+          checkIn,
+          workTime,
+          status
+        };
+      });
+      setRoster(formattedRoster);
+    }
+  };
 
   useEffect(() => {
     // Fetch manager's own attendance count
@@ -26,45 +70,12 @@ const ManagerAttendance = () => {
       }
     };
 
-    const fetchRosterData = async () => {
-      const [empRes, attRes] = await Promise.all([getEmployees(), getTodayAttendance()]);
-      if (empRes.success && attRes.success) {
-        const todayAtt = attRes.records;
-        
-        const formattedRoster = empRes.data.map(emp => {
-          const attRecord = todayAtt.find(r => r.employeeName && r.employeeName.includes(emp.fullName));
-          let status = 'Absent';
-          let checkIn = '-';
-          let workTime = '-';
-
-          if (attRecord) {
-            status = 'Present';
-            const checkInDate = new Date(attRecord.timestamp);
-            checkIn = checkInDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            // compute work time roughly based on timestamp diff
-            const diffMs = new Date() - checkInDate;
-            const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
-            const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-            workTime = `${diffHrs}h ${diffMins}m`;
-          }
-
-          return {
-            id: emp.id,
-            name: emp.fullName,
-            role: emp.role || 'Employee',
-            checkIn,
-            workTime,
-            status
-          };
-        });
-        setRoster(formattedRoster);
-      }
-    };
-
     fetchMyAttendance();
-    fetchRosterData();
   }, []);
+
+  useEffect(() => {
+    fetchRosterData(selectedDate);
+  }, [selectedDate]);
 
   const getDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371e3;
@@ -111,6 +122,20 @@ const ManagerAttendance = () => {
       setAttendanceMsg({ type: 'error', text: `Location error: ${error.message}. Please allow location access.` });
       setIsMarkingAttendance(false);
     }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+  };
+
+  const handleMarkAll = async (status) => {
+    if (window.confirm(`Are you sure you want to mark all employees as ${status} for ${selectedDate}?`)) {
+      setIsMarkingAll(true);
+      const res = await markAllAttendance(status, selectedDate);
+      if (res.success) {
+        setAttendanceMsg({ type: 'success', text: `Successfully marked all as ${status} for ${selectedDate}!` });
+        await fetchRosterData(selectedDate);
+      } else {
+        setAttendanceMsg({ type: 'error', text: res.message });
+      }
+      setIsMarkingAll(false);
+    }
   };
 
   const filteredRoster = roster.filter(emp => {
@@ -208,10 +233,38 @@ const ManagerAttendance = () => {
                 <h2 className="text-lg font-bold text-white">Employee Roster Log</h2>
               </div>
               
-              <div className="flex items-center gap-3 bg-[#0F172A] p-1 rounded-lg border border-slate-700">
-                <button onClick={() => setFilter('all')} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${filter === 'all' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-300'}`}>All ({roster.length})</button>
-                <button onClick={() => setFilter('present')} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${filter === 'present' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-emerald-400'}`}>Present ({presentCount})</button>
-                <button onClick={() => setFilter('absent')} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${filter === 'absent' ? 'bg-red-500/20 text-red-400' : 'text-slate-400 hover:text-red-400'}`}>Absent ({absentCount})</button>
+              <div className="flex flex-col xl:flex-row items-start xl:items-center gap-3">
+                <div className="flex items-center gap-2 bg-[#0F172A] p-1 rounded-lg border border-slate-700 mr-2">
+                  <CalendarIcon size={16} className="text-slate-400 ml-2" />
+                  <input 
+                    type="date" 
+                    value={selectedDate}
+                    max={new Date().toLocaleDateString('en-CA')}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="bg-transparent text-sm text-slate-200 outline-none px-2 py-1 [&::-webkit-calendar-picker-indicator]:invert"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => handleMarkAll('Present')} 
+                    disabled={isMarkingAll}
+                    className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded-md text-xs font-bold transition-colors disabled:opacity-50 whitespace-nowrap"
+                  >
+                    Mark All Present
+                  </button>
+                  <button 
+                    onClick={() => handleMarkAll('Absent')} 
+                    disabled={isMarkingAll}
+                    className="px-3 py-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-md text-xs font-bold transition-colors disabled:opacity-50 whitespace-nowrap"
+                  >
+                    Mark All Absent
+                  </button>
+                </div>
+                <div className="flex items-center gap-3 bg-[#0F172A] p-1 rounded-lg border border-slate-700">
+                  <button onClick={() => setFilter('all')} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${filter === 'all' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-300'}`}>All ({roster.length})</button>
+                  <button onClick={() => setFilter('present')} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${filter === 'present' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-emerald-400'}`}>Present ({presentCount})</button>
+                  <button onClick={() => setFilter('absent')} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${filter === 'absent' ? 'bg-red-500/20 text-red-400' : 'text-slate-400 hover:text-red-400'}`}>Absent ({absentCount})</button>
+                </div>
               </div>
             </div>
 

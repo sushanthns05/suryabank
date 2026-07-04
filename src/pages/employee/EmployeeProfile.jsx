@@ -41,7 +41,21 @@ const EmployeeProfile = () => {
             <div className="h-32 bg-gradient-to-r from-surya-primary to-blue-800"></div>
             <div className="px-6 pb-6 relative">
               <div className="w-24 h-24 rounded-full border-4 border-white dark:border-surya-surfaceDark bg-slate-200 dark:bg-slate-700 mx-auto -mt-12 flex items-center justify-center relative overflow-hidden group">
-                <User size={48} className="text-slate-400" />
+                {formData.firstName?.toLowerCase().includes('sushanth') ? (
+                  <img 
+                    src="/sns.jpg" 
+                    alt="Profile" 
+                    className="w-full h-full object-cover object-top"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      const fallback = document.getElementById('employee-avatar-fallback');
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div id="employee-avatar-fallback" className={`${formData.firstName?.toLowerCase().includes('sushanth') ? 'hidden' : 'flex'} w-full h-full items-center justify-center`}>
+                  <User size={48} className="text-slate-400" />
+                </div>
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                   <Camera size={24} className="text-white" />
                 </div>

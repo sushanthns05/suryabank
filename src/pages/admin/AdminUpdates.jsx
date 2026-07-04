@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, AlertTriangle, CheckCircle, Clock, Trash2, Edit, Bell, X } from 'lucide-react';
+import { Send, AlertTriangle, CheckCircle, Clock, Trash2, Edit, Bell, X, Shield, Terminal } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { doc, setDoc, addDoc, collection, onSnapshot, deleteDoc, updateDoc, query, orderBy } from 'firebase/firestore';
@@ -20,6 +20,11 @@ const AdminUpdates = () => {
   const [currentUpdate, setCurrentUpdate] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [editingNotif, setEditingNotif] = useState(null);
+  
+  // Security Sequence States
+  const [isInstallingSecurity, setIsInstallingSecurity] = useState(false);
+  const [securityLogs, setSecurityLogs] = useState([]);
+  const [securityMode, setSecurityMode] = useState('standard');
 
   useEffect(() => {
     let timerId = null;
@@ -39,11 +44,13 @@ const AdminUpdates = () => {
           if (timeSinceStart >= durationMs + 3000) {
             setCurrentUpdate(null);
             setDoc(maintenanceRef, { active: false }, { merge: true }).catch(e => {});
+            setDoc(doc(db, 'system', 'security'), { mode: 'standard', timestamp: new Date().toISOString() }).catch(e => {});
           } else {
             setCurrentUpdate(data);
             timerId = setTimeout(() => {
               setCurrentUpdate(null);
               setDoc(maintenanceRef, { active: false }, { merge: true }).catch(e => {});
+              setDoc(doc(db, 'system', 'security'), { mode: 'standard', timestamp: new Date().toISOString() }).catch(e => {});
             }, (durationMs + 3000) - timeSinceStart);
           }
         } else if (data.scheduledFor) {
@@ -52,11 +59,13 @@ const AdminUpdates = () => {
           if (nowTime >= scheduledTime + durationMs + 3000) {
             setCurrentUpdate(null);
             setDoc(maintenanceRef, { active: false, scheduledFor: null }, { merge: true }).catch(e => {});
+            setDoc(doc(db, 'system', 'security'), { mode: 'standard', timestamp: new Date().toISOString() }).catch(e => {});
           } else {
             setCurrentUpdate(data);
             timerId = setTimeout(() => {
               setCurrentUpdate(null);
               setDoc(maintenanceRef, { active: false, scheduledFor: null }, { merge: true }).catch(e => {});
+              setDoc(doc(db, 'system', 'security'), { mode: 'standard', timestamp: new Date().toISOString() }).catch(e => {});
             }, (scheduledTime + durationMs + 3000) - nowTime);
           }
         } else {
@@ -76,9 +85,19 @@ const AdminUpdates = () => {
       setNotifications(notifs);
     });
 
+    const securityRef = doc(db, 'system', 'security');
+    const unsubscribeSecurity = onSnapshot(securityRef, (docSnap) => {
+      if (docSnap.exists() && docSnap.data().mode === 'enhanced') {
+        setSecurityMode('enhanced');
+      } else {
+        setSecurityMode('standard');
+      }
+    });
+
     return () => {
       unsubscribeMaintenance();
       unsubscribeNotifs();
+      unsubscribeSecurity();
     };
   }, []);
 
@@ -141,14 +160,56 @@ const AdminUpdates = () => {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    let newFormData = { ...formData, [e.target.name]: e.target.value };
+    
+    if (e.target.name === 'type' && e.target.value === 'Maintenance' && (!formData.description || formData.description.trim() === '')) {
+      newFormData.description = "Surya Bank is currently monitoring, updating, and servicing technology hardware, software, and networks. Its primary goal is to prevent unexpected failures, optimize performance, fix bugs, and ensure your systems remain secure and efficient over their entire lifespan.";
+    }
+    
+    setFormData(newFormData);
     if (message) setMessage(null);
   };
 
   const handlePublish = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setIsSubmitting(true);
     setMessage(null);
+
+    if (formData.type === 'Security' && !isScheduled) {
+      setIsInstallingSecurity(true);
+      const logs = [
+        'Initializing Advanced Security Protocol...',
+        'Deploying Zero-Trust Architecture...',
+        'Upgrading Firewall Rules...',
+        'Encrypting Data Layers (AES-256)...',
+        'Applying AI Threat Detection Models...',
+        'Security Patch Installation Complete.'
+      ];
+      
+      let currentLog = 0;
+      setSecurityLogs([logs[0]]);
+      
+      const interval = setInterval(() => {
+        currentLog++;
+        if (currentLog < logs.length) {
+          setSecurityLogs(prev => [...prev, logs[currentLog]]);
+        } else {
+          clearInterval(interval);
+          setTimeout(async () => {
+            setIsInstallingSecurity(false);
+            setSecurityLogs([]);
+            await executePublish();
+            await setDoc(doc(db, 'system', 'security'), { mode: 'enhanced', timestamp: new Date().toISOString() });
+          }, 1500);
+        }
+      }, 800);
+      return; // prevent immediate publish
+    } else {
+      await executePublish();
+    }
+  };
+
+  const executePublish = async () => {
 
     try {
       const payload = { ...formData };
@@ -191,6 +252,7 @@ const AdminUpdates = () => {
       if (!isScheduled) {
         setTimeout(async () => {
           await setDoc(maintenanceRef, { active: false }, { merge: true });
+          await setDoc(doc(db, 'system', 'security'), { mode: 'standard', timestamp: new Date().toISOString() }).catch(e => {});
         }, duration * 1000 + 3000);
       }
       
@@ -206,10 +268,23 @@ const AdminUpdates = () => {
     }
   };
 
+  const inputClassName = `w-full p-3 border rounded-lg focus:ring-2 focus:ring-surya-primary outline-none transition-colors ${securityMode === 'enhanced' ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400' : 'bg-white text-slate-800 dark:bg-slate-700 dark:border-slate-600 dark:text-white'}`;
+
   return (
-    <div className="admin-updates p-6 max-w-4xl mx-auto fade-in" style={{ paddingTop: '100px' }}>
-      <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">Website Updates & Maintenance</h1>
-      <p className="text-slate-600 dark:text-slate-400 mb-8">Publish system updates and trigger maintenance mode across all customer portals in real-time.</p>
+    <div className={`admin-updates p-6 max-w-4xl mx-auto fade-in transition-colors duration-1000 ${securityMode === 'enhanced' ? 'bg-slate-900' : ''}`} style={{ paddingTop: '100px', minHeight: '100vh' }}>
+      
+      {securityMode === 'enhanced' && (
+        <div className="mb-6 p-4 rounded-xl bg-emerald-900/40 border border-emerald-500/50 flex items-center shadow-[0_0_15px_rgba(16,185,129,0.2)] animate-pulse-slow">
+          <Shield className="text-emerald-400 mr-3" size={28} />
+          <div>
+            <h2 className="text-emerald-400 font-bold text-lg tracking-wider uppercase">Maximum Security Mode Active</h2>
+            <p className="text-emerald-200/70 text-sm">All connections are running through advanced encryption protocols and zero-trust architecture.</p>
+          </div>
+        </div>
+      )}
+
+      <h1 className={`text-3xl font-bold mb-2 ${securityMode === 'enhanced' ? 'text-white' : 'text-slate-800 dark:text-white'}`}>Website Updates & Maintenance</h1>
+      <p className={`mb-8 ${securityMode === 'enhanced' ? 'text-slate-400' : 'text-slate-600 dark:text-slate-400'}`}>Publish system updates and trigger maintenance mode across all customer portals in real-time.</p>
 
       {currentUpdate && (
         <Card className="p-8 glass bg-white dark:bg-slate-800 shadow-xl rounded-2xl mb-8 border border-blue-200 dark:border-blue-800">
@@ -236,9 +311,9 @@ const AdminUpdates = () => {
         </Card>
       )}
 
-      <Card className="p-8 glass bg-white dark:bg-slate-800 shadow-xl rounded-2xl">
-        <h2 className="text-xl font-bold mb-6 flex items-center border-b pb-4">
-          <Send className="mr-2 text-surya-primary" /> Publish New Update
+      <Card className={`p-8 glass shadow-xl rounded-2xl ${securityMode === 'enhanced' ? 'bg-slate-800/80 border-slate-700 text-white' : 'bg-white dark:bg-slate-800 border-transparent'}`}>
+        <h2 className="text-xl font-bold mb-6 flex items-center border-b pb-4 border-slate-200 dark:border-slate-700">
+          <Send className={`mr-2 ${securityMode === 'enhanced' ? 'text-emerald-400' : 'text-surya-primary'}`} /> Publish New Update
         </h2>
 
         {message && (
@@ -258,7 +333,7 @@ const AdminUpdates = () => {
                 value={formData.version}
                 onChange={handleChange}
                 placeholder="e.g. v2.1.0"
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-surya-primary outline-none dark:bg-slate-700 dark:border-slate-600"
+                className={inputClassName}
                 required
               />
             </div>
@@ -268,7 +343,7 @@ const AdminUpdates = () => {
                 name="type"
                 value={formData.type}
                 onChange={handleChange}
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-surya-primary outline-none dark:bg-slate-700 dark:border-slate-600"
+                className={inputClassName}
               >
                 <option value="Feature">New Feature</option>
                 <option value="Maintenance">System Maintenance</option>
@@ -285,7 +360,7 @@ const AdminUpdates = () => {
                 onChange={handleChange}
                 min="10"
                 max="3600"
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-surya-primary outline-none dark:bg-slate-700 dark:border-slate-600"
+                className={inputClassName}
                 required
               />
             </div>
@@ -299,7 +374,7 @@ const AdminUpdates = () => {
               value={formData.title}
               onChange={handleChange}
               placeholder="e.g. Introducing Recurring Deposits"
-              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-surya-primary outline-none dark:bg-slate-700 dark:border-slate-600"
+              className={inputClassName}
               required
             />
           </div>
@@ -311,7 +386,7 @@ const AdminUpdates = () => {
               value={formData.description}
               onChange={handleChange}
               placeholder="Describe what is included in this update..."
-              className="w-full p-3 border rounded-lg h-32 focus:ring-2 focus:ring-surya-primary outline-none dark:bg-slate-700 dark:border-slate-600"
+              className={`${inputClassName} h-32`}
               required
             ></textarea>
           </div>
@@ -337,7 +412,7 @@ const AdminUpdates = () => {
                   type="datetime-local" 
                   value={scheduledFor}
                   onChange={(e) => setScheduledFor(e.target.value)}
-                  className="w-full md:w-1/2 p-3 border rounded-lg focus:ring-2 focus:ring-surya-primary outline-none dark:bg-slate-700 dark:border-slate-600"
+                  className={`w-full md:w-1/2 p-3 border rounded-lg focus:ring-2 focus:ring-surya-primary outline-none transition-colors ${securityMode === 'enhanced' ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white text-slate-800 dark:bg-slate-700 dark:border-slate-600 dark:text-white'}`}
                   required={isScheduled}
                 />
               </div>
@@ -367,29 +442,29 @@ const AdminUpdates = () => {
           )}
 
           <div className="flex justify-end">
-            <Button type="submit" variant="primary" disabled={isSubmitting} className={`px-8 py-3 border-none text-white font-bold text-lg ${isScheduled ? 'bg-blue-600 hover:bg-blue-700' : 'bg-red-600 hover:bg-red-700'}`}>
-              {isSubmitting ? 'Publishing...' : (isScheduled ? 'Schedule Update' : 'Publish Update & Trigger Maintenance')}
+            <Button type="submit" variant="primary" disabled={isSubmitting} className={`px-8 py-3 border-none text-white font-bold text-lg ${isScheduled ? 'bg-blue-600 hover:bg-blue-700' : (securityMode === 'enhanced' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700')}`}>
+              {isSubmitting && !isInstallingSecurity ? 'Publishing...' : (isScheduled ? 'Schedule Update' : 'Publish Update & Trigger Maintenance')}
             </Button>
           </div>
         </form>
       </Card>
 
-      <Card className="p-8 glass bg-white dark:bg-slate-800 shadow-xl rounded-2xl mt-8">
-        <h2 className="text-xl font-bold mb-6 flex items-center border-b pb-4">
-          <Bell className="mr-2 text-surya-primary" /> Notification History
+      <Card className={`p-8 glass shadow-xl rounded-2xl mt-8 ${securityMode === 'enhanced' ? 'bg-slate-800/80 border-slate-700 text-white' : 'bg-white dark:bg-slate-800'}`}>
+        <h2 className="text-xl font-bold mb-6 flex items-center border-b pb-4 border-slate-200 dark:border-slate-700">
+          <Bell className={`mr-2 ${securityMode === 'enhanced' ? 'text-emerald-400' : 'text-surya-primary'}`} /> Notification History
         </h2>
         <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
           {notifications.map(notif => (
-            <div key={notif.id} className="p-4 border rounded-xl dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/30 flex justify-between items-start transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/80">
+            <div key={notif.id} className={`p-4 border rounded-xl flex justify-between items-start transition-colors ${securityMode === 'enhanced' ? 'bg-slate-700/50 border-slate-600 hover:bg-slate-700/80' : 'dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/30 hover:bg-slate-50 dark:hover:bg-slate-800/80'}`}>
               <div className="flex-1 pr-4">
                 <div className="flex items-center mb-1">
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full mr-2 ${notif.type?.includes('Maintenance') ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400'}`}>
                     {notif.type || 'Notification'}
                   </span>
-                  <h4 className="font-bold text-slate-800 dark:text-slate-200">{notif.title}</h4>
+                  <h4 className={`font-bold ${securityMode === 'enhanced' ? 'text-white' : 'text-slate-800 dark:text-slate-200'}`}>{notif.title}</h4>
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 line-clamp-2">{notif.description}</p>
-                <span className="text-xs font-medium text-slate-400 mt-3 block flex items-center">
+                <p className={`text-sm mt-2 line-clamp-2 ${securityMode === 'enhanced' ? 'text-slate-300' : 'text-slate-600 dark:text-slate-400'}`}>{notif.description}</p>
+                <span className={`text-xs font-medium mt-3 block flex items-center ${securityMode === 'enhanced' ? 'text-slate-400' : 'text-slate-400'}`}>
                   <Clock size={12} className="mr-1" />
                   {new Date(notif.timestamp || notif.created_at).toLocaleString()}
                 </span>
@@ -443,6 +518,35 @@ const AdminUpdates = () => {
             <div className="flex justify-end gap-3">
               <Button type="button" variant="outline" onClick={() => setEditingNotif(null)} className="px-5">Cancel</Button>
               <Button type="button" variant="primary" onClick={handleSaveNotification} className="px-5">Save Changes</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Security Installation Modal */}
+      {isInstallingSecurity && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-md">
+          <div className="w-full max-w-2xl p-8 font-mono text-emerald-500">
+            <div className="flex items-center mb-6">
+              <Terminal size={32} className="mr-4 animate-pulse" />
+              <h2 className="text-2xl font-bold uppercase tracking-widest text-emerald-400">Security Core Deployment</h2>
+            </div>
+            
+            <div className="bg-black/50 border border-emerald-900/50 p-6 rounded-lg min-h-[300px] shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+              {securityLogs.map((log, idx) => (
+                <p key={idx} className="mb-2 text-sm leading-relaxed flex items-center">
+                  <span className="text-emerald-700 mr-3">[{new Date().toISOString().split('T')[1].substring(0,8)}]</span>
+                  {log}
+                </p>
+              ))}
+              <p className="mt-2 text-emerald-600 animate-pulse">_</p>
+            </div>
+            
+            <div className="mt-6 w-full bg-emerald-950/30 h-2 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-emerald-500 transition-all duration-300 ease-out"
+                style={{ width: `${(securityLogs.length / 6) * 100}%` }}
+              ></div>
             </div>
           </div>
         </div>

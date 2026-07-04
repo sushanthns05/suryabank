@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Send, RefreshCw, CheckCircle, AlertCircle, Wallet, PiggyBank, ArrowUpRight, ArrowDownRight, Bell, History, CreditCard, X, Banknote } from 'lucide-react';
+import { Send, RefreshCw, CheckCircle, AlertCircle, Wallet, PiggyBank, ArrowUpRight, ArrowDownRight, Bell, History, CreditCard, X, Banknote, Download } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import { sendTransactionAlertEmail, sendLoanApplicationEmail } from '../utils/emailService';
 import { collection, onSnapshot, query, orderBy, limit, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import CeoDirectiveBanner from '../components/shared/CeoDirectiveBanner';
 import { processTransaction, getTransactions, createCardApplication, createLoan } from '../services/api';
 import './CustomerDashboard.css';
 
@@ -12,7 +13,6 @@ const CustomerDashboard = () => {
   const [transferData, setTransferData] = useState({ email: '', amount: '', recipientName: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState({ type: '', message: '' });
-  const [latestAnnouncement, setLatestAnnouncement] = useState(null);
   const [userAccount, setUserAccount] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [isBranchOpen, setIsBranchOpen] = useState(true);
@@ -80,14 +80,6 @@ const CustomerDashboard = () => {
 
     fetchUserData();
 
-    // Fetch latest announcement
-    const q = query(collection(db, 'notifications'), orderBy('timestamp', 'desc'), limit(1));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      if (!snapshot.empty) {
-        setLatestAnnouncement(snapshot.docs[0].data());
-      }
-    });
-
     // Fetch branch status
     const branchStatusRef = doc(db, 'settings', 'branch_status');
     const unsubscribeBranch = onSnapshot(branchStatusRef, (docSnap) => {
@@ -97,7 +89,6 @@ const CustomerDashboard = () => {
     });
 
     return () => {
-      unsubscribe();
       unsubscribeBranch();
     };
   }, []);
@@ -298,23 +289,9 @@ const CustomerDashboard = () => {
             </div>
           </div>
 
-          {latestAnnouncement && (
-            <div className="mb-6 mt-4 p-4 rounded-xl flex items-start bg-indigo-50 border border-indigo-200 shadow-sm fade-in">
-              <div className="bg-indigo-100 p-2 rounded-full mr-4 text-indigo-600">
-                <Bell size={24} />
-              </div>
-              <div className="flex-1">
-                <h4 className="text-indigo-900 font-bold flex items-center">
-                  System Announcement: {latestAnnouncement.title}
-                  <span className="ml-2 px-2 py-0.5 bg-indigo-200 text-indigo-800 rounded-full text-xs font-semibold">
-                    {latestAnnouncement.type}
-                  </span>
-                </h4>
-                <p className="text-indigo-700 text-sm mt-1">{latestAnnouncement.description}</p>
-                <p className="text-indigo-400 text-xs mt-2">{new Date(latestAnnouncement.timestamp).toLocaleString()}</p>
-              </div>
-            </div>
-          )}
+          <div className="mt-4">
+            <CeoDirectiveBanner portal="customers" variant="employee" limit={2} />
+          </div>
 
           <div className="dashboard-grid" style={{ marginTop: '20px', display: 'grid', gridTemplateColumns: '1fr', gap: '30px' }}>
             {/* Account Summaries */}
@@ -480,6 +457,21 @@ const CustomerDashboard = () => {
                 </p>
                 <Button variant="outline" onClick={openLoanModal} style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
                   <Banknote size={18} /> Apply for Loan
+                </Button>
+              </Card>
+            </div>
+
+            {/* Desktop Application */}
+            <div className="desktop-app-section">
+              <Card>
+                <h3 style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary-blue)' }}>
+                  <Download size={20} style={{ color: 'var(--primary-gold)' }} /> Desktop App
+                </h3>
+                <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '20px' }}>
+                  Download our official desktop application for a faster and more secure banking experience.
+                </p>
+                <Button variant="outline" onClick={() => window.open('/surya-bank-setup.exe', '_blank')} style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                  <Download size={18} /> Download for Windows
                 </Button>
               </Card>
             </div>
