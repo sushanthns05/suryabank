@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Building2, Users, FileText, CreditCard, 
   Briefcase, Settings, LogOut, Menu, Search, ShieldCheck,
-  Bell, Moon, Sun, X, MessageSquare, ClipboardList, UserCheck, Calendar
+  Bell, Moon, Sun, X, MessageSquare, ClipboardList, UserCheck, Calendar, Rocket
 } from 'lucide-react';
 import { getManagerNotifications } from '../../services/api';
 
@@ -21,6 +21,7 @@ const SIDEBAR_MENU = [
       { name: 'Customers', path: '/manager/customers', icon: Users },
       { name: 'Loans', path: '/manager/loans', icon: Briefcase },
       { name: 'Employees', path: '/manager/employees', icon: UserCheck },
+      { name: 'Product Lifecycle', path: '/manager/products', icon: Rocket },
       { name: 'Attendance', path: '/manager/attendance', icon: ClipboardList },
       { name: 'Transactions', path: '/manager/transactions', icon: CreditCard },
     ]

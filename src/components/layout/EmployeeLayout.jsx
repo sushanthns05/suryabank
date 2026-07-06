@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, UserPlus, FileText, CreditCard, 
   Briefcase, Building, Settings, LogOut, Menu, Search, 
-  Bell, Moon, Sun, X, UserCheck, Calendar
+  Bell, Moon, Sun, X, UserCheck, Calendar, Rocket
 } from 'lucide-react';
 import { applyPendingUpdates } from '../../services/api';
 
@@ -27,6 +27,12 @@ const SIDEBAR_MENU = [
     title: 'Loan Management',
     items: [
       { name: 'Loan Approval', path: '/employee/loans', icon: Briefcase },
+    ]
+  },
+  {
+    title: 'Product Management',
+    items: [
+      { name: 'Product Dev Center', path: '/employee/products', icon: Rocket },
     ]
   },
   {

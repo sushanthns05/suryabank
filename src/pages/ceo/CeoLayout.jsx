@@ -438,6 +438,9 @@ const CeoLayout = () => {
                       <Link to="/ceo/appointments" onClick={() => setIsProfileDropdownOpen(false)} className="block px-3 py-2 rounded-lg text-slate-350 hover:bg-slate-900 hover:text-white transition-colors">
                         Appointment Center
                       </Link>
+                      <Link to="/ceo/launch-control" onClick={() => setIsProfileDropdownOpen(false)} className="block px-3 py-2 rounded-lg text-slate-350 hover:bg-slate-900 hover:text-white transition-colors">
+                        Executive Launch Control
+                      </Link>
                       <Link to="/ceo/vault" onClick={() => setIsProfileDropdownOpen(false)} className="block px-3 py-2 rounded-lg text-slate-350 hover:bg-slate-900 hover:text-white transition-colors">
                         Confidential Vault
                       </Link>

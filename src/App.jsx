@@ -34,6 +34,7 @@ import EmployeeNotifications from './pages/employee/EmployeeNotifications';
 import EmployeeAttendance from './pages/employee/EmployeeAttendance';
 import EmployeeLeaves from './pages/employee/EmployeeLeaves';
 import EmployeeAppointments from './pages/employee/EmployeeAppointments';
+import ProductDevelopmentCenter from './pages/employee/ProductDevelopmentCenter';
 import ManagerLogin from './pages/manager/ManagerLogin';
 import ManagerLayout from './components/layout/ManagerLayout';
 import ManagerDashboard from './pages/manager/ManagerDashboard';
@@ -50,6 +51,7 @@ import ManagerSettings from './pages/manager/ManagerSettings';
 import ManagerProfile from './pages/manager/ManagerProfile';
 import ManagerAttendance from './pages/manager/ManagerAttendance';
 import ManagerAppointments from './pages/manager/ManagerAppointments';
+import ProductReviewCenter from './pages/manager/ProductReviewCenter';
 import CeoLayout from './pages/ceo/CeoLayout';
 import CeoHome from './pages/ceo/CeoHome';
 import CeoAbout from './pages/ceo/CeoAbout';
@@ -84,6 +86,7 @@ import CeoDocVault from './pages/ceo/secure/CeoDocVault';
 import CeoProfileEditor from './pages/ceo/secure/CeoProfileEditor';
 import CeoCommandCenter from './pages/ceo/secure/CeoCommandCenter';
 import CeoAppointments from './pages/ceo/secure/CeoAppointments';
+import ExecutiveLaunchControl from './pages/ceo/secure/ExecutiveLaunchControl';
 // Public Layout Wrapper
 const PublicLayout = () => (
   <div className="app-container flex flex-col min-h-screen relative">
@@ -175,6 +178,7 @@ function App() {
               <Route path="attendance" element={<EmployeeAttendance />} />
               <Route path="leave" element={<EmployeeLeaves />} />
               <Route path="appointments" element={<EmployeeAppointments />} />
+              <Route path="products" element={<ProductDevelopmentCenter />} />
             </Route>
             
             <Route path="*" element={<Navigate to="/employee-login" replace />} />
@@ -208,6 +212,7 @@ function App() {
               <Route path="settings" element={<ManagerSettings />} />
               <Route path="profile" element={<ManagerProfile />} />
               <Route path="appointments" element={<ManagerAppointments />} />
+              <Route path="products" element={<ProductReviewCenter />} />
             </Route>
             
             <Route path="*" element={<Navigate to="/manager" replace />} />
@@ -258,6 +263,7 @@ function App() {
                   <Route path="profile-editor" element={<CeoProfileEditor />} />
                   <Route path="command-center" element={<CeoCommandCenter />} />
                   <Route path="appointments" element={<CeoAppointments />} />
+                  <Route path="launch-control" element={<ExecutiveLaunchControl />} />
                 </Route>
               </Route>
               <Route path="*" element={<Navigate to="/ceo" replace />} />
@@ -331,6 +337,7 @@ function App() {
                 <Route path="vault" element={<CeoDocVault />} />
                 <Route path="profile-editor" element={<CeoProfileEditor />} />
                 <Route path="command-center" element={<CeoCommandCenter />} />
+                <Route path="launch-control" element={<ExecutiveLaunchControl />} />
               </Route>
             </Route>
 
@@ -346,6 +353,8 @@ function App() {
               <Route path="notifications" element={<EmployeeNotifications />} />
               <Route path="attendance" element={<EmployeeAttendance />} />
               <Route path="leave" element={<EmployeeLeaves />} />
+              <Route path="appointments" element={<EmployeeAppointments />} />
+              <Route path="products" element={<ProductDevelopmentCenter />} />
             </Route>
           </Routes>
         </Router>

@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, addDoc, doc, updateDoc, deleteDoc, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, doc, updateDoc, deleteDoc, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 
 // ==========================================
@@ -65,7 +65,7 @@ export const requestAppointment = async (requestData) => {
     const reqRef = collection(db, 'meetingRequests');
     const newRequest = {
       ...requestData,
-      status: 'Pending',
+      status: requestData.status || 'Pending',
       createdAt: new Date().toISOString()
     };
     const docRef = await addDoc(reqRef, newRequest);
@@ -87,6 +87,17 @@ export const getCEOAppointments = async () => {
   }
 };
 
+export const subscribeToCEOAppointments = (callback) => {
+  const reqRef = collection(db, 'meetingRequests');
+  const q = query(reqRef, orderBy('createdAt', 'desc'));
+  return onSnapshot(q, (snap) => {
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    callback({ success: true, data });
+  }, (error) => {
+    callback({ success: false, message: error.message });
+  });
+};
+
 export const getUserAppointments = async (userId) => {
   try {
     const reqRef = collection(db, 'meetingRequests');
@@ -99,6 +110,30 @@ export const getUserAppointments = async (userId) => {
   } catch (error) {
     return { success: false, message: error.message };
   }
+};
+
+export const subscribeToUserAppointments = (userId, callback) => {
+  const reqRef = collection(db, 'meetingRequests');
+  const q = query(reqRef, where('employeeId', '==', userId));
+  return onSnapshot(q, (snap) => {
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    callback({ success: true, data });
+  }, (error) => {
+    callback({ success: false, message: error.message });
+  });
+};
+
+export const subscribeToManagerTeamRequests = (managerId, callback) => {
+  const reqRef = collection(db, 'meetingRequests');
+  const q = query(reqRef, where('managerId', '==', managerId));
+  return onSnapshot(q, (snap) => {
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    callback({ success: true, data });
+  }, (error) => {
+    callback({ success: false, message: error.message });
+  });
 };
 
 export const updateAppointmentStatus = async (requestId, updateData) => {
