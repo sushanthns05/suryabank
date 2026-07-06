@@ -8,6 +8,9 @@ import {
 } from 'lucide-react';
 import { useCeoAuth } from '../../context/CeoAuthContext';
 import { generatePdfLetter } from './CeoMockData';
+import EditableText from '../../components/ceo/cms/EditableText';
+import EditableRichText from '../../components/ceo/cms/EditableRichText';
+import EditableImage from '../../components/ceo/cms/EditableImage';
 
 // --- MOCK DATA ---
 const SECTIONS = [
@@ -208,13 +211,23 @@ We will continue to build, expand, and safeguard the interests of our stakeholde
               <Award size={14} /> Annual Shareholder Address 2025–2026
             </div>
             
-            <h1 className="text-5xl lg:text-7xl font-serif font-bold leading-[1.1] mb-6 tracking-tight">
-              Engineering the Future of Global Finance.
-            </h1>
+            <EditableText 
+              as="h1"
+              collectionName="cms_pages" 
+              documentId="ceo_message" 
+              fieldKey="hero_title"
+              fallbackText="Engineering the Future of Global Finance."
+              className="text-5xl lg:text-7xl font-serif font-bold leading-[1.1] mb-6 tracking-tight block w-full"
+            />
             
-            <p className={`text-xl leading-relaxed ${isDarkMode ? 'text-slate-400' : 'text-slate-600'} max-w-2xl`}>
-              A comprehensive review of our financial performance, quantum-safe security initiatives, and unwavering commitment to sustainable growth.
-            </p>
+            <EditableText 
+              as="p"
+              collectionName="cms_pages" 
+              documentId="ceo_message" 
+              fieldKey="hero_subtitle"
+              fallbackText="A comprehensive review of our financial performance, quantum-safe security initiatives, and unwavering commitment to sustainable growth."
+              className={`text-xl leading-relaxed ${isDarkMode ? 'text-slate-400' : 'text-slate-600'} max-w-2xl block w-full`}
+            />
           </motion.header>
 
           {/* EXECUTIVE PROFILE PANEL */}
@@ -223,11 +236,30 @@ We will continue to build, expand, and safeguard the interests of our stakeholde
               <img src="/sns.jpg" alt="Chairman Portrait" className="w-full h-full object-cover rounded-full relative z-10 grayscale hover:grayscale-0 transition-all duration-700" />
             </div>
             <div className="flex-1 text-center md:text-left">
-              <h2 className="text-3xl font-serif font-bold mb-1">Sushanth NS</h2>
-              <p className="text-ceo-gold font-bold uppercase tracking-widest text-xs mb-4">Founder, Chairman & Chief Executive Officer</p>
-              <p className={`text-sm leading-relaxed font-serif italic ${isDarkMode ? 'text-slate-300' : 'text-slate-700'} mb-6`}>
-                "Our mandate is not merely to participate in the financial ecosystem, but to architect its ultimate, most secure iteration. Trust is the currency of the future, and we are its primary custodians."
-              </p>
+              <EditableText 
+                as="h2"
+                collectionName="cms_pages" 
+                documentId="ceo_message" 
+                fieldKey="profile_name"
+                fallbackText="Sushanth NS"
+                className="text-3xl font-serif font-bold mb-1 block w-full"
+              />
+              <EditableText 
+                as="p"
+                collectionName="cms_pages" 
+                documentId="ceo_message" 
+                fieldKey="profile_title"
+                fallbackText="Founder, Chairman & Chief Executive Officer"
+                className="text-ceo-gold font-bold uppercase tracking-widest text-xs mb-4 block w-full"
+              />
+              <EditableText 
+                as="p"
+                collectionName="cms_pages" 
+                documentId="ceo_message" 
+                fieldKey="profile_quote"
+                fallbackText='"Our mandate is not merely to participate in the financial ecosystem, but to architect its ultimate, most secure iteration. Trust is the currency of the future, and we are its primary custodians."'
+                className={`text-sm leading-relaxed font-serif italic ${isDarkMode ? 'text-slate-300' : 'text-slate-700'} mb-6 block w-full`}
+              />
               <img src="/signature.png" alt="Digital Signature" className="h-12 invert opacity-80 mix-blend-screen" />
             </div>
           </div>
@@ -240,15 +272,12 @@ We will continue to build, expand, and safeguard the interests of our stakeholde
               <h2 className="text-sm font-bold uppercase tracking-widest text-ceo-gold mb-6 flex items-center gap-4">
                 <span className="w-8 h-px bg-ceo-gold"></span> Executive Introduction
               </h2>
-              <div className={`prose prose-lg max-w-none ${isDarkMode ? 'prose-invert' : ''}`}>
-                <p className={`text-xl leading-relaxed font-light ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}`}>
-                  <span className="float-left text-7xl font-serif text-ceo-gold leading-none pr-4 pt-2">F</span>
-                  Y2025 has been a year of remarkable transformation and unprecedented capital strength for Surya Bank. In the face of dynamic macroeconomic conditions, we have not only weathered global volatility but have emerged as the definitive leader in enterprise-grade financial technology.
-                </p>
-                <p className="mt-6 leading-relaxed">
-                  We have expanded our active customer network to 25 million and committed over $5 Billion in sustainable climate-focused assets. Our core operations are now backed by advanced AI intelligence and zero-trust transaction structures, ensuring that every interaction within our ecosystem is frictionless and cryptographically impenetrable.
-                </p>
-              </div>
+              <EditableRichText 
+                collectionName="cms_pages"
+                documentId="ceo_message"
+                fieldKey="intro_body"
+                fallbackHtml={`<p class="text-xl leading-relaxed font-light ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}"><span class="float-left text-7xl font-serif text-ceo-gold leading-none pr-4 pt-2">F</span>Y2025 has been a year of remarkable transformation and unprecedented capital strength for Surya Bank. In the face of dynamic macroeconomic conditions, we have not only weathered global volatility but have emerged as the definitive leader in enterprise-grade financial technology.</p><p class="mt-6 leading-relaxed">We have expanded our active customer network to 25 million and committed over $5 Billion in sustainable climate-focused assets. Our core operations are now backed by advanced AI intelligence and zero-trust transaction structures, ensuring that every interaction within our ecosystem is frictionless and cryptographically impenetrable.</p>`}
+              />
             </section>
 
             {/* HIGHLIGHT: STRATEGIC ACHIEVEMENTS */}
@@ -267,21 +296,13 @@ We will continue to build, expand, and safeguard the interests of our stakeholde
               <h2 className="text-sm font-bold uppercase tracking-widest text-ceo-gold mb-6 flex items-center gap-4">
                 <span className="w-8 h-px bg-ceo-gold"></span> Financial Performance
               </h2>
-              <div className={`prose prose-lg max-w-none ${isDarkMode ? 'prose-invert' : ''} leading-relaxed`}>
-                <p>
-                  In the past fiscal year, Surya Bank reported record gross revenues of <strong>$4.8 Billion</strong>, representing a 17.4% growth year-over-year. Our net profit margins expanded to 31.2%, supported directly by the automated efficiencies of our proprietary AI risk systems.
-                </p>
-                
-                {/* Pull Quote */}
-                <blockquote className={`border-l-4 border-ceo-gold pl-8 py-4 my-12 italic text-3xl font-serif leading-tight ${isDarkMode ? 'text-white' : 'text-slate-900'} relative`}>
-                  <div className="absolute top-0 left-4 text-7xl text-ceo-gold/20 font-serif leading-none">"</div>
-                  Our capital reserves remain Fortress-level. We are positioned not just to survive economic downturns, but to actively acquire market share during them.
-                </blockquote>
-                
-                <p>
-                  The bank's Common Equity Tier 1 (CET1) capital ratio stands at a solid 16.4%, and our liquidity coverage ratio is maintained at 185%, far exceeding international Basel III compliance limits. We have continuously delivered robust dividend distributions to our equity partners, maintaining an uninterrupted streak for 12 consecutive quarters.
-                </p>
-              </div>
+              <EditableRichText 
+                collectionName="cms_pages"
+                documentId="ceo_message"
+                fieldKey="financials_body"
+                fallbackHtml={`<p>In the past fiscal year, Surya Bank reported record gross revenues of <strong>$4.8 Billion</strong>, representing a 17.4% growth year-over-year. Our net profit margins expanded to 31.2%, supported directly by the automated efficiencies of our proprietary AI risk systems.</p><blockquote class="border-l-4 border-ceo-gold pl-8 py-4 my-12 italic text-3xl font-serif leading-tight ${isDarkMode ? 'text-white' : 'text-slate-900'} relative"><div class="absolute top-0 left-4 text-7xl text-ceo-gold/20 font-serif leading-none">"</div>Our capital reserves remain Fortress-level. We are positioned not just to survive economic downturns, but to actively acquire market share during them.</blockquote><p>The bank's Common Equity Tier 1 (CET1) capital ratio stands at a solid 16.4%, and our liquidity coverage ratio is maintained at 185%, far exceeding international Basel III compliance limits. We have continuously delivered robust dividend distributions to our equity partners, maintaining an uninterrupted streak for 12 consecutive quarters.</p>`}
+                className="leading-relaxed"
+              />
             </section>
 
             {/* VIDEO ADDRESS */}
@@ -315,11 +336,13 @@ We will continue to build, expand, and safeguard the interests of our stakeholde
               <h2 className="text-sm font-bold uppercase tracking-widest text-ceo-gold mb-6 flex items-center gap-4">
                 <span className="w-8 h-px bg-ceo-gold"></span> Cyber Security
               </h2>
-              <div className={`prose prose-lg max-w-none ${isDarkMode ? 'prose-invert' : ''} leading-relaxed`}>
-                <p>
-                  Security is the foundation of digital trust. Through our technology centers, we have completed the initial migration phase of core ledgers to lattice-based post-quantum cryptography. In an era where quantum computing threats are emerging, Surya Bank depositors can rest assured that their accounts are protected by next-generation cryptographic standards.
-                </p>
-              </div>
+              <EditableRichText 
+                collectionName="cms_pages"
+                documentId="ceo_message"
+                fieldKey="cyber_body"
+                fallbackHtml={`<p>Security is the foundation of digital trust. Through our technology centers, we have completed the initial migration phase of core ledgers to lattice-based post-quantum cryptography. In an era where quantum computing threats are emerging, Surya Bank depositors can rest assured that their accounts are protected by next-generation cryptographic standards.</p>`}
+                className="leading-relaxed"
+              />
             </section>
             
             {/* TIMELINE */}
@@ -369,7 +392,7 @@ We will continue to build, expand, and safeguard the interests of our stakeholde
       </div>
 
       {/* AI EXECUTIVE ASSISTANT (FLOATING) */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-[100px] right-6 z-50">
         <AnimatePresence>
           {isAiOpen && (
             <motion.div 

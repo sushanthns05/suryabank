@@ -5,8 +5,10 @@ import CeoCommandPalette from './CeoCommandPalette';
 
 // Auth and Database imports for Secure Board & Notifications
 import { useCeoAuth } from '../../context/CeoAuthContext';
+import { useCeoCMS } from '../../context/CeoCMSContext';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+import { Pencil, Save, XCircle } from 'lucide-react';
 
 // Translations dictionary for demo-purposes of multi-language compliance
 const translations = {
@@ -65,6 +67,9 @@ const CeoLayout = () => {
   const [notifications, setNotifications] = useState([]);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+
+  // Executive CMS Context
+  const { isEditMode, toggleEditMode } = useCeoCMS();
 
   const t = translations[lang];
 
@@ -430,6 +435,9 @@ const CeoLayout = () => {
                       <Link to="/ceo/calendar" onClick={() => setIsProfileDropdownOpen(false)} className="block px-3 py-2 rounded-lg text-slate-350 hover:bg-slate-900 hover:text-white transition-colors">
                         Executive Calendar
                       </Link>
+                      <Link to="/ceo/appointments" onClick={() => setIsProfileDropdownOpen(false)} className="block px-3 py-2 rounded-lg text-slate-350 hover:bg-slate-900 hover:text-white transition-colors">
+                        Appointment Center
+                      </Link>
                       <Link to="/ceo/vault" onClick={() => setIsProfileDropdownOpen(false)} className="block px-3 py-2 rounded-lg text-slate-350 hover:bg-slate-900 hover:text-white transition-colors">
                         Confidential Vault
                       </Link>
@@ -773,6 +781,32 @@ const CeoLayout = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Outlet />
       </main>
+
+      {/* Floating Executive Edit Mode Toggle (CEO ONLY) */}
+      {role === 'CEO' && (
+        <div className="fixed bottom-6 right-6 z-[10000]">
+          <button
+            onClick={toggleEditMode}
+            className={`flex items-center gap-2 px-4 py-3 rounded-full shadow-2xl transition-all duration-300 font-bold border ${
+              isEditMode 
+                ? 'bg-rose-600 text-white border-rose-500 hover:bg-rose-700 animate-pulse' 
+                : 'bg-ceo-gold text-ceo-navy border-yellow-400 hover:scale-105'
+            }`}
+          >
+            {isEditMode ? (
+              <>
+                <XCircle size={18} />
+                <span className="text-sm">Exit CMS</span>
+              </>
+            ) : (
+              <>
+                <Pencil size={18} />
+                <span className="text-sm">Executive Edit Mode</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className={`border-t mt-16 transition-colors ${

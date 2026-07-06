@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { UserPlus, Mail, Lock, Unlock, RefreshCw, CheckCircle, CalendarDays, Check, Phone, MapPin, CreditCard, Info, IdCard, Search, Edit, BookOpen, ArrowUpRight, ArrowDownRight, IndianRupee, History, AlertCircle, Users, Activity, TrendingUp, X } from 'lucide-react';
 import { getConsultations, approveConsultation, registerUser, getUserByAccount, updateUserDetails, processTransaction, getTransactions, updateCustomerStatus, getCardApplications, updateCardApplicationStatus, wipeAllCardApplications } from '../services/api';
 import { sendWelcomeEmail, sendConsultationApprovalEmail, sendBranchTransactionEmail, sendCardApprovalEmail, sendCustomCustomerEmail } from '../utils/emailService';
-import CeoDirectiveBanner from '../components/shared/CeoDirectiveBanner';
-import CeoTaskInbox from '../components/shared/CeoTaskInbox';
+import ExecutiveCommandCenter from '../components/shared/ExecutiveCommandCenter';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -104,9 +103,7 @@ const EmployeeDashboard = () => {
   const [emailData, setEmailData] = useState({ name: '', email: '', subject: '', message: '' });
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   
-  // CEO Tasks
-  const [ceoTasks, setCeoTasks] = useState([]);
-  // --------------------------------
+
 
   const fetchConsultations = async () => {
     try {
@@ -143,35 +140,10 @@ const EmployeeDashboard = () => {
     fetchConsultations();
     fetchCardApps();
 
-    // Fetch CEO tasks assigned to employees
-    const employeeId = localStorage.getItem('employeeId') || '';
-    const qTasks = query(collection(db, 'ceo_tasks'), orderBy('timestamp', 'desc'));
-    const unsubTasks = onSnapshot(qTasks, (snapshot) => {
-      const list = [];
-      snapshot.forEach(docSnap => {
-        const data = docSnap.data();
-        if (data.status !== 'archived' && (data.audience === 'employees' || data.audience === 'all_staff' || data.assignedEmployee === employeeId)) {
-          list.push({ id: docSnap.id, ...data });
-        }
-      });
-      setCeoTasks(list);
-    });
 
-    return () => unsubTasks();
   }, []);
 
-  const handleUpdateTaskProgress = async (id, currentProgress) => {
-    const newProgress = Math.min((currentProgress || 0) + 25, 100);
-    const updates = { progress: newProgress };
-    if (newProgress === 100) updates.status = 'Completed';
-    else updates.status = 'In Progress';
-    
-    try {
-      await updateDoc(doc(db, 'ceo_tasks', id), updates);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+
 
   const handleApproveConsultationSubmit = async (e) => {
     e.preventDefault();
@@ -473,7 +445,7 @@ const EmployeeDashboard = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <CeoDirectiveBanner portal="employees" variant="employee" limit={2} />
+      <ExecutiveCommandCenter portal="employees" role="Employee" />
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -497,7 +469,7 @@ const EmployeeDashboard = () => {
         </div>
       </div>
 
-      <CeoTaskInbox portal="employees" />
+
 
       {activeTab === 'operations' && (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 fade-in">

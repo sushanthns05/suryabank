@@ -127,54 +127,60 @@ export const CeoAuthProvider = ({ children }) => {
       if (firebaseUser) {
         setUser(firebaseUser);
         
-        // Fetch or assign role in Firestore
-        const userDocRef = doc(db, 'ceo_users', firebaseUser.uid);
-        let userSnap = await getDoc(userDocRef);
-        let assignedRole = '';
-
-        if (!userSnap.exists()) {
-          assignedRole = 'Investor'; // default fallback
-          if (firebaseUser.email.includes('ceo') || firebaseUser.email.includes('founder')) {
-            assignedRole = 'CEO';
-          } else if (firebaseUser.email.includes('assistant')) {
-            assignedRole = 'Executive Assistant';
-          } else if (firebaseUser.email.includes('board')) {
-            assignedRole = 'Board Member';
-          } else if (firebaseUser.email.includes('admin')) {
-            assignedRole = 'Administrator';
-          } else if (firebaseUser.email.includes('media')) {
-            assignedRole = 'Media';
-          }
-
-          // Create Firestore profile
-          await setDoc(userDocRef, {
-            email: firebaseUser.email,
-            role: assignedRole,
-            createdAt: new Date().toISOString(),
-            lastLogin: new Date().toISOString()
-          });
-        } else {
-          const userData = userSnap.data();
-          assignedRole = userData.role;
-          
-          // Update last login
-          await updateDoc(userDocRef, {
-            lastLogin: new Date().toISOString()
-          });
-        }
-        
-        setRole(assignedRole);
-        localStorage.setItem('active_role', assignedRole);
-
-        // Fetch login history logs
         try {
-          const q = query(collection(db, 'ceo_session_logs'), orderBy('timestamp', 'desc'), limit(10));
-          const querySnap = await getDocs(q);
-          const history = [];
-          querySnap.forEach(d => history.push(d.data()));
-          setLoginHistory(history);
-        } catch (historyErr) {
-          console.error(historyErr);
+          // Fetch or assign role in Firestore
+          const userDocRef = doc(db, 'ceo_users', firebaseUser.uid);
+          let userSnap = await getDoc(userDocRef);
+          let assignedRole = '';
+
+          if (!userSnap.exists()) {
+            assignedRole = 'Investor'; // default fallback
+            if (firebaseUser.email.includes('ceo') || firebaseUser.email.includes('founder')) {
+              assignedRole = 'CEO';
+            } else if (firebaseUser.email.includes('assistant')) {
+              assignedRole = 'Executive Assistant';
+            } else if (firebaseUser.email.includes('board')) {
+              assignedRole = 'Board Member';
+            } else if (firebaseUser.email.includes('admin')) {
+              assignedRole = 'Administrator';
+            } else if (firebaseUser.email.includes('media')) {
+              assignedRole = 'Media';
+            }
+
+            // Create Firestore profile
+            await setDoc(userDocRef, {
+              email: firebaseUser.email,
+              role: assignedRole,
+              createdAt: new Date().toISOString(),
+              lastLogin: new Date().toISOString()
+            });
+          } else {
+            const userData = userSnap.data();
+            assignedRole = userData.role;
+            
+            // Update last login
+            await updateDoc(userDocRef, {
+              lastLogin: new Date().toISOString()
+            });
+          }
+          
+          setRole(assignedRole);
+          localStorage.setItem('active_role', assignedRole);
+
+          // Fetch login history logs
+          try {
+            const q = query(collection(db, 'ceo_session_logs'), orderBy('timestamp', 'desc'), limit(10));
+            const querySnap = await getDocs(q);
+            const history = [];
+            querySnap.forEach(d => history.push(d.data()));
+            setLoginHistory(history);
+          } catch (historyErr) {
+            console.error(historyErr);
+          }
+        } catch (err) {
+          console.error("Error fetching CEO user data:", err);
+          // If Firestore fails, default to safe fallback so the screen doesn't stay blank
+          setRole('Investor');
         }
 
       } else {

@@ -4,6 +4,8 @@ import { ArrowRight, Globe, Star, Users, Briefcase, TrendingUp, Award, Clock } f
 import { biography } from './CeoMockData';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+import EditableText from '../../components/ceo/cms/EditableText';
+import EditableImage from '../../components/ceo/cms/EditableImage';
 
 const CeoHome = () => {
   const navigate = useNavigate();
@@ -89,20 +91,40 @@ const CeoHome = () => {
               <Star size={12} /> Executive Leadership Portal
             </div>
             
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif tracking-tight leading-tight text-white">
-              Office of the CEO,<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-ceo-gold via-yellow-200 to-white font-bold">
-                Chairman & Founder
-              </span>
-            </h1>
+            <EditableText 
+              as="h1"
+              collectionName="cms_pages"
+              documentId="ceo_home"
+              fieldKey="hero_title"
+              fallbackText="Office of the CEO,"
+              className="text-4xl sm:text-5xl lg:text-6xl font-serif tracking-tight leading-tight text-white block w-full"
+            />
+            <EditableText 
+              as="h1"
+              collectionName="cms_pages"
+              documentId="ceo_home"
+              fieldKey="hero_subtitle"
+              fallbackText="Chairman & Founder"
+              className="text-4xl sm:text-5xl lg:text-6xl font-serif tracking-tight leading-tight text-transparent bg-clip-text bg-gradient-to-r from-ceo-gold via-yellow-200 to-white font-bold block w-full"
+            />
 
-            <p className="text-2xl font-semibold text-slate-300">
-              {activeProfile.name}
-            </p>
+            <EditableText 
+              as="p"
+              collectionName="cms_pages"
+              documentId="ceo_home"
+              fieldKey="profile_name"
+              fallbackText={activeProfile.name}
+              className="text-2xl font-semibold text-slate-300 block w-full mt-2"
+            />
 
-            <blockquote className="border-l-2 border-ceo-gold pl-4 text-slate-400 italic text-base max-w-lg leading-relaxed">
-              "{activeProfile.quote}"
-            </blockquote>
+            <EditableText 
+              as="blockquote"
+              collectionName="cms_pages"
+              documentId="ceo_home"
+              fieldKey="profile_quote"
+              fallbackText={`"${activeProfile.quote}"`}
+              className="border-l-2 border-ceo-gold pl-4 text-slate-400 italic text-base max-w-lg leading-relaxed block w-full"
+            />
 
             {/* CTAs */}
             <div className="flex flex-wrap gap-4 pt-4">
@@ -132,16 +154,13 @@ const CeoHome = () => {
             <div className="absolute inset-0 bg-gradient-to-tr from-ceo-gold/10 to-blue-500/10 rounded-3xl blur-2xl -z-10" />
             <div className="relative border border-slate-700 p-3 bg-slate-900/60 backdrop-blur rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl">
               <div className="aspect-[4/5] rounded-2xl bg-gradient-to-b from-slate-800 to-slate-950 overflow-hidden relative flex flex-col justify-end border border-slate-850">
-                {/* Visual Portrait */}
-                <img 
-                  src="/sns.jpg" 
-                  alt={activeProfile.name} 
+                <EditableImage 
+                  collectionName="cms_pages"
+                  documentId="ceo_home"
+                  fieldKey="profile_image"
+                  fallbackSrc="/sns.jpg"
+                  alt={activeProfile.name}
                   className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 hover:scale-105"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    const fallback = document.getElementById('profile-placeholder');
-                    if (fallback) fallback.style.display = 'flex';
-                  }}
                 />
                 
                 {/* Visual Placeholder Art fallback */}
@@ -153,7 +172,7 @@ const CeoHome = () => {
                 </div>
 
                 {/* Glassy Overlay for text content */}
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-900/70 to-transparent pt-20 pb-6 px-6 text-center z-10">
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-900/70 to-transparent pt-20 pb-6 px-6 text-center z-10 pointer-events-none">
                   <h3 className="font-serif text-lg text-white font-semibold">{activeProfile.name}</h3>
                   <p className="text-xs text-ceo-gold tracking-widest uppercase mt-1">Surya Bank Group Founder</p>
                 </div>

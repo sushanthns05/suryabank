@@ -407,3 +407,612 @@ export const generatePdfLetter = (letterTitle, letterContent, userEmail) => {
     console.error("Failed to write to download audit logs:", err);
   }
 };
+
+// --- NEW DATA FOR EXECUTIVE HONORS PORTAL ---
+
+export const extendedAwardsList = [
+  { 
+    id: "aw1",
+    year: "2026", 
+    title: "Global Banker of the Year", 
+    organization: "World Finance Forum", 
+    category: "Leadership",
+    country: "United Kingdom",
+    location: "London, UK",
+    presenter: "Sir Evelyn de Rothschild",
+    date: "June 15, 2026",
+    description: "Awarded to Sushanth NS for exemplary leadership and commitment to ESG financing on a global scale.",
+    officialCitation: "For redefining modern banking with a core focus on sustainability, equitable wealth distribution, and unyielding cryptographic security.",
+    achievementSummary: "Spearheaded the integration of $5B green infrastructure bonds while maintaining industry-leading profitability.",
+    verificationStatus: "Verified via Blockchain",
+    verificationHash: "0x8F9A2C...4B21",
+    certificateNumber: "WFF-2026-GB-01",
+    videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+    imageUrl: "/sns.jpg",
+    pressRelease: "Surya Bank CEO named Global Banker of the Year..."
+  },
+  { 
+    id: "aw2",
+    year: "2025", 
+    title: "FinTech Pioneer of the Year", 
+    organization: "Global Banking Tech Awards", 
+    category: "Technology",
+    country: "Singapore",
+    location: "Marina Bay Sands, Singapore",
+    presenter: "MAS Managing Director",
+    date: "November 10, 2025",
+    description: "Recognizing Surya Bank's deployment of zero-trust settlement pipelines and AI underwriting.",
+    officialCitation: "For pushing the boundaries of AI integration in retail banking, reducing loan decision latency to sub-3 minutes.",
+    achievementSummary: "Built the fastest AI underwriting engine in APAC.",
+    verificationStatus: "Verified via Digital Signature",
+    verificationHash: "0x3A1B9C...7D42",
+    certificateNumber: "GBT-2025-FP-44",
+    videoUrl: null,
+    imageUrl: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=800",
+    pressRelease: "Surya Bank recognized for AI supremacy..."
+  },
+  { 
+    id: "aw3",
+    year: "2024", 
+    title: "Environmental Stewardship Excellence", 
+    organization: "Global ESG Council", 
+    category: "ESG",
+    country: "Switzerland",
+    location: "Geneva, Switzerland",
+    presenter: "UN Environment Programme Director",
+    date: "April 22, 2024",
+    description: "For the launching and execution of the $5B Green Infrastructure Bond program.",
+    officialCitation: "For demonstrating that massive capital mobilization for climate action is highly compatible with shareholder returns.",
+    achievementSummary: "Raised and deployed $5 Billion towards renewable energy projects worldwide.",
+    verificationStatus: "Verified by UN",
+    verificationHash: "0x7E4D2A...9F11",
+    certificateNumber: "ESG-2024-ES-08",
+    videoUrl: null,
+    imageUrl: "https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?auto=format&fit=crop&q=80&w=800",
+    pressRelease: "Surya Bank wins top ESG honors..."
+  },
+  { 
+    id: "aw4",
+    year: "2023", 
+    title: "Outstanding Security Innovation", 
+    organization: "Cybersecurity In Banking League", 
+    category: "Innovation",
+    country: "United States",
+    location: "San Francisco, USA",
+    presenter: "Director of CISA",
+    date: "October 14, 2023",
+    description: "For pioneering early-stage lattice-based cryptographic integration on mobile wallets.",
+    officialCitation: "For fortifying consumer finance against quantum threats before the industry standard mandated it.",
+    achievementSummary: "Deployed post-quantum cryptography to 25 million mobile wallets.",
+    verificationStatus: "Cryptographically Verified",
+    verificationHash: "0x1C2D3E...4F5G",
+    certificateNumber: "CBL-2023-OSI-99",
+    videoUrl: null,
+    imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800",
+    pressRelease: "Surya Bank sets new security standard..."
+  },
+  { 
+    id: "aw5",
+    year: "2021", 
+    title: "CEO of the Decade (Asia-Pacific)", 
+    organization: "Asian Finance Weekly", 
+    category: "Leadership",
+    country: "Hong Kong",
+    location: "Hong Kong",
+    presenter: "Financial Secretary of HK",
+    date: "December 05, 2021",
+    description: "Honoring ten years of unprecedented growth and steadfast leadership.",
+    officialCitation: "For transforming a regional banking platform into a global financial powerhouse.",
+    achievementSummary: "Grew Surya Bank AUM by 400% over the decade.",
+    verificationStatus: "Verified",
+    verificationHash: "0x9A8B7C...6D5E",
+    certificateNumber: "AFW-2021-CEO-01",
+    videoUrl: null,
+    imageUrl: "https://images.unsplash.com/photo-1556761175-5973dc0f32d7?auto=format&fit=crop&q=80&w=800",
+    pressRelease: "Sushanth NS named CEO of the Decade..."
+  }
+];
+
+export const awardsAnalytics = {
+  awardsByYear: [
+    { year: "2015", count: 1 },
+    { year: "2018", count: 3 },
+    { year: "2021", count: 5 },
+    { year: "2023", count: 8 },
+    { year: "2024", count: 12 },
+    { year: "2025", count: 15 },
+    { year: "2026", count: 18 }
+  ],
+  awardsByCategory: [
+    { name: "Leadership", value: 35 },
+    { name: "Technology", value: 25 },
+    { name: "ESG", value: 20 },
+    { name: "Innovation", value: 15 },
+    { name: "Other", value: 5 }
+  ],
+  globalDistribution: [
+    { region: "North America", count: 14 },
+    { region: "Europe", count: 18 },
+    { region: "Asia-Pacific", count: 22 },
+    { region: "Middle East", count: 6 },
+    { region: "South America", count: 2 }
+  ]
+};
+
+export const leadershipImpactData = {
+  innovation: "Surya Bank allocates 15% of annual net income purely to exploratory fintech R&D. Our quantum-resilient ledgers and AI underwriting engines were built in-house, securing 12 global patents.",
+  esg: "Under Sushanth NS's mandate, Surya Bank has committed $5B to green infrastructure and maintains a zero-tolerance policy for fossil fuel expansion financing.",
+  governance: "Maintained a 100% compliance record across 15 regulatory jurisdictions with an entirely independent audit committee."
+};
+
+// --- NEW DATA FOR STRATEGIC VISION & TRANSFORMATION HUB ---
+
+export const strategicKPIs = {
+  visionProgress: 78,
+  initiatives: 24,
+  digitalAdoption: 94,
+  aiTransformationIndex: 88,
+  customerSatisfaction: 85,
+  financialInclusion: 92,
+  esgProgress: 81,
+  innovationProjects: 12,
+  countriesServed: 15,
+  activePrograms: 36,
+  strategicInvestments: "$2.4B",
+  transformationScore: "A+"
+};
+
+export const transformationAnalytics = {
+  investmentAllocation: [
+    { name: "AI & Automation", value: 35 },
+    { name: "Cybersecurity", value: 25 },
+    { name: "Green Tech", value: 20 },
+    { name: "Open Banking", value: 15 },
+    { name: "Legacy Migrations", value: 5 }
+  ],
+  progressByPillar: [
+    { pillar: "Digital Banking", progress: 95 },
+    { pillar: "AI Integration", progress: 88 },
+    { pillar: "Customer Exp", progress: 85 },
+    { pillar: "Inclusion", progress: 92 },
+    { pillar: "Expansion", progress: 75 },
+    { pillar: "Sustainability", progress: 81 },
+    { pillar: "Cybersecurity", progress: 90 },
+    { pillar: "System Innovation", progress: 70 }
+  ],
+  innovationIndex: [
+    { year: "2021", score: 45 },
+    { year: "2022", score: 60 },
+    { year: "2023", score: 72 },
+    { year: "2024", score: 85 },
+    { year: "2025", score: 92 },
+    { year: "2026", score: 98 }
+  ],
+  budgetVsActual: [
+    { category: "R&D", budget: 100, actual: 95 },
+    { category: "Security", budget: 150, actual: 160 },
+    { float: "Marketing", budget: 80, actual: 75 },
+    { category: "Infrastructure", budget: 200, actual: 190 }
+  ]
+};
+
+export const extendedVisionPillars = [
+  { 
+    id: "v1",
+    title: "Digital Banking", 
+    desc: "Achieving friction-free global mobile account access, custom digital wallets, and zero-fee borders.", 
+    detail: "Transitioning 100% of retail transactions to instant cloud-native structures, bypassing legacy ACH delays.",
+    icon: "Smartphone",
+    color: "from-blue-500/20 to-indigo-500/20 text-blue-400",
+    progress: 95,
+    phase: "Optimization",
+    completion: "Q4 2026",
+    health: "On Track",
+    owner: "Eleanor Vance (CTO)",
+    priority: "High",
+    budget: "$450M",
+    objectives: ["100% Cloud Native", "Zero-Fee Borders", "Sub-second Settlement"],
+    kpis: ["99.999% Uptime", "50M Mobile MAUs", "Zero API Latency"],
+    risks: ["Legacy system migration delays", "Cloud provider outages"],
+    mitigation: "Multi-cloud active-active redundancy and phased microservice rollout.",
+    opportunities: ["Embedded finance in non-banking apps"]
+  },
+  { 
+    id: "v2",
+    title: "AI Banking Integration", 
+    desc: "Deploying automated cash-flow predictive models, smart savings prompts, and algorithmic credit checks.", 
+    detail: "Leveraging large-language intelligence models to process micro-underwriting in less than 3 minutes.",
+    icon: "Brain",
+    color: "from-purple-500/20 to-pink-500/20 text-purple-400",
+    progress: 88,
+    phase: "Scaling",
+    completion: "Q2 2027",
+    health: "On Track",
+    owner: "Dr. Aris Vance (Chief Data Officer)",
+    priority: "Critical",
+    budget: "$600M",
+    objectives: ["Auto-underwriting", "Predictive Cashflow", "AI Wealth Advisors"],
+    kpis: ["3 Min Loan Decision", "85% AI Resolution", "Zero Hallucination Tolerance"],
+    risks: ["Algorithmic bias", "Data privacy breaches"],
+    mitigation: "Continuous model auditing by independent ethics committee and federated learning.",
+    opportunities: ["Hyper-personalized wealth management"]
+  },
+  { 
+    id: "v3",
+    title: "Customer Experience", 
+    desc: "Delivering empathetic, personalized interfaces that anticipate consumer needs and resolve tickets.", 
+    detail: "Providing 24/7 localized human-AI hybrid support channels, maintaining a Net Promoter Score above 82.",
+    icon: "Heart",
+    color: "from-rose-500/20 to-red-500/20 text-rose-400",
+    progress: 85,
+    phase: "Execution",
+    completion: "Ongoing",
+    health: "At Risk (Minor)",
+    owner: "Sarah Jenkins (CXO)",
+    priority: "High",
+    budget: "$250M",
+    objectives: ["Proactive Support", "Omnichannel Parity", "Empathetic Design"],
+    kpis: ["NPS > 82", "First Contact Resolution 90%", "App Rating > 4.8"],
+    risks: ["Over-reliance on AI frustrating users"],
+    mitigation: "Instant human-handoff protocol if sentiment drops below threshold.",
+    opportunities: ["Voice-activated banking"]
+  },
+  { 
+    id: "v4",
+    title: "Financial Inclusion", 
+    desc: "Opening access channels for unbanked micro-enterprises in emerging trade networks.", 
+    detail: "Providing alternative credit evaluation formulas to fund 150,000+ small merchants in low-bandwidth regions.",
+    icon: "Users",
+    color: "from-emerald-500/20 to-teal-500/20 text-emerald-400",
+    progress: 92,
+    phase: "Scaling",
+    completion: "Q4 2026",
+    health: "On Track",
+    owner: "Meera Nair (Head of ESG)",
+    priority: "Medium",
+    budget: "$150M",
+    objectives: ["Fund 150k SMEs", "Low-bandwidth Apps", "Alt-Credit Scoring"],
+    kpis: ["150k Micro-loans Issued", "Default Rate < 2%", "Rural Adoption Rate"],
+    risks: ["Macro-economic instability in emerging markets"],
+    mitigation: "Diversified geographic portfolio and micro-insurance bundling.",
+    opportunities: ["Capturing loyalty of high-growth developing market merchants"]
+  },
+  {
+    id: "v5",
+    title: "Global Expansion",
+    desc: "Connecting local treasury lines directly with international centers in New York, London, and Singapore.",
+    detail: "Facilitating multi-currency corporate settlement corridors compliant with local regulatory policies.",
+    icon: "Globe",
+    color: "from-amber-500/20 to-yellow-500/20 text-amber-400",
+    progress: 75,
+    phase: "Planning",
+    completion: "Q4 2028",
+    health: "On Track",
+    owner: "James Rutherford (Head of Markets)",
+    priority: "Medium",
+    budget: "$800M",
+    objectives: ["Establish 3 Hubs", "24/7 Trade Desks", "Cross-border compliance"],
+    kpis: ["$50B Cross-border Volume", "Zero Regulatory Fines", "Launch in 5 new EU countries"],
+    risks: ["Regulatory pushback in new jurisdictions"],
+    mitigation: "Early engagement with local regulators and joint ventures.",
+    opportunities: ["Capturing underserved SME cross-border trade flows"]
+  },
+  {
+    id: "v6",
+    title: "Sustainable Finance",
+    desc: "Directing deposits exclusively to clean energy projects and green infrastructure syndications.",
+    detail: "Diverting capital away from fossil fuels, backed by our audited $5B green bond allocation frame.",
+    icon: "Leaf",
+    color: "from-green-500/20 to-emerald-500/20 text-green-400",
+    progress: 81,
+    phase: "Execution",
+    completion: "2030 (Net Zero target)",
+    health: "On Track",
+    owner: "Meera Nair (Head of ESG)",
+    priority: "High",
+    budget: "$5B (Capital Allocation)",
+    objectives: ["$5B Green Bonds", "Zero Fossil Fuel Funding", "Carbon Neutral Ops"],
+    kpis: ["100% Clean Portfolio", "Scope 1,2,3 Emissions", "Green Bond Yield"],
+    risks: ["Greenwashing accusations if auditing fails"],
+    mitigation: "Third-party rigorous carbon auditing and public ledger transparency.",
+    opportunities: ["Premium pricing for certified green loans"]
+  },
+  {
+    id: "v7",
+    title: "Cybersecurity Shield",
+    desc: "Integrating lattice post-quantum cryptography to secure core transaction databases.",
+    detail: "Employing continuous AI threat auditing and zero-trust verification structures across all wallets.",
+    icon: "Shield",
+    color: "from-cyan-500/20 to-blue-500/20 text-cyan-400",
+    progress: 90,
+    phase: "Optimization",
+    completion: "Q1 2027",
+    health: "On Track",
+    owner: "Michael Chang (CISO)",
+    priority: "Critical",
+    budget: "$350M",
+    objectives: ["PQC Migration", "Zero-Trust Network", "AI Threat Hunting"],
+    kpis: ["0 Data Breaches", "100% PQC Coverage", "Mean Time To Respond (MTTR) < 5m"],
+    risks: ["Performance overhead of PQC algorithms"],
+    mitigation: "Hardware acceleration and optimized lattice libraries.",
+    opportunities: ["Licensing security tech to other financial institutions"]
+  },
+  {
+    id: "v8",
+    title: "System Innovation",
+    desc: "Building open banking APIs so developers can deploy fintech apps directly on Surya Bank rails.",
+    detail: "Providing fully compliant GraphQL developer endpoints to accelerate third-party wealth tool builds.",
+    icon: "Zap",
+    color: "from-orange-500/20 to-yellow-500/20 text-orange-400",
+    progress: 70,
+    phase: "Execution",
+    completion: "Q3 2027",
+    health: "Delayed",
+    owner: "Eleanor Vance (CTO)",
+    priority: "Medium",
+    budget: "$120M",
+    objectives: ["GraphQL API Launch", "Developer Portal", "99.99% Sandbox Uptime"],
+    kpis: ["500+ Active 3rd Party Devs", "10M API calls/day", "$50M API Revenue"],
+    risks: ["Third-party data misuse"],
+    mitigation: "Strict API token scoping, rate limiting, and continuous auditing.",
+    opportunities: ["Creating a 'Plaid-like' ecosystem on Surya Bank rails"]
+  }
+];
+
+export const globalExpansionData = {
+  currentOperations: ["US", "UK", "Switzerland", "Singapore", "Hong Kong", "India", "UAE", "Australia"],
+  futureExpansions: ["Germany", "France", "Japan", "Brazil", "South Africa"],
+  nodes: [
+    { country: 'US', x: 20, y: 35, status: 'active', metric: '4.2M Users' },
+    { country: 'Brazil', x: 28, y: 70, status: 'planned', metric: 'Market Entry Q3' },
+    { country: 'UK', x: 45, y: 30, status: 'active', metric: '1.8M Users' },
+    { country: 'Germany', x: 48, y: 32, status: 'planned', metric: 'License Pending' },
+    { country: 'UAE', x: 60, y: 45, status: 'active', metric: 'Corporate Hub' },
+    { country: 'India', x: 70, y: 48, status: 'active', metric: '12M Users' },
+    { country: 'Singapore', x: 78, y: 60, status: 'active', metric: 'APAC HQ' },
+    { country: 'Japan', x: 85, y: 38, status: 'planned', metric: 'Partner Search' },
+    { country: 'Australia', x: 88, y: 75, status: 'active', metric: '800k Users' }
+  ]
+};
+
+export const successStoriesData = [
+  {
+    title: "Project Quantum Leap",
+    outcome: "Migrated 25M wallets to Post-Quantum Cryptography with zero downtime.",
+    impact: "Secured $42B AUM against future quantum decryption attacks.",
+    pillar: "Cybersecurity Shield",
+    lessons: "Hardware acceleration is critical for lattice cryptography overhead."
+  },
+  {
+    title: "Project Green Earth",
+    outcome: "Fully deployed the $5B green bond allocation ahead of schedule.",
+    impact: "Funded 12 major solar/wind projects; reduced carbon footprint by 40%.",
+    pillar: "Sustainable Finance",
+    lessons: "Rigorous third-party auditing is essential for investor trust."
+  }
+];
+
+export const investorViewData = {
+  valueCreation: "Surya Bank's strategy focuses on high margin digital acquisition, retaining customers through AI-driven personalization, and securing massive corporate liquidity flows via blockchain APIs.",
+  capitalAllocation: "60% Growth Initiatives, 20% Dividend Returns, 20% Security & Resilience.",
+  innovationPipeline: "Q3 2026: AI Wealth Advisors. Q1 2027: Predictive Sovereign Debt Models. Q4 2027: fully decentralized settlement rails.",
+  futureOutlook: "Projecting a 15% CAGR in revenue and 18% CAGR in net profits through 2030, driven by emerging market adoption and premium corporate APIs."
+};
+
+// --- NEW DATA FOR EXECUTIVE STRATEGY & TRANSFORMATION COMMAND CENTER ---
+
+export const strategyExecKPIs = {
+  overallProgress: 82,
+  activeInitiatives: 45,
+  businessUnits: 9,
+  countriesServed: 18,
+  strategicInvestments: "$8.5B",
+  aiIndex: 94,
+  digitalAdoption: 96,
+  esgProgress: 88,
+  customerGrowth: "+12.4%",
+  innovationScore: 92,
+  revenueGrowth: "+18.2%",
+  marketShare: "14%"
+};
+
+export const extendedStrategyPillars = [
+  {
+    id: "retail",
+    title: "Retail Banking",
+    icon: "Users",
+    description: "Empowering mobile depositors with AI financial advisors, competitive savings tools, and card facilities.",
+    mission: "To become the primary financial relationship for 100M+ global consumers through frictionless, intelligent mobile banking.",
+    objectives: [
+      "Launch smart automated budget calculators for retail mobile wallets.",
+      "Achieve average check underwriting times below 10 seconds.",
+      "Maintain active Net Promoter Score (NPS) above 82."
+    ],
+    metrics: [
+      { label: "Active Retail Users", value: "22.4M" },
+      { label: "NPS Score", value: "85" },
+      { label: "Mobile Share of Tx", value: "94%" }
+    ],
+    chartData: [
+      { year: "2021", assets: 10 },
+      { year: "2022", assets: 13.5 },
+      { year: "2023", assets: 18 },
+      { year: "2024", assets: 22.4 }
+    ],
+    growthLabel: "Active Accounts (Millions)",
+    timeline: "Q1 2025 - Q4 2027",
+    budget: "$1.2B",
+    roi: "22% IRR projected by 2028",
+    sponsor: "Sarah Jenkins (CXO)",
+    department: "Consumer Banking",
+    projectManager: "David Chen",
+    supportingTeams: ["Mobile Dev", "AI Analytics", "Retail Risk"],
+    status: "Scaling",
+    progress: 85,
+    dependencies: ["Core Ledger Migration", "AI Chatbot v2.0"],
+    risks: ["Aggressive neo-bank customer acquisition", "Data privacy legislation changes"],
+    mitigation: "Lock-in via high-yield savings tied to direct deposit, proactive GDPR compliance auditing."
+  },
+  {
+    id: "corporate",
+    title: "Corporate Banking",
+    icon: "Target",
+    description: "Enterprise treasury pipelines, liquidity pooling solutions, and international B2B settlement rails.",
+    mission: "Provide real-time, cross-border treasury dominance for multinational Fortune 1000 enterprises.",
+    objectives: [
+      "Streamline corporate B2B remittance times using private ledgers.",
+      "Connect European commercial divisions directly to Southeast Asian corridors.",
+      "Provide real-time automated treasury management services."
+    ],
+    metrics: [
+      { label: "Corporate Clients", value: "18,500+" },
+      { label: "SME Support", value: "42,000" },
+      { label: "Annual Volume", value: "$18.5B" }
+    ],
+    chartData: [
+      { year: "2021", assets: 8 },
+      { year: "2022", assets: 11.2 },
+      { year: "2023", assets: 15 },
+      { year: "2024", assets: 18.5 }
+    ],
+    growthLabel: "Annual Transaction Volume ($B)",
+    timeline: "Q3 2024 - Q4 2026",
+    budget: "$2.5B",
+    roi: "18% IRR, $500M fee revenue",
+    sponsor: "James Rutherford (Head of Markets)",
+    department: "Corporate Treasury",
+    projectManager: "Elena Rostova",
+    supportingTeams: ["Blockchain Dev", "FX Trading", "Corporate Compliance"],
+    status: "Execution",
+    progress: 72,
+    dependencies: ["Regulatory approval in EU/SG", "Quantum-safe encryption layer"],
+    risks: ["Geopolitical sanctions interrupting settlement corridors"],
+    mitigation: "Dynamic routing algorithms and isolated jurisdictional ledgers."
+  },
+  {
+    id: "digital",
+    title: "Digital Infrastructure",
+    icon: "Zap",
+    description: "Core cloud banking engines, microservices architectures, and instant API ledgers.",
+    mission: "Build a zero-latency, infinitely scalable, and quantum-resistant core banking substrate.",
+    objectives: [
+      "Achieve 99.999% uptime for core ledger clusters on distributed servers.",
+      "Decouple customer database layers into secure container clusters.",
+      "Reduce server transaction latencies to sub-5 milliseconds."
+    ],
+    metrics: [
+      { label: "System Uptime", value: "99.999%" },
+      { label: "API Requests/Min", value: "250k" },
+      { label: "Core Latency", value: "4.2ms" }
+    ],
+    chartData: [
+      { year: "2021", assets: 50 },
+      { year: "2022", assets: 120 },
+      { year: "2023", assets: 190 },
+      { year: "2024", assets: 250 }
+    ],
+    growthLabel: "API Traffic (K Requests / min)",
+    timeline: "Q1 2023 - Q4 2026",
+    budget: "$3.0B",
+    roi: "$1.2B annual opex reduction",
+    sponsor: "Eleanor Vance (CTO)",
+    department: "Engineering",
+    projectManager: "Dr. Marcus Thorne",
+    supportingTeams: ["Cloud Ops", "Platform Engineering", "Site Reliability"],
+    status: "Optimization",
+    progress: 92,
+    dependencies: ["AWS/GCP Enterprise Agreements", "Hardware Cryptography Modules"],
+    risks: ["Cloud provider catastrophic failure", "Migration data loss"],
+    mitigation: "Multi-cloud active-active architecture, zero-downtime shadow database mirroring."
+  },
+  {
+    id: "green_finance",
+    title: "Green Finance",
+    icon: "Leaf",
+    description: "Sustaining ecological health via targeted clean-energy capital allocations and green bonds.",
+    mission: "Lead the global transition to Net Zero by aggressively reallocating capital to sustainable infrastructure.",
+    objectives: [
+      "Commit $5 Billion to sustainable solar, wind, and smart grid developments.",
+      "Audit carbon profiles of all institutional corporate loan portfolios.",
+      "Offer interest rate rebates to companies achieving verified climate goals."
+    ],
+    metrics: [
+      { label: "Green Capital", value: "$5.2B" },
+      { label: "Net Zero Target", value: "2030" },
+      { label: "Projects Funded", value: "128" }
+    ],
+    chartData: [
+      { year: "2021", assets: 1.5 },
+      { year: "2022", assets: 2.8 },
+      { year: "2023", assets: 4.1 },
+      { year: "2024", assets: 5.2 }
+    ],
+    growthLabel: "Green Finance Capital Allocated ($B)",
+    timeline: "2025 - 2030",
+    budget: "$5.0B Allocation",
+    roi: "Brand equity, regulatory benefits, 8% Yield",
+    sponsor: "Meera Nair (Head of ESG)",
+    department: "Sustainability & Investment",
+    projectManager: "Julian Bates",
+    supportingTeams: ["ESG Auditing", "Risk Management", "Corporate Lending"],
+    status: "Execution",
+    progress: 81,
+    dependencies: ["Global carbon pricing frameworks", "Third-party ESG auditors"],
+    risks: ["Greenwashing reputational damage", "Underperformance of green tech"],
+    mitigation: "Strict adherence to SBTi (Science Based Targets initiative) and diversified tech funding."
+  }
+];
+
+export const macroEconomicData = {
+  indicators: [
+    { name: "Global Inflation Rate", value: "3.2%", trend: "down" },
+    { name: "Fed Funds Target", value: "4.50%", trend: "stable" },
+    { name: "ECB Rate", value: "3.75%", trend: "down" },
+    { name: "US GDP Growth (Est)", value: "2.1%", trend: "up" },
+    { name: "USD/EUR", value: "0.92", trend: "stable" },
+    { name: "S&P 500 Bank Index", value: "+14%", trend: "up" }
+  ],
+  competitorComparison: [
+    { bank: "Surya Bank", digitalAdoption: 94, roe: 15.2, costIncomeRatio: 42, npa: 1.1 },
+    { bank: "JPMorgan Chase", digitalAdoption: 82, roe: 14.8, costIncomeRatio: 54, npa: 1.4 },
+    { bank: "Goldman Sachs", digitalAdoption: 78, roe: 11.5, costIncomeRatio: 65, npa: 1.2 },
+    { bank: "DBS Bank", digitalAdoption: 89, roe: 16.2, costIncomeRatio: 41, npa: 1.0 }
+  ]
+};
+
+export const strategyRoadmapNodes = {
+  vision: "Global Financial Dominance & Tech Innovation",
+  objectives: [
+    { name: "100M+ Retail Users", status: "Active", progress: 75 },
+    { name: "Zero-Latency Settlements", status: "Active", progress: 92 },
+    { name: "Net Zero by 2030", status: "Active", progress: 45 }
+  ],
+  pillars: [
+    { name: "Digital Substrate", objective: "Zero-Latency Settlements", budget: "$3B" },
+    { name: "AI Underwriting", objective: "100M+ Retail Users", budget: "$1.2B" },
+    { name: "Green Bond Issuance", objective: "Net Zero by 2030", budget: "$5B" }
+  ],
+  projects: [
+    { name: "Post-Quantum Auth", pillar: "Digital Substrate", eta: "Q2 2026", status: "On Track" },
+    { name: "GraphQL APIs", pillar: "Digital Substrate", eta: "Q4 2026", status: "Delayed" },
+    { name: "Predictive Cashflow Models", pillar: "AI Underwriting", eta: "Q1 2027", status: "On Track" },
+    { name: "Solar Syndicate Alpha", pillar: "Green Bond Issuance", eta: "Q3 2026", status: "Completed" }
+  ]
+};
+
+export const execAnalytics = {
+  budgetVsActual: [
+    { category: "Retail", budget: 1200, actual: 1150 },
+    { category: "Corporate", budget: 2500, actual: 2600 },
+    { category: "Digital Infrastructure", budget: 3000, actual: 2900 },
+    { category: "ESG", budget: 500, actual: 480 },
+    { category: "Wealth", budget: 800, actual: 750 }
+  ],
+  revenueContribution: [
+    { name: "Retail", value: 35 },
+    { name: "Corporate", value: 40 },
+    { name: "Wealth", value: 15 },
+    { name: "Investment", value: 10 }
+  ]
+};
+

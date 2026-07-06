@@ -45,5 +45,75 @@ service cloud.firestore {
       allow read: if true;
       allow write: if true;
     }
+
+    match /ceo_users/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /ceo_session_logs/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /ceo_notifications/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /ceo_approvals/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /ceo_profile_data/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /meetingSlots/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /meetingRequests/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /meetingHistory/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /meetingNotes/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /meetingTasks/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /meetingNotifications/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /ceo_audit_logs/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /ceo_feedback/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /ceo_download_logs/{document} {
+      allow read: if true;
+      allow write: if true;
+    }
   }
 }

@@ -1,69 +1,116 @@
-import React from 'react';
-import { Award, Landmark, Sparkles, Heart, HelpCircle, Trophy } from 'lucide-react';
-import { awardsList } from './CeoMockData';
-
-// Map colors/icons to categories for visuals
-const awardsMeta = [
-  { id: '1', icon: Trophy, color: 'from-amber-500/20 to-yellow-500/20 text-amber-400' },
-  { id: '2', icon: Sparkles, color: 'from-purple-500/20 to-pink-500/20 text-purple-400' },
-  { id: '3', icon: Landmark, color: 'from-emerald-500/20 to-green-500/20 text-emerald-400' },
-  { id: '4', icon: Heart, color: 'from-blue-500/20 to-cyan-500/20 text-blue-400' }
-];
+import React, { useState } from 'react';
+import ExecutiveStats from '../../components/ceo/awards/ExecutiveStats';
+import InteractiveTimeline from '../../components/ceo/awards/InteractiveTimeline';
+import GlobalRecognitionMap from '../../components/ceo/awards/GlobalRecognitionMap';
+import DigitalTrophyGallery from '../../components/ceo/awards/DigitalTrophyGallery';
+import ExecutiveAnalytics from '../../components/ceo/awards/ExecutiveAnalytics';
+import LeadershipImpact from '../../components/ceo/awards/LeadershipImpact';
+import MediaAndCertificates from '../../components/ceo/awards/MediaAndCertificates';
+import AiAwardsAssistant from '../../components/ceo/awards/AiAwardsAssistant';
+import AwardDetailModal from '../../components/ceo/awards/AwardDetailModal';
+import { Download, Share2 } from 'lucide-react';
+import { generatePdfLetter } from './CeoMockData';
 
 const CeoAwards = () => {
+  const [selectedAward, setSelectedAward] = useState(null);
+
+  const handleExportSummary = () => {
+    const title = "Executive Recognition & Awards Summary";
+    const content = "Surya Bank, under the leadership of CEO Sushanth NS, has been recognized globally for its excellence in banking, technology innovation, and environmental stewardship.\n\n" +
+      "Key Milestones:\n" +
+      "• Over 85 Global Accolades across 18 countries.\n" +
+      "• Named Global Banker of the Year (2026).\n" +
+      "• Pioneer in AI Underwriting and Post-Quantum Cryptographic ledgers.\n" +
+      "• Deployed $5B towards Green Infrastructure Initiatives.\n\n" +
+      "This document serves as an official verified summary of Surya Bank's executive honors portfolio. For detailed certificates and citations, please visit the live Executive Honors Portal.";
+    generatePdfLetter(title, content, "investor-relations@suryabank.com");
+  };
+
+  const handleSharePortfolio = async () => {
+    const shareData = {
+      title: 'Surya Bank Executive Honors',
+      text: 'Explore the verified global recognition and awards of Surya Bank and CEO Sushanth NS.',
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Portfolio link copied to clipboard!');
+      }
+    } catch (err) {
+      console.error('Error sharing portfolio:', err);
+    }
+  };
+
   return (
-    <div className="space-y-12 animate-in fade-in duration-300">
+    <div className="space-y-12 animate-in fade-in duration-500 pb-20">
       
-      {/* Header */}
-      <div className="text-center max-w-xl mx-auto space-y-2">
-        <span className="text-xs uppercase tracking-widest font-bold text-ceo-gold">Executive Honors</span>
-        <h1 className="text-3xl md:text-4xl font-serif text-white font-bold">Awards & Accolades</h1>
-        <p className="text-xs text-slate-400">Review international financial decorations, digital technology leadership milestones, and ESG community awards.</p>
+      {/* Premium Header */}
+      <div className="relative pt-8 pb-12 border-b border-slate-800 text-center max-w-4xl mx-auto space-y-4">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ceo-gold/50 to-transparent" />
+        
+        <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-ceo-gold px-4 py-1.5 rounded-full border border-ceo-gold/30 bg-ceo-gold/10 inline-block">
+          Executive Honors & Global Recognition Center
+        </span>
+        
+        <h1 className="text-4xl md:text-5xl font-serif text-white font-bold leading-tight">
+          A Legacy of <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-ceo-gold to-yellow-600">Global Excellence</span>
+        </h1>
+        
+        <p className="text-sm text-slate-400 leading-relaxed max-w-2xl mx-auto">
+          Explore the milestones, innovations, and institutional accolades defining Sushanth NS's leadership journey. Verified digital records of worldwide impact across finance, technology, and sustainability.
+        </p>
+
+        <div className="flex justify-center gap-3 pt-4">
+          <button onClick={handleExportSummary} className="flex items-center gap-2 px-4 py-2 bg-ceo-gold hover:bg-yellow-500 text-slate-900 rounded-lg text-xs font-bold transition-colors shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+            <Download size={14} /> Export Executive Summary
+          </button>
+          <button onClick={handleSharePortfolio} className="flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-700 hover:border-ceo-gold/50 text-slate-300 rounded-lg text-xs font-bold transition-colors">
+            <Share2 size={14} /> Share Portfolio
+          </button>
+        </div>
       </div>
 
-      {/* Grid of awards */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {awardsList.map((award, index) => {
-          const meta = awardsMeta[index] || awardsMeta[0];
-          const IconComponent = meta.icon;
+      {/* Main Stats Counter */}
+      <ExecutiveStats />
 
-          return (
-            <div 
-              key={index}
-              className="p-6 sm:p-8 rounded-3xl bg-slate-900 border border-slate-805 hover:border-ceo-gold/40 transition-all shadow-lg flex items-start gap-6 group"
-            >
-              {/* Left icon wrapper */}
-              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-tr ${meta.color} flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform`}>
-                <IconComponent size={28} />
-              </div>
+      {/* Primary Analytics & Global Map */}
+      <div className="grid grid-cols-1 gap-12">
+        <ExecutiveAnalytics />
+        <GlobalRecognitionMap onAwardClick={setSelectedAward} />
+      </div>
 
-              {/* Right text contents */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-lg font-bold text-ceo-gold">{award.year}</span>
-                  <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">{award.organization}</span>
-                </div>
-                <h3 className="font-serif text-sm font-semibold text-white group-hover:text-ceo-gold transition-colors">
-                  {award.title}
-                </h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  {award.description}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </section>
+      {/* Leadership Impact Pillars */}
+      <div className="space-y-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-serif text-white font-bold">Leadership Impact</h2>
+          <p className="text-xs text-slate-400 mt-1">Driving institutional change through visionary pillars.</p>
+        </div>
+        <LeadershipImpact />
+      </div>
 
-      {/* Trophies Case details banner */}
-      <section className="bg-slate-950 border border-slate-805 rounded-3xl p-8 text-center space-y-4 max-w-3xl mx-auto shadow-xl">
-        <Award className="mx-auto text-ceo-gold" size={32} />
-        <h3 className="font-serif text-lg text-white font-semibold">Regulatory Certifications Case</h3>
-        <p className="text-xs text-slate-400 leading-relaxed max-w-lg mx-auto">
-          Surya Bank maintains institutional certifications in ISO/IEC 27001 (Security Management), Basel Capital Adequacy Framework Tier-1 Compliancy, and Carbon Trust Portfolio Audits.
-        </p>
-      </section>
+      {/* Interactive Timeline & 3D Trophy Gallery */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <DigitalTrophyGallery onAwardClick={setSelectedAward} />
+        <InteractiveTimeline onAwardClick={setSelectedAward} />
+      </div>
 
+      {/* Media and Verified Certificates */}
+      <MediaAndCertificates onAwardClick={setSelectedAward} />
+
+      {/* Floating AI Assistant */}
+      <AiAwardsAssistant />
+
+      {/* Detail Modal */}
+      {selectedAward && (
+        <AwardDetailModal 
+          award={selectedAward} 
+          onClose={() => setSelectedAward(null)} 
+        />
+      )}
+      
     </div>
   );
 };

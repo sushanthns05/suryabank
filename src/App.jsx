@@ -33,7 +33,7 @@ import EmployeeProfile from './pages/employee/EmployeeProfile';
 import EmployeeNotifications from './pages/employee/EmployeeNotifications';
 import EmployeeAttendance from './pages/employee/EmployeeAttendance';
 import EmployeeLeaves from './pages/employee/EmployeeLeaves';
-
+import EmployeeAppointments from './pages/employee/EmployeeAppointments';
 import ManagerLogin from './pages/manager/ManagerLogin';
 import ManagerLayout from './components/layout/ManagerLayout';
 import ManagerDashboard from './pages/manager/ManagerDashboard';
@@ -49,7 +49,7 @@ import ManagerCommunication from './pages/manager/ManagerCommunication';
 import ManagerSettings from './pages/manager/ManagerSettings';
 import ManagerProfile from './pages/manager/ManagerProfile';
 import ManagerAttendance from './pages/manager/ManagerAttendance';
-
+import ManagerAppointments from './pages/manager/ManagerAppointments';
 import CeoLayout from './pages/ceo/CeoLayout';
 import CeoHome from './pages/ceo/CeoHome';
 import CeoAbout from './pages/ceo/CeoAbout';
@@ -70,6 +70,7 @@ import CeoAdmin from './pages/ceo/CeoAdmin';
 
 // Secure Executive Office Imports
 import { CeoAuthProvider } from './context/CeoAuthContext';
+import { CeoCMSProvider } from './context/CeoCMSContext';
 import ProtectedRoute from './components/ceo/ProtectedRoute';
 import CeoLogin from './pages/ceo/CeoLogin';
 import CeoDashboard from './pages/ceo/secure/CeoDashboard';
@@ -82,7 +83,7 @@ import CeoCalendar from './pages/ceo/secure/CeoCalendar';
 import CeoDocVault from './pages/ceo/secure/CeoDocVault';
 import CeoProfileEditor from './pages/ceo/secure/CeoProfileEditor';
 import CeoCommandCenter from './pages/ceo/secure/CeoCommandCenter';
-
+import CeoAppointments from './pages/ceo/secure/CeoAppointments';
 // Public Layout Wrapper
 const PublicLayout = () => (
   <div className="app-container flex flex-col min-h-screen relative">
@@ -173,6 +174,7 @@ function App() {
               <Route path="notifications" element={<EmployeeNotifications />} />
               <Route path="attendance" element={<EmployeeAttendance />} />
               <Route path="leave" element={<EmployeeLeaves />} />
+              <Route path="appointments" element={<EmployeeAppointments />} />
             </Route>
             
             <Route path="*" element={<Navigate to="/employee-login" replace />} />
@@ -205,6 +207,7 @@ function App() {
               <Route path="communication" element={<ManagerCommunication />} />
               <Route path="settings" element={<ManagerSettings />} />
               <Route path="profile" element={<ManagerProfile />} />
+              <Route path="appointments" element={<ManagerAppointments />} />
             </Route>
             
             <Route path="*" element={<Navigate to="/manager" replace />} />
@@ -217,85 +220,51 @@ function App() {
   if (isCeoSite) {
     return (
       <CeoAuthProvider>
-        <SocketProvider>
+        <CeoCMSProvider>
+          <SocketProvider>
           <DesktopSwitchButton />
           <Router>
             <Routes>
               <Route path="/" element={<Navigate to="/ceo" replace />} />
               <Route path="/ceo" element={<CeoLayout />}>
-                <Route index element={<CeoHome />} />
-                <Route path="about" element={<CeoAbout />} />
-                <Route path="message" element={<CeoMessage />} />
-                <Route path="vision" element={<CeoVision />} />
-                <Route path="strategy" element={<CeoStrategy />} />
-                <Route path="innovation" element={<CeoInnovation />} />
-                <Route path="governance" element={<CeoGovernance />} />
-                <Route path="esg" element={<CeoESG />} />
-                <Route path="investors" element={<CeoInvestorRelations />} />
-                <Route path="media" element={<CeoMedia />} />
-                <Route path="publications" element={<CeoPublications />} />
-                <Route path="awards" element={<CeoAwards />} />
-                <Route path="events" element={<CeoEvents />} />
-                <Route path="gallery" element={<CeoGallery />} />
-                <Route path="contact" element={<CeoContact />} />
-                
-                {/* Secure Executive Paths */}
                 <Route path="login" element={<CeoLogin />} />
-                <Route path="dashboard" element={
-                  <ProtectedRoute allowedRoles={['CEO']}>
-                    <CeoDashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="ea" element={
-                  <ProtectedRoute allowedRoles={['Executive Assistant', 'CEO']}>
-                    <EADashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="board" element={
-                  <ProtectedRoute allowedRoles={['Board Member', 'CEO', 'Executive Assistant']}>
-                    <BoardDashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="investor-dashboard" element={
-                  <ProtectedRoute allowedRoles={['Investor', 'CEO', 'Executive Assistant', 'Board Member']}>
-                    <InvestorDashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="media-secure" element={
-                  <ProtectedRoute allowedRoles={['Media', 'CEO', 'Executive Assistant']}>
-                    <MediaDashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="admin" element={
-                  <ProtectedRoute allowedRoles={['Administrator', 'CEO']}>
-                    <AdminDashboardSecure />
-                  </ProtectedRoute>
-                } />
-                <Route path="calendar" element={
-                  <ProtectedRoute allowedRoles={['CEO', 'Executive Assistant', 'Administrator', 'Board Member']}>
-                    <CeoCalendar />
-                  </ProtectedRoute>
-                } />
-                <Route path="vault" element={
-                  <ProtectedRoute allowedRoles={['CEO', 'Executive Assistant', 'Board Member', 'Investor', 'Media', 'Administrator']}>
-                    <CeoDocVault />
-                  </ProtectedRoute>
-                } />
-                <Route path="profile-editor" element={
-                  <ProtectedRoute allowedRoles={['CEO', 'Executive Assistant', 'Administrator']}>
-                    <CeoProfileEditor />
-                  </ProtectedRoute>
-                } />
-                <Route path="command-center" element={
-                  <ProtectedRoute allowedRoles={['CEO', 'Executive Assistant']}>
-                    <CeoCommandCenter />
-                  </ProtectedRoute>
-                } />
+                
+                <Route element={<ProtectedRoute allowedRoles={['CEO']} />}>
+                  <Route index element={<CeoHome />} />
+                  <Route path="about" element={<CeoAbout />} />
+                  <Route path="message" element={<CeoMessage />} />
+                  <Route path="vision" element={<CeoVision />} />
+                  <Route path="strategy" element={<CeoStrategy />} />
+                  <Route path="innovation" element={<CeoInnovation />} />
+                  <Route path="governance" element={<CeoGovernance />} />
+                  <Route path="esg" element={<CeoESG />} />
+                  <Route path="investors" element={<CeoInvestorRelations />} />
+                  <Route path="media" element={<CeoMedia />} />
+                  <Route path="publications" element={<CeoPublications />} />
+                  <Route path="awards" element={<CeoAwards />} />
+                  <Route path="events" element={<CeoEvents />} />
+                  <Route path="gallery" element={<CeoGallery />} />
+                  <Route path="contact" element={<CeoContact />} />
+                  
+                  {/* Secure Executive Paths */}
+                  <Route path="dashboard" element={<CeoDashboard />} />
+                  <Route path="ea" element={<EADashboard />} />
+                  <Route path="board" element={<BoardDashboard />} />
+                  <Route path="investor-dashboard" element={<InvestorDashboard />} />
+                  <Route path="media-secure" element={<MediaDashboard />} />
+                  <Route path="admin" element={<AdminDashboardSecure />} />
+                  <Route path="calendar" element={<CeoCalendar />} />
+                  <Route path="vault" element={<CeoDocVault />} />
+                  <Route path="profile-editor" element={<CeoProfileEditor />} />
+                  <Route path="command-center" element={<CeoCommandCenter />} />
+                  <Route path="appointments" element={<CeoAppointments />} />
+                </Route>
               </Route>
               <Route path="*" element={<Navigate to="/ceo" replace />} />
             </Routes>
           </Router>
-        </SocketProvider>
+          </SocketProvider>
+        </CeoCMSProvider>
       </CeoAuthProvider>
     );
   }
@@ -303,7 +272,8 @@ function App() {
   // Original Public Site Routing with added CEO routes for direct access
   return (
     <CeoAuthProvider>
-      <SocketProvider>
+      <CeoCMSProvider>
+        <SocketProvider>
         <DesktopSwitchButton />
         <Router>
           <Routes>
@@ -331,74 +301,37 @@ function App() {
 
             {/* CEO Portal Routes */}
             <Route path="/ceo" element={<CeoLayout />}>
-              <Route index element={<CeoHome />} />
-              <Route path="about" element={<CeoAbout />} />
-              <Route path="message" element={<CeoMessage />} />
-              <Route path="vision" element={<CeoVision />} />
-              <Route path="strategy" element={<CeoStrategy />} />
-              <Route path="innovation" element={<CeoInnovation />} />
-              <Route path="governance" element={<CeoGovernance />} />
-              <Route path="esg" element={<CeoESG />} />
-              <Route path="investors" element={<CeoInvestorRelations />} />
-              <Route path="media" element={<CeoMedia />} />
-              <Route path="publications" element={<CeoPublications />} />
-              <Route path="awards" element={<CeoAwards />} />
-              <Route path="events" element={<CeoEvents />} />
-              <Route path="gallery" element={<CeoGallery />} />
-              <Route path="contact" element={<CeoContact />} />
-              
-              {/* Secure Executive Paths */}
               <Route path="login" element={<CeoLogin />} />
-              <Route path="dashboard" element={
-                <ProtectedRoute allowedRoles={['CEO']}>
-                  <CeoDashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="ea" element={
-                <ProtectedRoute allowedRoles={['Executive Assistant', 'CEO']}>
-                  <EADashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="board" element={
-                <ProtectedRoute allowedRoles={['Board Member', 'CEO', 'Executive Assistant']}>
-                  <BoardDashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="investor-dashboard" element={
-                <ProtectedRoute allowedRoles={['Investor', 'CEO', 'Executive Assistant', 'Board Member']}>
-                  <InvestorDashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="media-secure" element={
-                <ProtectedRoute allowedRoles={['Media', 'CEO', 'Executive Assistant']}>
-                  <MediaDashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="admin" element={
-                <ProtectedRoute allowedRoles={['Administrator', 'CEO']}>
-                  <AdminDashboardSecure />
-                </ProtectedRoute>
-              } />
-              <Route path="calendar" element={
-                <ProtectedRoute allowedRoles={['CEO', 'Executive Assistant', 'Administrator', 'Board Member']}>
-                  <CeoCalendar />
-                </ProtectedRoute>
-              } />
-              <Route path="vault" element={
-                <ProtectedRoute allowedRoles={['CEO', 'Executive Assistant', 'Board Member', 'Investor', 'Media', 'Administrator']}>
-                  <CeoDocVault />
-                </ProtectedRoute>
-              } />
-              <Route path="profile-editor" element={
-                <ProtectedRoute allowedRoles={['CEO', 'Executive Assistant', 'Administrator']}>
-                  <CeoProfileEditor />
-                </ProtectedRoute>
-              } />
-              <Route path="command-center" element={
-                <ProtectedRoute allowedRoles={['CEO', 'Executive Assistant']}>
-                  <CeoCommandCenter />
-                </ProtectedRoute>
-              } />
+              
+              <Route element={<ProtectedRoute allowedRoles={['CEO']} />}>
+                <Route index element={<CeoHome />} />
+                <Route path="about" element={<CeoAbout />} />
+                <Route path="message" element={<CeoMessage />} />
+                <Route path="vision" element={<CeoVision />} />
+                <Route path="strategy" element={<CeoStrategy />} />
+                <Route path="innovation" element={<CeoInnovation />} />
+                <Route path="governance" element={<CeoGovernance />} />
+                <Route path="esg" element={<CeoESG />} />
+                <Route path="investors" element={<CeoInvestorRelations />} />
+                <Route path="media" element={<CeoMedia />} />
+                <Route path="publications" element={<CeoPublications />} />
+                <Route path="awards" element={<CeoAwards />} />
+                <Route path="events" element={<CeoEvents />} />
+                <Route path="gallery" element={<CeoGallery />} />
+                <Route path="contact" element={<CeoContact />} />
+                
+                {/* Secure Executive Paths */}
+                <Route path="dashboard" element={<CeoDashboard />} />
+                <Route path="ea" element={<EADashboard />} />
+                <Route path="board" element={<BoardDashboard />} />
+                <Route path="investor-dashboard" element={<InvestorDashboard />} />
+                <Route path="media-secure" element={<MediaDashboard />} />
+                <Route path="admin" element={<AdminDashboardSecure />} />
+                <Route path="calendar" element={<CeoCalendar />} />
+                <Route path="vault" element={<CeoDocVault />} />
+                <Route path="profile-editor" element={<CeoProfileEditor />} />
+                <Route path="command-center" element={<CeoCommandCenter />} />
+              </Route>
             </Route>
 
             {/* Employee Dashboard Routes with specialized Layout */}
@@ -416,7 +349,8 @@ function App() {
             </Route>
           </Routes>
         </Router>
-      </SocketProvider>
+        </SocketProvider>
+      </CeoCMSProvider>
     </CeoAuthProvider>
   );
 }

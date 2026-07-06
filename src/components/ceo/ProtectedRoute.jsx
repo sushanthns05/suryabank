@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { useCeoAuth } from '../../context/CeoAuthContext';
 import { ShieldAlert, KeyRound, Loader2 } from 'lucide-react';
 
@@ -51,7 +51,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     );
   }
 
-  return children;
+  return children ? children : <Outlet />;
 };
 
 export default ProtectedRoute;

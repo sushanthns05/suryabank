@@ -30,6 +30,15 @@ export default {
       fontFamily: {
         sans: ['Inter', 'sans-serif'], // Professional clean typography
         serif: ['Georgia', 'serif'],
+      },
+      animation: {
+        'marquee': 'marquee 25s linear infinite',
+      },
+      keyframes: {
+        marquee: {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(-100%)' },
+        }
       }
     },
   },

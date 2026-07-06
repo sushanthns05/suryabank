@@ -9,8 +9,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Legend, PieChart, Pie, Cell
 } from 'recharts';
-import CeoDirectiveBanner from '../../components/shared/CeoDirectiveBanner';
-import CeoTaskInbox from '../../components/shared/CeoTaskInbox';
+import ExecutiveCommandCenter from '../../components/shared/ExecutiveCommandCenter';
 
 // Dummy Data for charts
 const performanceData = [
@@ -110,8 +109,7 @@ const EmployeeOverview = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
 
-      <CeoDirectiveBanner portal="employees" variant="employee" limit={2} />
-      <CeoTaskInbox portal="employees" />
+      <ExecutiveCommandCenter portal="employees" role="Employee" />
 
       {/* Urgent Manager Broadcasts */}
       {broadcasts.length > 0 && (

@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Building2, Users, FileText, CreditCard, 
   Briefcase, Settings, LogOut, Menu, Search, ShieldCheck,
-  Bell, Moon, Sun, X, MessageSquare, ClipboardList, UserCheck
+  Bell, Moon, Sun, X, MessageSquare, ClipboardList, UserCheck, Calendar
 } from 'lucide-react';
 import { getManagerNotifications } from '../../services/api';
 
@@ -37,6 +37,7 @@ const SIDEBAR_MENU = [
     items: [
       { name: 'Messages', path: '/manager/communication', icon: MessageSquare },
       { name: 'Notifications', path: '/manager/notifications', icon: Bell },
+      { name: 'CEO Appointments', path: '/manager/appointments', icon: Calendar },
     ]
   },
   {
