@@ -12,7 +12,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Legend, PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
-import { getAvailableSlots, subscribeToCEOAppointments, updateAppointmentStatus } from '../../../services/appointmentService';
+import { getAvailableSlots, subscribeToCEOAppointments, updateAppointmentStatus, addMeetingSlot } from '../../../services/appointmentService';
 import { useCeoCMS } from '../../../context/CeoCMSContext';
 import EditableText from '../../../components/ceo/cms/EditableText';
 
@@ -78,6 +78,42 @@ const CeoAppointments = () => {
     endTime: '10:00',
     title: 'Focus Time'
   });
+
+  // Availability Modal State
+  const [showAvailabilityModal, setShowAvailabilityModal] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [availabilityForm, setAvailabilityForm] = useState({
+    date: '',
+    startTime: '09:00',
+    endTime: '10:00',
+    duration: '1 hour'
+  });
+
+  useEffect(() => {
+    const fetchSlots = async () => {
+      const slotsRes = await getAvailableSlots();
+      if (slotsRes.success) setAvailableSlots(slotsRes.data);
+    };
+    fetchSlots();
+  }, []);
+
+  const handleAddAvailability = async (e) => {
+    e.preventDefault();
+    const res = await addMeetingSlot({
+      date: availabilityForm.date,
+      startTime: availabilityForm.startTime,
+      endTime: availabilityForm.endTime,
+      duration: availabilityForm.duration
+    });
+    
+    if (res.success) {
+      alert('Availability slot added successfully');
+      setShowAvailabilityModal(false);
+      setAvailableSlots([...availableSlots, res.data]);
+    } else {
+      alert('Failed to add slot: ' + res.message);
+    }
+  };
 
   const getWeekDates = () => {
     const today = new Date();
@@ -502,12 +538,20 @@ const CeoAppointments = () => {
                   <button className="px-3 py-1 text-slate-600 dark:text-slate-400 hover:text-slate-900 text-sm font-bold">Month</button>
                 </div>
               </div>
-              <button 
-                onClick={() => setShowBlockModal(true)}
-                className="px-4 py-2 bg-surya-primary text-white dark:bg-surya-secondary dark:text-slate-900 rounded-xl text-sm font-bold flex items-center shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
-              >
-                <Plus size={16} className="mr-2" /> Block Time
-              </button>
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setShowAvailabilityModal(true)}
+                  className="px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-bold flex items-center shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
+                >
+                  <Plus size={16} className="mr-2" /> Set Availability
+                </button>
+                <button 
+                  onClick={() => setShowBlockModal(true)}
+                  className="px-4 py-2 bg-surya-primary text-white dark:bg-surya-secondary dark:text-slate-900 rounded-xl text-sm font-bold flex items-center shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
+                >
+                  <Plus size={16} className="mr-2" /> Block Time
+                </button>
+              </div>
             </div>
             
             {/* Mock Calendar Grid */}
@@ -792,6 +836,48 @@ const CeoAppointments = () => {
           </>
         )}
       </AnimatePresence>
+
+      {/* --- SET AVAILABILITY MODAL --- */}
+      {showAvailabilityModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800"
+          >
+            <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-green-50 dark:bg-green-900/30">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2"><CheckCircle size={20} className="text-green-500" /> Publish Availability Slot</h3>
+              <button onClick={() => setShowAvailabilityModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                <XCircle size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleAddAvailability} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Date</label>
+                <input type="date" required value={availabilityForm.date} onChange={e => setAvailabilityForm({...availabilityForm, date: e.target.value})} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-green-500" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Start Time</label>
+                  <input type="time" required value={availabilityForm.startTime} onChange={e => setAvailabilityForm({...availabilityForm, startTime: e.target.value})} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-green-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">End Time</label>
+                  <input type="time" required value={availabilityForm.endTime} onChange={e => setAvailabilityForm({...availabilityForm, endTime: e.target.value})} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-green-500" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Duration text (e.g. 1 hour)</label>
+                <input type="text" required value={availabilityForm.duration} onChange={e => setAvailabilityForm({...availabilityForm, duration: e.target.value})} placeholder="1 hour" className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-green-500" />
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setShowAvailabilityModal(false)} className="px-4 py-2.5 text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">Cancel</button>
+                <button type="submit" className="px-6 py-2.5 bg-green-500 text-white font-bold rounded-lg hover:shadow-md transition-shadow">Publish Slot</button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
 
       {/* --- BLOCK TIME MODAL --- */}
       {showBlockModal && (
