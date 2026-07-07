@@ -417,7 +417,7 @@ const Services = () => {
                         value={formData.name}
                         onChange={handleInputChange}
                         required 
-                        style={{ width: '100%', padding: '10px 10px 10px 40px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc' }}
+                        style={{ width: '100%', padding: '10px 10px 10px 40px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#0f172a' }}
                         placeholder="John Doe"
                       />
                     </div>
@@ -433,7 +433,7 @@ const Services = () => {
                         value={formData.email}
                         onChange={handleInputChange}
                         required 
-                        style={{ width: '100%', padding: '10px 10px 10px 40px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc' }}
+                        style={{ width: '100%', padding: '10px 10px 10px 40px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#0f172a' }}
                         placeholder="you@example.com"
                       />
                     </div>
@@ -536,7 +536,7 @@ const Services = () => {
                   value={cardFormData.nameOnCard}
                   onChange={handleCardInputChange}
                   required 
-                  style={{ width: '100%', padding: '10px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', textTransform: 'uppercase' }}
+                  style={{ width: '100%', padding: '10px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#0f172a', textTransform: 'uppercase' }}
                   placeholder="NAME ON CARD"
                 />
               </div>
@@ -549,7 +549,7 @@ const Services = () => {
                   onChange={handleCardInputChange}
                   required 
                   rows="3"
-                  style={{ width: '100%', padding: '10px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', resize: 'none' }}
+                  style={{ width: '100%', padding: '10px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#0f172a', resize: 'none' }}
                   placeholder="Full Delivery Address"
                 />
               </div>
@@ -660,7 +660,7 @@ const Services = () => {
                   required 
                   min="1000"
                   step="500"
-                  style={{ width: '100%', padding: '10px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc' }}
+                  style={{ width: '100%', padding: '10px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#0f172a' }}
                   placeholder="e.g. 50000"
                 />
               </div>
@@ -675,7 +675,7 @@ const Services = () => {
                   required 
                   min="6"
                   max="360"
-                  style={{ width: '100%', padding: '10px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc' }}
+                  style={{ width: '100%', padding: '10px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#0f172a' }}
                   placeholder="e.g. 24"
                 />
               </div>

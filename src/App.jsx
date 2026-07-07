@@ -21,6 +21,9 @@ import AadhaarSeedingForm from './pages/AadhaarSeedingForm';
 import DepositPayInSlip from './pages/DepositPayInSlip';
 import ChequeBookRequisitionForm from './pages/ChequeBookRequisitionForm';
 import InternetBankingPermissionForm from './pages/InternetBankingPermissionForm';
+import Careers from './pages/Careers';
+import Security from './pages/Security';
+import TermsAndPrivacy from './pages/TermsAndPrivacy';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUpdates from './pages/admin/AdminUpdates';
 import EmployeeDashboard from './pages/EmployeeDashboard';
@@ -299,6 +302,9 @@ function App() {
               <Route path="/deposit-pay-in-slip" element={<DepositPayInSlip />} />
               <Route path="/cheque-book-requisition-form" element={<ChequeBookRequisitionForm />} />
               <Route path="/internet-banking-permission-form" element={<InternetBankingPermissionForm />} />
+              <Route path="/careers" element={<Careers />} />
+              <Route path="/security" element={<Security />} />
+              <Route path="/terms" element={<TermsAndPrivacy />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/updates" element={<AdminUpdates />} />
               <Route path="/employee-login" element={<EmployeeLogin />} />

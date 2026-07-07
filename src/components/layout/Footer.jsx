@@ -61,9 +61,9 @@ const Footer = () => {
           <h3 className="text-white font-heading font-bold text-lg mb-6">Company</h3>
           <ul className="space-y-3">
             <li><Link to="/about" className="text-sm hover:text-primary-gold transition-colors">About Us</Link></li>
-            <li><a href="#" onClick={(e) => openModal(e, 'Careers', 'Join the Surya Bank team!')} className="text-sm hover:text-primary-gold transition-colors">Careers</a></li>
-            <li><a href="#" onClick={(e) => openModal(e, 'Security', 'High end security')} className="text-sm hover:text-primary-gold transition-colors">Security</a></li>
-            <li><a href="#" onClick={(e) => openModal(e, 'Terms', 'Terms')} className="text-sm hover:text-primary-gold transition-colors">Terms & Privacy</a></li>
+            <li><Link to="/careers" className="text-sm hover:text-primary-gold transition-colors">Careers</Link></li>
+            <li><Link to="/security" className="text-sm hover:text-primary-gold transition-colors">Security</Link></li>
+            <li><Link to="/terms" className="text-sm hover:text-primary-gold transition-colors">Terms & Privacy</Link></li>
           </ul>
         </div>
 
