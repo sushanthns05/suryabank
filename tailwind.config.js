@@ -25,7 +25,12 @@ export default {
           gold: '#D4AF37',
           'gold-hover': '#C19D2F',
           dark: '#030c1a',
-        }
+        },
+        'primary-gold': '#D4AF37',
+        'accent-blue': '#3B82F6',
+        'accent-emerald': '#10B981',
+        'bg-primary': '#07111F',
+        'bg-secondary': '#0D1B2A',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'], // Professional clean typography

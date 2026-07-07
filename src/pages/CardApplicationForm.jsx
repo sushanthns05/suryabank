@@ -1,166 +1,123 @@
-import React from 'react';
-import { Download, Printer, FileText } from 'lucide-react';
-import './AccountOpeningForm.css'; // Reusing the same CSS for consistent print styling
-
-const Field = ({ label, wide = false, small = false }) => (
-  <div className={`aof-field ${wide ? 'wide' : ''} ${small ? 'small' : ''}`}>
-    <span>{label}</span>
-  </div>
-);
-
-const Check = ({ label }) => (
-  <label className="aof-check">
-    <span className="aof-box" aria-hidden="true"></span>
-    <span>{label}</span>
-  </label>
-);
-
-const Section = ({ number, title, children }) => (
-  <section className="aof-section">
-    <div className="aof-section-title">
-      <span>{number}</span>
-      <h2>{title}</h2>
-    </div>
-    {children}
-  </section>
-);
+import React, { useState } from 'react';
+import { FormLayout, FormCard, FormInput, FormCheckbox, FormButton, FileUploadZone } from '../components/forms/FormSystem';
+import PrintableCardForm from '../components/forms/PrintableCardForm';
+import { CreditCard, MapPin, Shield, FileSignature } from 'lucide-react';
 
 const CardApplicationForm = () => {
-  const printForm = () => {
-    window.print();
+  const [formData, setFormData] = useState({
+    cardType: 'Debit Card',
+    network: 'Visa',
+    nameOnCard: '',
+    accountNumber: '',
+    mobile: '',
+    email: '',
+    deliveryAddress: '',
+    city: '',
+    state: '',
+    pincode: '',
+    pan: '',
+    agreedToTerms: false,
+    signatureFile: null
+  });
+
+  const updateForm = (key, value) => setFormData(prev => ({ ...prev, [key]: value }));
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      updateForm('signatureFile', e.target.files[0]);
+    }
   };
 
+  const calculateProgress = () => {
+    let fields = ['nameOnCard', 'accountNumber', 'mobile', 'deliveryAddress', 'pan', 'agreedToTerms', 'signatureFile'];
+    let filled = fields.filter(f => formData[f]).length;
+    return Math.round((filled / fields.length) * 100);
+  };
+
+  const printForm = () => window.print();
+
   return (
-    <div className="account-form-page fade-in">
-      <div className="aof-toolbar">
-        <div>
-          <p className="aof-kicker">Surya Bank Forms</p>
-          <h1>ATM / Debit / Credit Card Application</h1>
-        </div>
-        <div className="aof-actions">
-          <button type="button" onClick={printForm} className="aof-action-btn">
-            <Printer size={18} />
-            Print
-          </button>
-          <button type="button" onClick={printForm} className="aof-action-btn primary">
-            <Download size={18} />
-            Save as PDF
-          </button>
-        </div>
+    <FormLayout 
+      title="ATM / Debit / Credit Card Application" 
+      subtitle="Apply for a new physical card for your account."
+      referenceNo={`CRD-${Math.floor(Math.random() * 90000) + 10000}`}
+      progress={calculateProgress()}
+      onPrint={printForm}
+      hideHeaderOnPrint={true}
+    >
+      <div className="print:hidden">
+        <form>
+          <FormCard step={1} title="Card Selection" icon={CreditCard}>
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-[#111827] mb-4">Select Card Type</label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormCheckbox label="Debit Card" checked={formData.cardType === 'Debit Card'} onChange={() => updateForm('cardType', 'Debit Card')} />
+                <FormCheckbox label="Credit Card" checked={formData.cardType === 'Credit Card'} onChange={() => updateForm('cardType', 'Credit Card')} />
+                <FormCheckbox label="Business Card" checked={formData.cardType === 'Business Card'} onChange={() => updateForm('cardType', 'Business Card')} />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-[#111827] mb-4">Select Network</label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormCheckbox label="Visa" checked={formData.network === 'Visa'} onChange={() => updateForm('network', 'Visa')} />
+                <FormCheckbox label="Mastercard" checked={formData.network === 'Mastercard'} onChange={() => updateForm('network', 'Mastercard')} />
+                <FormCheckbox label="RuPay" checked={formData.network === 'RuPay'} onChange={() => updateForm('network', 'RuPay')} />
+              </div>
+            </div>
+          </FormCard>
+
+          <FormCard step={2} title="Delivery Details" icon={MapPin}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormInput label="Name to appear on Card" value={formData.nameOnCard} onChange={e => updateForm('nameOnCard', e.target.value)} required />
+              <FormInput label="Linked Account Number" value={formData.accountNumber} onChange={e => updateForm('accountNumber', e.target.value)} required />
+              <FormInput label="Mobile Number" value={formData.mobile} onChange={e => updateForm('mobile', e.target.value)} required />
+              <FormInput label="Email Address" type="email" value={formData.email} onChange={e => updateForm('email', e.target.value)} required />
+              <div className="md:col-span-2">
+                <FormInput label="Delivery Address" value={formData.deliveryAddress} onChange={e => updateForm('deliveryAddress', e.target.value)} required />
+              </div>
+              <FormInput label="City" value={formData.city} onChange={e => updateForm('city', e.target.value)} required />
+              <FormInput label="State" value={formData.state} onChange={e => updateForm('state', e.target.value)} required />
+              <FormInput label="PIN Code" value={formData.pincode} onChange={e => updateForm('pincode', e.target.value)} required />
+            </div>
+          </FormCard>
+
+          <FormCard step={3} title="KYC Verification" icon={Shield}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormInput label="PAN Number" value={formData.pan} onChange={e => updateForm('pan', e.target.value)} required />
+            </div>
+          </FormCard>
+
+          <FormCard step={4} title="Declarations & Signature" icon={FileSignature}>
+            <div className="space-y-4 mb-8">
+              <FormCheckbox 
+                label="I have read and understood the Terms and Conditions governing the issuance of the Card." 
+                checked={formData.agreedToTerms} 
+                onChange={() => updateForm('agreedToTerms', !formData.agreedToTerms)} 
+              />
+              <FormCheckbox 
+                label="I authorize Surya Bank to deduct the applicable issuance and annual fees from my account." 
+                checked={formData.agreedToTerms} 
+                onChange={() => updateForm('agreedToTerms', !formData.agreedToTerms)} 
+              />
+            </div>
+            
+            <FileUploadZone 
+              label="Applicant's Signature" 
+              description="Upload a clear image of your signature (PNG, JPG)" 
+              file={formData.signatureFile}
+              onChange={handleFileChange}
+            />
+          </FormCard>
+
+          <div className="flex justify-end gap-4 mt-8">
+            <FormButton type="button" variant="outline" onClick={printForm}>Print Form for Offline Submission</FormButton>
+          </div>
+        </form>
       </div>
 
-      <main className="aof-sheet" aria-label="Surya Bank card application form">
-        <header className="aof-header">
-          <div className="aof-brand">
-            <img src="/logo.png" alt="Surya Bank" />
-            <div>
-              <strong>Surya Bank</strong>
-              <span>Trusted Digital Banking</span>
-            </div>
-          </div>
-          <div className="aof-title">
-            <p>For branch use only</p>
-            <h2>Card Application Form</h2>
-          </div>
-          <div className="aof-photo-box">Paste recent photograph</div>
-        </header>
-
-        <div className="aof-branch-row">
-          <Field label="Branch name" />
-          <Field label="Application date" small />
-          <Field label="Customer ID / CIF" small />
-          <Field label="Account number (12 Digits)" />
-        </div>
-
-        <Section number="1" title="Card Type Requested">
-          <div className="aof-check-grid">
-            <Check label="ATM / Debit Card" />
-            <Check label="Credit Card" />
-            <Check label="Forex Card" />
-            <Check label="Replacement Card (Lost/Stolen)" />
-            <Check label="Renewal" />
-            <Check label="Add-on Card" />
-          </div>
-        </Section>
-
-        <Section number="2" title="Applicant Details">
-          <div className="aof-grid">
-            <Field label="Full name as per bank records" wide />
-            <Field label="Name to be printed on Card (Max 20 chars)" wide />
-            <Field label="Date of birth" small />
-            <Field label="Gender" small />
-            <Field label="PAN number" small />
-            <Field label="Mobile number" small />
-            <Field label="Email address" wide />
-          </div>
-        </Section>
-
-        <Section number="3" title="Delivery Address">
-          <div className="aof-grid">
-            <Field label="Address Line 1" wide />
-            <Field label="Address Line 2" wide />
-            <Field label="City" small />
-            <Field label="State" small />
-            <Field label="PIN code" small />
-            <Field label="Country" small />
-          </div>
-        </Section>
-
-        <Section number="4" title="Add-on Card Applicant (Optional)">
-          <div className="aof-grid">
-            <Field label="Name of Add-on Applicant" wide />
-            <Field label="Name to be printed on Card" />
-            <Field label="Relationship with Primary Applicant" small />
-            <Field label="Date of birth" small />
-            <Field label="PAN number" small />
-          </div>
-        </Section>
-
-        <Section number="5" title="Declaration">
-          <p className="aof-declaration">
-            I/We confirm that the information provided in this application is true and complete. I/We agree to abide by the
-            terms and conditions governing the issuance and usage of the Surya Bank Card as may be amended from time to time.
-            I/We authorize Surya Bank to verify my/our details and deduct the applicable issuance/annual fees from my/our account.
-          </p>
-          <div className="aof-signature-row">
-            <div>
-              <span>Primary Applicant Signature</span>
-            </div>
-            <div>
-              <span>Add-on Applicant Signature (If applicable)</span>
-            </div>
-            <div>
-              <span>Date</span>
-            </div>
-          </div>
-        </Section>
-
-        <Section number="6" title="Branch Checklist (For Bank Use Only)">
-          <div className="aof-check-grid documents">
-            <Check label="Signature verified" />
-            <Check label="Account status active" />
-            <Check label="KYC compliance checked" />
-            <Check label="Charges recovered" />
-          </div>
-          <div className="aof-signature-row branch">
-            <div>
-              <span>Employee name and ID</span>
-            </div>
-            <div>
-              <span>Authorized officer signature</span>
-            </div>
-            <div>
-              <span>Branch seal</span>
-            </div>
-          </div>
-        </Section>
-
-        <footer className="aof-footer">
-          <FileText size={16} />
-          <span>Surya Bank card application form. Please complete in BLOCK LETTERS using black or blue ink.</span>
-        </footer>
-      </main>
-    </div>
+      <div className="hidden print:block w-full">
+        <PrintableCardForm data={formData} />
+      </div>
+    </FormLayout>
   );
 };
 

@@ -30,57 +30,59 @@ const Footer = () => {
     fetchVersion();
   }, []);
   return (
-    <footer className="footer bg-gradient-blue text-white">
-      <div className="container footer-content">
-        <div className="footer-col brand-col">
-          <Link to="/" className="footer-brand">
-            <Sun className="brand-icon" size={32} />
-            <span className="brand-text">Surya<span className="brand-accent">Bank</span></span>
+    <footer className="bg-bg-secondary text-slate-300 py-16 border-t border-white/5 relative z-10 print:hidden">
+      <div className="container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="space-y-4">
+          <Link to="/" className="flex items-center gap-3 mb-6">
+            <img src="/logo.png" alt="Surya Bank Logo" className="h-8 w-auto object-contain brightness-0 invert" />
+            <span className="font-heading text-2xl font-bold text-white tracking-tight">Surya<span className="text-primary-gold">Bank</span></span>
           </Link>
-          <p className="footer-tagline">Banking with Trust, Powered by Innovation.</p>
-          <div className="social-links">
-            <a href="#" className="social-icon"><span>FB</span></a>
-            <a href="#" className="social-icon"><span>TW</span></a>
-            <a href="#" className="social-icon"><span>IG</span></a>
-            <a href="#" className="social-icon"><span>IN</span></a>
+          <p className="text-sm text-slate-400 max-w-xs">Banking with Trust, Powered by Innovation. Experience the future of global enterprise banking.</p>
+          <div className="flex gap-4 pt-4">
+            <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary-gold hover:text-bg-primary transition-all text-sm font-bold">FB</a>
+            <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary-gold hover:text-bg-primary transition-all text-sm font-bold">X</a>
+            <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary-gold hover:text-bg-primary transition-all text-sm font-bold">IG</a>
+            <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary-gold hover:text-bg-primary transition-all text-sm font-bold">IN</a>
           </div>
         </div>
 
-        <div className="footer-col">
-          <h3>Services</h3>
-          <ul>
-            <li><Link to="/services">Savings Accounts</Link></li>
-            <li><Link to="/recurring-deposit">Recurring Deposits (RD)</Link></li>
-            <li><Link to="/services">Business Loans</Link></li>
-            <li><Link to="/services">Credit Cards</Link></li>
-            <li><Link to="/services">Investments</Link></li>
+        <div>
+          <h3 className="text-white font-heading font-bold text-lg mb-6">Services</h3>
+          <ul className="space-y-3">
+            <li><Link to="/services" className="text-sm hover:text-primary-gold transition-colors">Savings Accounts</Link></li>
+            <li><Link to="/recurring-deposit" className="text-sm hover:text-primary-gold transition-colors">Recurring Deposits (RD)</Link></li>
+            <li><Link to="/services" className="text-sm hover:text-primary-gold transition-colors">Business Loans</Link></li>
+            <li><Link to="/services" className="text-sm hover:text-primary-gold transition-colors">Credit Cards</Link></li>
+            <li><Link to="/services" className="text-sm hover:text-primary-gold transition-colors">Wealth Management</Link></li>
           </ul>
         </div>
 
-        <div className="footer-col">
-          <h3>Company</h3>
-          <ul>
-            <li><Link to="/about">About Us</Link></li>
-            <li><a href="#" onClick={(e) => openModal(e, 'Careers', 'Join the Surya Bank team! We are currently looking for innovative minds to shape the future of digital banking. Send your resume to careers@suryabank.com')}>Careers</a></li>
-            <li><a href="#" onClick={(e) => openModal(e, 'Security', 'High end security with regular security updates.')}>Security</a></li>
-            <li><a href="#" onClick={(e) => openModal(e, 'Terms & Privacy', 'Verified by government official terms.')}>Terms & Privacy</a></li>
+        <div>
+          <h3 className="text-white font-heading font-bold text-lg mb-6">Company</h3>
+          <ul className="space-y-3">
+            <li><Link to="/about" className="text-sm hover:text-primary-gold transition-colors">About Us</Link></li>
+            <li><a href="#" onClick={(e) => openModal(e, 'Careers', 'Join the Surya Bank team!')} className="text-sm hover:text-primary-gold transition-colors">Careers</a></li>
+            <li><a href="#" onClick={(e) => openModal(e, 'Security', 'High end security')} className="text-sm hover:text-primary-gold transition-colors">Security</a></li>
+            <li><a href="#" onClick={(e) => openModal(e, 'Terms', 'Terms')} className="text-sm hover:text-primary-gold transition-colors">Terms & Privacy</a></li>
           </ul>
         </div>
 
-        <div className="footer-col contact-col">
-          <h3>Contact Us</h3>
-          <ul>
-            <li><Phone size={16} /> 1-800-SURYA-BNK</li>
-            <li><Mail size={16} /> support@suryabank.com</li>
-            <li><MapPin size={16} /> 123 Financial District, Tech City</li>
+        <div>
+          <h3 className="text-white font-heading font-bold text-lg mb-6">Contact Us</h3>
+          <ul className="space-y-4">
+            <li className="flex items-start gap-3 text-sm">
+              <Phone size={18} className="text-primary-gold shrink-0 mt-0.5" /> 
+              <span>1-800-SURYA-BNK<br/><span className="text-xs text-slate-500">24/7 Priority Support</span></span>
+            </li>
+            <li className="flex items-center gap-3 text-sm"><Mail size={18} className="text-primary-gold shrink-0" /> support@suryabank.com</li>
+            <li className="flex items-start gap-3 text-sm"><MapPin size={18} className="text-primary-gold shrink-0 mt-0.5" /> 123 Financial District, Tech City, Global Hub</li>
           </ul>
         </div>
       </div>
-      <div className="footer-bottom">
-        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <p>&copy; {new Date().getFullYear()} Surya Bank. All rights reserved.</p>
-          <span className="text-xs text-slate-400">Version: {version}</span>
-        </div>
+      
+      <div className="container mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+        <p className="text-sm text-slate-500">&copy; {new Date().getFullYear()} Surya Bank. All rights reserved.</p>
+        <span className="text-xs text-slate-600 font-mono bg-white/5 px-3 py-1 rounded-full border border-white/10">Version: {version}</span>
       </div>
 
       {/* Info Modal */}

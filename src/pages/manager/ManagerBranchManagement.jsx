@@ -47,6 +47,21 @@ const ManagerBranchManagement = () => {
     return () => unsubscribe();
   }, []);
 
+  // Automatic open/close based on time (09:00 AM to 04:00 PM)
+  useEffect(() => {
+    const hour = currentTime.getHours();
+    const shouldBeOpen = hour >= 9 && hour < 16; // Open from 09:00 to 15:59. Closes exactly at 16:00 (4 PM)
+    
+    if (isBranchOpen !== shouldBeOpen && !isUpdating) {
+      const autoUpdateStatus = async () => {
+        setIsUpdating(true);
+        await updateBranchStatus(shouldBeOpen);
+        setIsUpdating(false);
+      };
+      autoUpdateStatus();
+    }
+  }, [currentTime, isBranchOpen, isUpdating]);
+
   const handleToggleStatus = async () => {
     if (isUpdating) return;
     setIsUpdating(true);
@@ -72,13 +87,12 @@ const ManagerBranchManagement = () => {
               <div className="flex items-center gap-3">
                 <h1 className="text-3xl font-bold text-white tracking-tight">Kengeri Satellite Town Branch</h1>
                 <button 
-                  onClick={handleToggleStatus}
-                  disabled={isUpdating}
-                  title="Click to toggle offline branch status globally"
-                  className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-widest flex items-center gap-2 transition-all transform active:scale-95 shadow-xl disabled:opacity-50 ${
+                  disabled={true}
+                  title="Branch status is automatically managed (09:00 AM - 04:00 PM)"
+                  className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-widest flex items-center gap-2 transition-all transform shadow-xl disabled:cursor-not-allowed ${
                     isBranchOpen 
-                      ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-400 hover:to-emerald-500 shadow-emerald-500/30 border border-emerald-400' 
-                      : 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-400 hover:to-red-500 shadow-red-500/30 border border-red-400'
+                      ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-emerald-500/30 border border-emerald-400 opacity-90' 
+                      : 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-red-500/30 border border-red-400 opacity-90'
                   }`}
                 >
                   <Power size={18} className={isBranchOpen ? 'animate-pulse text-emerald-100' : 'text-red-100'} /> 
@@ -88,7 +102,7 @@ const ManagerBranchManagement = () => {
               <div className="flex flex-wrap items-center text-slate-400 text-sm mt-2 gap-x-4 gap-y-2">
                 <span className="flex items-center gap-1.5"><MapPin size={14} className="text-slate-500" /> BDA Complex Area, Kengeri, Bengaluru</span>
                 <span className="flex items-center gap-1.5"><Award size={14} className="text-[#F59E0B]" /> Branch Code: <strong>SURY-0123</strong></span>
-                <span className="flex items-center gap-1.5"><UserIcon size={14} className="text-slate-500" /> Manager: <strong>Sushanth N S</strong></span>
+                <span className="flex items-center gap-1.5"><UserIcon size={14} className="text-slate-500" /> Manager: <strong>Yashwanth SB</strong></span>
               </div>
             </div>
           </div>

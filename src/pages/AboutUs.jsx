@@ -1,4 +1,6 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { ShieldCheck, Globe, Users, Building2 } from 'lucide-react';
 import Card from '../components/ui/Card';
 import './AboutUs.css';
 
@@ -7,7 +9,7 @@ const kengeriTeam = [
     roleGroup: "Branch Leadership",
     description: "Guiding the branch towards excellence and ensuring seamless operations.",
     members: [
-      { name: "Sushanth N S", role: "Manager and Head of Bank" },
+      { name: "Yashwanth S B", role: "Manager and Head of Bank" },
       { name: "Girish Yadav J", role: "System Manager" }
     ]
   },
@@ -23,8 +25,8 @@ const kengeriTeam = [
     ]
   },
   {
-    roleGroup: "Personal Bankers / Banking Associates",
-    description: "Assist customers in opening/closing accounts, explain product features (like loans and credit cards), and help with basic investment needs.",
+    roleGroup: "Personal Bankers",
+    description: "Assist customers in opening/closing accounts, explain product features, and help with basic investment needs.",
     members: [
       { name: "Manjunath R", role: "Senior Personal Banker" },
       { name: "Kumar G", role: "Personal Banker" },
@@ -35,7 +37,7 @@ const kengeriTeam = [
   },
   {
     roleGroup: "Loan Officers",
-    description: "Evaluate and process loan applications, check credit histories, interview applicants, and explain terms for mortgages, auto, or personal loans.",
+    description: "Evaluate and process loan applications, check credit histories, interview applicants, and explain terms.",
     members: [
       { name: "Hemanth Patil", role: "Senior Loan Officer" },
       { name: "Manjunath S R", role: "Loan Officer" },
@@ -57,82 +59,184 @@ const kengeriTeam = [
   }
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+};
+
 const AboutUs = () => {
   return (
-    <div className="about-page fade-in">
-      <div className="about-hero">
-        <div className="container text-center">
-          <h1 className="about-title">Our Legacy. Your Trust.</h1>
-          <p className="about-subtitle">Over 200 years of empowering generations.</p>
-        </div>
+    <div className="bg-bg-primary min-h-screen pt-32 pb-24 text-white overflow-hidden selection:bg-primary-gold selection:text-bg-primary relative">
+      {/* Background Gradients */}
+      <div className="absolute top-0 left-0 w-full h-full bg-aurora opacity-30 pointer-events-none"></div>
+      <div className="absolute top-1/3 right-0 w-[600px] h-[600px] bg-primary-gold/5 rounded-full blur-[120px] pointer-events-none"></div>
+
+      <div className="container relative z-10 text-center mb-24">
+        <motion.h1 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-5xl md:text-7xl font-heading font-bold mb-6"
+        >
+          Our Legacy. <br/><span className="text-gradient">Your Trust.</span>
+        </motion.h1>
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-xl text-slate-400 max-w-2xl mx-auto"
+        >
+          Over 200 years of empowering generations with financial stability, innovation, and unwavering security.
+        </motion.p>
       </div>
       
-      <div className="container about-content">
-        <Card className="about-card shadow-hover">
-          <h2>About Surya Bank</h2>
+      <div className="container relative z-10 mb-32">
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8 }}
+          className="p-8 md:p-12 lg:p-16 rounded-[3rem] bg-bg-secondary/50 border border-white/5 shadow-2xl glass relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary-gold/10 rounded-full blur-[80px]"></div>
           
-          <div className="about-text-content">
-            <p>
-              <strong>Surya Bank (SB)</strong>, a Fortune 500 company, is an Indian Multinational, Public Sector Banking and Financial services statutory body headquartered in Bengaluru. The rich heritage and legacy of over 200 years, accredits SB as the most trusted Bank by Indians through generations.
-            </p>
-
-            <div className="stats-grid">
-              <div className="stat-box">
-                <h3>Rs. 61+ Trillion</h3>
-                <p>Asset Base</p>
-              </div>
-              <div className="stat-box">
-                <h3>50+ Crore</h3>
-                <p>Customers</p>
-              </div>
-              <div className="stat-box">
-                <h3>23,270+</h3>
-                <p>Branches</p>
-              </div>
-              <div className="stat-box">
-                <h3>63,580+</h3>
-                <p>ATMs / ADWMs</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 className="text-4xl font-heading font-bold mb-8 text-white flex items-center gap-4">
+                <Building2 className="text-primary-gold" size={40} /> About Surya Bank
+              </h2>
+              
+              <div className="space-y-6 text-slate-300 leading-relaxed text-lg">
+                <p>
+                  <strong className="text-white">Surya Bank (SB)</strong>, a Fortune 500 company, is an Indian Multinational, Public Sector Banking and Financial services statutory body headquartered in Bengaluru. The rich heritage and legacy of over 200 years, accredits SB as the most trusted Bank by Indians through generations.
+                </p>
+                <p>
+                  We are the largest banking and financial services organization in India. We serve over 50 crore customers through our vast network with an undeterred focus on innovation and customer centricity, which stems from the core values of the Bank: <strong className="text-primary-gold">Service, Transparency, Ethics, Politeness, and Sustainability.</strong>
+                </p>
+                <p>
+                  Growing with times, SB continues to redefine banking in India, as it aims to offer responsible and sustainable Banking solutions globally.
+                </p>
               </div>
             </div>
 
-            <p>
-              We are the largest banking and financial services organization in India. We serve over 50 crore customers through our vast network of over 23,270 branches, 63,580 ATMs/ADWMs, and 82,900 BC outlets, with an undeterred focus on innovation and customer centricity, which stems from the core values of the Bank: <strong>Service, Transparency, Ethics, Politeness, and Sustainability.</strong>
-            </p>
-
-            <p>
-              The Bank has successfully diversified businesses through its various subsidiaries i.e. <strong>SBIGeneral Insurance, SB Life Insurance, SB Mutual Fund, SB Card,</strong> etc. It has spread its presence globally and operates across time zones through 241 offices in 29 foreign countries.
-            </p>
-
-            <p>
-              Growing with times, SB continues to redefine banking in India, as it aims to offer responsible and sustainable Banking solutions.
-            </p>
-
-            <div className="last-updated">
-              <p><em>Last Updated on Monday, 15th June 2026</em></p>
-            </div>
+            <motion.div 
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="grid grid-cols-2 gap-6"
+            >
+              {[
+                { label: 'Asset Base', value: '61+ Tn', icon: ShieldCheck },
+                { label: 'Customers', value: '50+ Cr', icon: Users },
+                { label: 'Branches', value: '23.2k+', icon: Building2 },
+                { label: 'Global Offices', value: '241', icon: Globe },
+              ].map((stat, idx) => (
+                <motion.div key={idx} variants={itemVariants} className="p-8 rounded-3xl bg-bg-primary/50 border border-white/5 hover:border-primary-gold/30 transition-all hover:-translate-y-2 group">
+                  <stat.icon className="text-slate-500 group-hover:text-primary-gold mb-4 transition-colors" size={32} />
+                  <h3 className="text-3xl font-bold text-white mb-2 group-hover:text-gradient transition-colors">{stat.value}</h3>
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">{stat.label}</p>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
-        </Card>
+        </motion.div>
       </div>
-      <div className="container team-section">
-        <div className="text-center">
-          <h2 className="section-title">Kengeri Satellite Town Branch</h2>
-          <p className="section-subtitle">Meet our dedicated team of professionals ready to serve you.</p>
+
+      <div className="container relative z-10">
+        <div className="text-center mb-20">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-4xl md:text-5xl font-heading font-bold mb-4 text-white"
+          >
+            Kengeri Satellite Town <span className="text-gradient">Branch</span>
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-xl text-slate-400 max-w-2xl mx-auto"
+          >
+            Meet our dedicated team of professionals ready to serve you with world-class financial expertise.
+          </motion.p>
         </div>
         
-        <div className="team-grid">
-          {kengeriTeam.map((group, index) => (
-            <div key={index} className="team-category">
-              <h3>{group.roleGroup}</h3>
-              <p className="category-desc">{group.description}</p>
-              <div className="team-members">
-                {group.members.map((member, mIndex) => (
-                  <Card key={mIndex} className="team-member-card">
-                    <h4>{member.name}</h4>
-                    <p className="role">{member.role}</p>
-                  </Card>
-                ))}
-              </div>
+        <div className="space-y-24">
+          
+          {/* Executive Leadership (CEO & Founder) */}
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="flex flex-col items-center justify-center mb-16"
+          >
+            <div className="mb-10 text-center max-w-3xl mx-auto">
+              <h3 className="text-3xl font-heading font-bold text-white mb-4">Executive Leadership</h3>
+              <p className="text-lg text-slate-400">The visionary leading Surya Bank into the future of digital finance.</p>
             </div>
+            
+            <motion.div 
+              whileHover={{ scale: 1.02, y: -5 }}
+              className="p-12 md:p-16 rounded-[3rem] bg-gradient-to-br from-[#0d284f]/80 to-[#071A35]/90 border border-primary-gold/30 hover:border-primary-gold/60 transition-all flex flex-col items-center text-center glass shadow-2xl relative overflow-hidden w-full max-w-2xl"
+            >
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary-gold/10 rounded-full blur-[80px]"></div>
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent-blue/10 rounded-full blur-[60px]"></div>
+              
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-bg-primary border-4 border-primary-gold flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(212,175,55,0.3)] relative z-10">
+                <span className="text-5xl md:text-6xl font-heading font-bold text-gradient">S</span>
+              </div>
+              <h4 className="text-4xl md:text-5xl font-heading font-bold text-white mb-4 relative z-10">Sushanth N S</h4>
+              <p className="text-lg md:text-xl font-bold text-primary-gold bg-primary-gold/10 px-8 py-2 rounded-full relative z-10 tracking-wide uppercase">CEO, Chairman and Founder</p>
+            </motion.div>
+          </motion.div>
+
+          {/* Rest of the Branch Team */}
+          {kengeriTeam.map((group, index) => (
+            <motion.div 
+              key={index}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="mb-10 text-center max-w-3xl mx-auto">
+                <h3 className="text-3xl font-heading font-bold text-white mb-4">{group.roleGroup}</h3>
+                <p className="text-lg text-slate-400">{group.description}</p>
+              </div>
+              <motion.div 
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-center"
+              >
+                {group.members.map((member, mIndex) => (
+                  <motion.div 
+                    key={mIndex} 
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    className="p-8 rounded-[2rem] bg-bg-secondary/30 border border-white/5 hover:border-primary-gold/20 hover:bg-bg-secondary/80 transition-all flex flex-col items-center text-center glass shadow-soft"
+                  >
+                    <div className="w-20 h-20 rounded-full bg-bg-primary border border-white/10 flex items-center justify-center mb-6 text-2xl font-heading font-bold text-primary-gold">
+                      {member.name.charAt(0)}
+                    </div>
+                    <h4 className="text-xl font-bold text-white mb-2">{member.name}</h4>
+                    <p className="text-sm font-medium text-primary-gold bg-primary-gold/10 px-4 py-1.5 rounded-full">{member.role}</p>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.div>
           ))}
         </div>
       </div>

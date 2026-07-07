@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { CreditCard, Shield, TrendingUp, Briefcase, HeartPulse, Landmark, Calendar, User, Mail, MessageSquare, X, CheckCircle, RefreshCw, FileText, AlertCircle, BookOpen, Banknote } from 'lucide-react';
 import { createConsultation, createCardApplication, createLoan } from '../services/api';
 import { sendConsultationEmail, sendLoanApplicationEmail } from '../utils/emailService';
@@ -217,123 +218,174 @@ const Services = () => {
     }
   ];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.15 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  };
+
   return (
-    <div className="services-page fade-in">
-      <div className="services-hero" style={{ paddingTop: '140px', paddingBottom: '80px', background: 'var(--gradient-blue)', borderBottom: '4px solid var(--primary-gold)' }}>
-        <div className="container text-center">
-          <h1 className="services-title">Premium Financial Services</h1>
-          <p className="services-subtitle">Tailored solutions for your personal and business banking needs, backed by 200 years of trust.</p>
-        </div>
+    <div className="bg-bg-primary min-h-screen pt-32 pb-24 text-white overflow-hidden selection:bg-primary-gold selection:text-bg-primary relative">
+      {/* Background Gradients */}
+      <div className="absolute top-0 left-0 w-full h-full bg-aurora opacity-20 pointer-events-none"></div>
+      <div className="absolute top-1/4 right-0 w-[800px] h-[800px] bg-primary-blue/5 rounded-full blur-[150px] pointer-events-none"></div>
+
+      <div className="container relative z-10 text-center mb-20">
+        <motion.h1 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-5xl md:text-7xl font-heading font-bold mb-6"
+        >
+          Premium <br/><span className="text-gradient">Financial Services</span>
+        </motion.h1>
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-xl text-slate-400 max-w-2xl mx-auto"
+        >
+          Tailored solutions for your personal and business banking needs, backed by 200 years of trust.
+        </motion.p>
       </div>
       
-      <div className="container services-content">
-        <div className="services-grid">
+      <div className="container relative z-10 mb-32">
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
+        >
           {servicesList.map((service, index) => (
-            <Card hover key={index} className="service-card">
-              <div className="service-icon-wrapper">
+            <motion.div 
+              key={index} 
+              variants={itemVariants}
+              whileHover={{ y: -10 }}
+              className="p-10 rounded-[2.5rem] bg-bg-secondary/40 border border-white/5 hover:border-primary-gold/30 hover:bg-bg-secondary/80 transition-all shadow-soft hover:shadow-2xl glass flex flex-col h-full group relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-gold/5 rounded-full blur-[40px] group-hover:bg-primary-gold/10 transition-colors"></div>
+              <div className="w-20 h-20 rounded-3xl bg-bg-primary border border-white/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500 text-primary-gold shadow-lg shadow-black/20">
                 {service.icon}
               </div>
-              <h2 className="service-card-title">{service.title}</h2>
-              <p className="service-card-desc">{service.description}</p>
-              <div className="service-card-action">
-                <Button variant="glass" className="w-full" onClick={service.action ? service.action : undefined}>{service.linkText}</Button>
+              <h2 className="text-2xl font-bold text-white mb-4 group-hover:text-primary-gold transition-colors">{service.title}</h2>
+              <p className="text-slate-400 leading-relaxed mb-10 flex-grow text-lg">{service.description}</p>
+              <div className="mt-auto relative z-10">
+                <button 
+                  onClick={service.action ? service.action : undefined}
+                  className="w-full px-6 py-4 rounded-full border border-white/20 text-white font-bold hover:bg-primary-gold hover:text-bg-primary hover:border-primary-gold transition-all duration-300"
+                >
+                  {service.linkText}
+                </button>
               </div>
-            </Card>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
         
-        <div className="services-cta mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          <Card className="glass-dark text-center p-5 flex flex-col h-full justify-between">
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="mt-24 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
+        >
+          <div className="p-8 rounded-3xl bg-bg-secondary border border-white/5 shadow-2xl flex flex-col h-full justify-between">
             <div>
-              <h2 style={{ color: 'var(--primary-gold)', marginBottom: '15px' }}>Not sure where to start?</h2>
-              <p style={{ color: '#cbd5e1', marginBottom: '25px', maxWidth: '600px', margin: '0 auto 25px auto' }}>
+              <h2 className="text-2xl font-bold text-primary-gold mb-4">Not sure where to start?</h2>
+              <p className="text-slate-400 mb-8 leading-relaxed">
                 Speak with one of our certified financial advisors today to find the perfect banking products for your unique lifestyle and goals.
               </p>
             </div>
-            <Button variant="primary" size="lg" onClick={() => setIsModalOpen(true)}>Book a Consultation</Button>
-          </Card>
+            <button className="w-full px-6 py-4 rounded-full bg-gradient-to-r from-primary-gold to-yellow-500 text-bg-primary font-bold hover:shadow-lg hover:shadow-primary-gold/30 transition-all transform hover:-translate-y-0.5" onClick={() => setIsModalOpen(true)}>
+              Book a Consultation
+            </button>
+          </div>
           
-          <Card className="glass-dark text-center p-5 flex flex-col h-full justify-between border border-[var(--primary-blue)] shadow-[0_0_15px_rgba(37,99,235,0.2)]">
+          <div className="p-8 rounded-3xl bg-bg-secondary border border-accent-blue/30 shadow-[0_0_15px_rgba(59,130,246,0.1)] flex flex-col h-full justify-between">
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(37, 99, 235, 0.2)', color: '#60a5fa', padding: '12px', borderRadius: '50%', marginBottom: '15px' }}>
+              <div className="w-12 h-12 rounded-full bg-accent-blue/20 text-accent-blue flex items-center justify-center mb-6">
                 <FileText size={24} />
               </div>
-              <h2 style={{ color: '#fff', marginBottom: '15px' }}>Open an Account Offline</h2>
-              <p style={{ color: '#cbd5e1', marginBottom: '25px', maxWidth: '600px', margin: '0 auto 25px auto' }}>
+              <h2 className="text-2xl font-bold text-white mb-4">Open an Account Offline</h2>
+              <p className="text-slate-400 mb-8 leading-relaxed">
                 Prefer traditional banking? Download our account opening form, fill it at your convenience, and submit it at your nearest branch.
               </p>
             </div>
-            <Button variant="primary" size="lg" onClick={() => window.location.href = '/offline-account-opening'}>Get Offline Form</Button>
-          </Card>
+            <button className="w-full px-6 py-4 rounded-full bg-accent-blue text-white font-bold hover:bg-blue-600 transition-colors" onClick={() => window.location.href = '/offline-account-opening'}>
+              Get Offline Form
+            </button>
+          </div>
 
-          <Card className="glass-dark text-center p-5 flex flex-col h-full justify-between border border-[var(--primary-gold)] shadow-[0_0_15px_rgba(234,179,8,0.2)]">
+          <div className="p-8 rounded-3xl bg-bg-secondary border border-primary-gold/30 shadow-[0_0_15px_rgba(212,175,55,0.1)] flex flex-col h-full justify-between">
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(234, 179, 8, 0.2)', color: 'var(--primary-gold)', padding: '12px', borderRadius: '50%', marginBottom: '15px' }}>
+              <div className="w-12 h-12 rounded-full bg-primary-gold/20 text-primary-gold flex items-center justify-center mb-6">
                 <CreditCard size={24} />
               </div>
-              <h2 style={{ color: '#fff', marginBottom: '15px' }}>Apply for Card Offline</h2>
-              <p style={{ color: '#cbd5e1', marginBottom: '25px', maxWidth: '600px', margin: '0 auto 25px auto' }}>
+              <h2 className="text-2xl font-bold text-white mb-4">Apply for Card Offline</h2>
+              <p className="text-slate-400 mb-8 leading-relaxed">
                 Download our card application form, fill in your details, and submit it directly to your nearest branch.
               </p>
             </div>
-            <Button variant="primary" size="lg" onClick={() => window.open('/card-application-form', '_blank')}>Download Card Form</Button>
-          </Card>
+            <button className="w-full px-6 py-4 rounded-full border border-primary-gold text-primary-gold font-bold hover:bg-primary-gold/10 transition-colors" onClick={() => window.open('/card-application-form', '_blank')}>
+              Download Card Form
+            </button>
+          </div>
 
-          <Card className="glass-dark text-center p-5 flex flex-col h-full justify-between border border-[var(--primary-blue)] shadow-[0_0_15px_rgba(37,99,235,0.2)]">
+          <div className="p-8 rounded-3xl bg-bg-secondary border border-accent-blue/30 shadow-[0_0_15px_rgba(59,130,246,0.1)] flex flex-col h-full justify-between">
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(37, 99, 235, 0.2)', color: '#60a5fa', padding: '12px', borderRadius: '50%', marginBottom: '15px' }}>
+              <div className="w-12 h-12 rounded-full bg-accent-blue/20 text-accent-blue flex items-center justify-center mb-6">
                 <FileText size={24} />
               </div>
-              <h2 style={{ color: '#fff', marginBottom: '15px' }}>Link Aadhaar Offline</h2>
-              <p style={{ color: '#cbd5e1', marginBottom: '25px', maxWidth: '600px', margin: '0 auto 25px auto' }}>
+              <h2 className="text-2xl font-bold text-white mb-4">Link Aadhaar Offline</h2>
+              <p className="text-slate-400 mb-8 leading-relaxed">
                 Download the Aadhaar seeding consent form and submit it at the branch with your original Aadhaar card and 2 xerox copies.
               </p>
             </div>
-            <Button variant="primary" size="lg" onClick={() => window.open('/aadhaar-seeding-form', '_blank')}>Download Aadhaar Form</Button>
-          </Card>
+            <button className="w-full px-6 py-4 rounded-full border border-accent-blue text-accent-blue font-bold hover:bg-accent-blue/10 transition-colors" onClick={() => window.open('/aadhaar-seeding-form', '_blank')}>
+              Download Aadhaar Form
+            </button>
+          </div>
 
-          <Card className="glass-dark text-center p-5 flex flex-col h-full justify-between border border-[var(--primary-gold)] shadow-[0_0_15px_rgba(234,179,8,0.2)]">
+          <div className="p-8 rounded-3xl bg-bg-secondary border border-primary-gold/30 shadow-[0_0_15px_rgba(212,175,55,0.1)] flex flex-col h-full justify-between">
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(234, 179, 8, 0.2)', color: 'var(--primary-gold)', padding: '12px', borderRadius: '50%', marginBottom: '15px' }}>
+              <div className="w-12 h-12 rounded-full bg-primary-gold/20 text-primary-gold flex items-center justify-center mb-6">
                 <FileText size={24} />
               </div>
-              <h2 style={{ color: '#fff', marginBottom: '15px' }}>Cash Deposit Slip</h2>
-              <p style={{ color: '#cbd5e1', marginBottom: '25px', maxWidth: '600px', margin: '0 auto 25px auto' }}>
+              <h2 className="text-2xl font-bold text-white mb-4">Cash Deposit Slip</h2>
+              <p className="text-slate-400 mb-8 leading-relaxed">
                 Print the deposit pay-in slip, write the account and cash details, and submit it at the branch with the cash amount.
               </p>
             </div>
-            <Button variant="primary" size="lg" onClick={() => window.open('/deposit-pay-in-slip', '_blank')}>Download Deposit Slip</Button>
-          </Card>
+            <button className="w-full px-6 py-4 rounded-full border border-primary-gold text-primary-gold font-bold hover:bg-primary-gold/10 transition-colors" onClick={() => window.open('/deposit-pay-in-slip', '_blank')}>
+              Download Deposit Slip
+            </button>
+          </div>
 
-          <Card className="glass-dark text-center p-5 flex flex-col h-full justify-between border border-[var(--primary-blue)] shadow-[0_0_15px_rgba(37,99,235,0.2)]">
+          <div className="p-8 rounded-3xl bg-bg-secondary border border-accent-blue/30 shadow-[0_0_15px_rgba(59,130,246,0.1)] flex flex-col h-full justify-between">
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(37, 99, 235, 0.2)', color: '#60a5fa', padding: '12px', borderRadius: '50%', marginBottom: '15px' }}>
+              <div className="w-12 h-12 rounded-full bg-accent-blue/20 text-accent-blue flex items-center justify-center mb-6">
                 <FileText size={24} />
               </div>
-              <h2 style={{ color: '#fff', marginBottom: '15px' }}>Cheque Book Request</h2>
-              <p style={{ color: '#cbd5e1', marginBottom: '25px', maxWidth: '600px', margin: '0 auto 25px auto' }}>
+              <h2 className="text-2xl font-bold text-white mb-4">Cheque Book Request</h2>
+              <p className="text-slate-400 mb-8 leading-relaxed">
                 Print the cheque book requisition form, fill account and leaf details, and submit it at the branch for manager verification.
               </p>
             </div>
-            <Button variant="primary" size="lg" onClick={() => window.open('/cheque-book-requisition-form', '_blank')}>Download Cheque Form</Button>
-          </Card>
-
-          <Card className="glass-dark text-center p-5 flex flex-col h-full justify-between border border-[var(--primary-gold)] shadow-[0_0_15px_rgba(234,179,8,0.2)]">
-            <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(234, 179, 8, 0.2)', color: 'var(--primary-gold)', padding: '12px', borderRadius: '50%', marginBottom: '15px' }}>
-                <FileText size={24} />
-              </div>
-              <h2 style={{ color: '#fff', marginBottom: '15px' }}>Internet Banking Permission</h2>
-              <p style={{ color: '#cbd5e1', marginBottom: '25px', maxWidth: '600px', margin: '0 auto 25px auto' }}>
-                Print the internet banking permission form, fill customer and facility details, and submit it offline for manager approval.
-              </p>
-            </div>
-            <Button variant="primary" size="lg" onClick={() => window.open('/internet-banking-permission-form', '_blank')}>Download NetBanking Form</Button>
-          </Card>
-        </div>
+            <button className="w-full px-6 py-4 rounded-full border border-accent-blue text-accent-blue font-bold hover:bg-accent-blue/10 transition-colors" onClick={() => window.open('/cheque-book-requisition-form', '_blank')}>
+              Download Cheque Form
+            </button>
+          </div>
+        </motion.div>
       </div>
 
-      {isModalOpen && (
+      <AnimatePresence>      {isModalOpen && (
         <div className="modal-overlay fade-in" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           <div className="modal-content glass-dark" style={{ background: 'var(--bg-card)', padding: '30px', borderRadius: '16px', maxWidth: '500px', width: '100%', position: 'relative', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
             <button 
@@ -933,6 +985,7 @@ const Services = () => {
           </div>
         </div>
       )}
+      </AnimatePresence>
     </div>
   );
 };

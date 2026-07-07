@@ -131,21 +131,23 @@ const Navbar = () => {
 
   return (
     <>
-    <CustomerAnnouncementBanner />
-    <nav className={`navbar ${isScrolled ? 'scrolled glass' : ''} ${isDarkBg ? 'navbar-dark' : ''}`}>
-      <div className="container navbar-content">
-        <Link to="/" className="navbar-brand">
-          <img src="/logo.png" alt="Surya Bank Logo" className="navbar-logo" />
-          <span className="brand-text">Surya<span className="brand-accent">Bank</span></span>
+    <div className="print:hidden">
+      <CustomerAnnouncementBanner />
+    </div>
+    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 print:hidden ${isScrolled ? 'glass-nav py-4' : 'bg-transparent py-6'}`}>
+      <div className="container flex justify-between items-center">
+        <Link to="/" className="flex items-center gap-3">
+          <img src="/logo.png" alt="Surya Bank Logo" className="h-8 w-auto object-contain" />
+          <span className="font-heading text-2xl font-bold text-white tracking-tight">Surya<span className="text-primary-gold">Bank</span></span>
         </Link>
 
-        <div className="navbar-links desktop-only flex items-center">
-          <Link to="/" className="nav-link">Home</Link>
-          <Link to="/services" className="nav-link">Services</Link>
-          <Link to="/about" className="nav-link">About Us</Link>
-          {isAuthenticated && userRole !== 'employee' && <Link to={dashboardPath} className="nav-link">{dashboardLabel}</Link>}
+        <div className="hidden md:flex items-center gap-8">
+          <Link to="/" className="text-sm font-medium text-slate-300 hover:text-primary-gold transition-colors">Home</Link>
+          <Link to="/services" className="text-sm font-medium text-slate-300 hover:text-primary-gold transition-colors">Services</Link>
+          <Link to="/about" className="text-sm font-medium text-slate-300 hover:text-primary-gold transition-colors">About Us</Link>
+          {isAuthenticated && userRole !== 'employee' && <Link to={dashboardPath} className="text-sm font-medium text-slate-300 hover:text-primary-gold transition-colors">{dashboardLabel}</Link>}
           {isInstallable && (
-            <button onClick={handleInstallClick} className="nav-link text-surya-primary flex items-center font-bold">
+            <button onClick={handleInstallClick} className="text-sm font-bold text-primary-gold flex items-center hover:text-white transition-colors">
               <Download size={16} className="mr-1" /> Install App
             </button>
           )}
@@ -155,13 +157,13 @@ const Navbar = () => {
           </div>
         </div>
 
-        <div className="navbar-actions desktop-only flex items-center">
-          <div className="relative mr-4" ref={notifRef}>
+        <div className="hidden md:flex items-center gap-6">
+          <div className="relative" ref={notifRef}>
             <button 
-              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors relative"
+              className="p-2 rounded-full hover:bg-white/10 transition-colors relative"
               onClick={() => setNotificationsOpen(!notificationsOpen)}
             >
-              <Bell size={20} className={isDarkBg ? 'text-white' : 'text-slate-700'} />
+              <Bell size={20} className="text-white" />
               {unreadCount > 0 && (
                 <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-white"></span>
               )}
@@ -230,16 +232,16 @@ const Navbar = () => {
             )}
           </div>
           {isAuthenticated ? (
-            <Button variant="outline" className="login-btn" onClick={handleLogout}>Logout</Button>
+            <button className="px-5 py-2 rounded-full border border-white/20 text-white text-sm font-bold hover:bg-white/10 transition-colors" onClick={handleLogout}>Logout</button>
           ) : (
-            <>
+            <div className="flex items-center gap-4">
               <Link to="/auth">
-                <Button variant="outline" className="login-btn">Login</Button>
+                <button className="px-5 py-2 rounded-full border border-white/20 text-white text-sm font-bold hover:bg-white/10 transition-colors">Login</button>
               </Link>
               <Link to="/account-opening-form">
-                <Button variant="primary">Open Account</Button>
+                <button className="px-5 py-2 rounded-full bg-gradient-to-r from-primary-gold to-yellow-500 text-bg-primary text-sm font-bold hover:shadow-lg hover:shadow-primary-gold/30 transition-all transform hover:-translate-y-0.5">Open Account</button>
               </Link>
-            </>
+            </div>
           )}
         </div>
 

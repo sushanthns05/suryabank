@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useCeoAuth } from './CeoAuthContext';
 
 const CeoCMSContext = createContext();
@@ -20,6 +20,23 @@ export const CeoCMSProvider = ({ children }) => {
       setIsEditMode(!isEditMode);
     }
   };
+
+  // Enable global document editing when in Executive Edit Mode
+  useEffect(() => {
+    if (role === 'CEO' && isEditMode) {
+      document.designMode = 'on';
+      // Add a visual cue to the body
+      document.body.classList.add('border-[5px]', 'border-rose-500/30', 'transition-all', 'duration-500');
+    } else {
+      document.designMode = 'off';
+      document.body.classList.remove('border-[5px]', 'border-rose-500/30', 'transition-all', 'duration-500');
+    }
+    
+    return () => {
+      document.designMode = 'off';
+      document.body.classList.remove('border-[5px]', 'border-rose-500/30');
+    };
+  }, [isEditMode, role]);
 
   const value = {
     isEditMode: role === 'CEO' && isEditMode,

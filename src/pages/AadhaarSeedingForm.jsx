@@ -1,171 +1,95 @@
-import React from 'react';
-import { Download, Printer, FileText } from 'lucide-react';
-import './AccountOpeningForm.css';
-
-const Field = ({ label, wide = false, small = false }) => (
-  <div className={`aof-field ${wide ? 'wide' : ''} ${small ? 'small' : ''}`}>
-    <span>{label}</span>
-  </div>
-);
-
-const Check = ({ label }) => (
-  <label className="aof-check">
-    <span className="aof-box" aria-hidden="true"></span>
-    <span>{label}</span>
-  </label>
-);
-
-const Section = ({ number, title, children }) => (
-  <section className="aof-section">
-    <div className="aof-section-title">
-      <span>{number}</span>
-      <h2>{title}</h2>
-    </div>
-    {children}
-  </section>
-);
+import React, { useState } from 'react';
+import { FormLayout, FormCard, FormInput, FormCheckbox, FormButton, FileUploadZone } from '../components/forms/FormSystem';
+import PrintableAadhaarForm from '../components/forms/PrintableAadhaarForm';
+import { User, Smartphone, FileSignature } from 'lucide-react';
 
 const AadhaarSeedingForm = () => {
-  const printForm = () => {
-    window.print();
+  const [formData, setFormData] = useState({
+    customerName: '',
+    accountNumber: '',
+    aadhaarNumber: '',
+    mobileNumber: '',
+    agreedToTerms: false,
+    signatureFile: null
+  });
+
+  const updateForm = (key, value) => setFormData(prev => ({ ...prev, [key]: value }));
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      updateForm('signatureFile', e.target.files[0]);
+    }
   };
 
+  const calculateProgress = () => {
+    let fields = ['customerName', 'accountNumber', 'aadhaarNumber', 'mobileNumber', 'agreedToTerms', 'signatureFile'];
+    let filled = fields.filter(f => formData[f]).length;
+    return Math.round((filled / fields.length) * 100);
+  };
+
+  const printForm = () => window.print();
+
   return (
-    <div className="account-form-page fade-in">
-      <div className="aof-toolbar">
-        <div>
-          <p className="aof-kicker">Surya Bank Forms</p>
-          <h1>Aadhaar Seeding Consent Letter</h1>
-        </div>
-        <div className="aof-actions">
-          <button type="button" onClick={printForm} className="aof-action-btn">
-            <Printer size={18} />
-            Print
-          </button>
-          <button type="button" onClick={printForm} className="aof-action-btn primary">
-            <Download size={18} />
-            Save as PDF
-          </button>
-        </div>
+    <FormLayout 
+      title="Aadhaar Seeding Consent Form" 
+      subtitle="Link your Aadhaar number to your bank account for DBT and other benefits."
+      referenceNo={`AAD-${Math.floor(Math.random() * 90000) + 10000}`}
+      progress={calculateProgress()}
+      onPrint={printForm}
+      hideHeaderOnPrint={true}
+    >
+      <div className="print:hidden">
+        <form>
+          <FormCard step={1} title="Customer Information" icon={User}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormInput label="Customer Name" value={formData.customerName} onChange={e => updateForm('customerName', e.target.value)} required />
+              <FormInput label="Account Number" value={formData.accountNumber} onChange={e => updateForm('accountNumber', e.target.value)} required />
+            </div>
+          </FormCard>
+
+          <FormCard step={2} title="Aadhaar & Verification Details" icon={Smartphone}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormInput label="Aadhaar Number (UID)" value={formData.aadhaarNumber} onChange={e => updateForm('aadhaarNumber', e.target.value)} required />
+              <FormInput label="Mobile Number (Registered with UIDAI)" value={formData.mobileNumber} onChange={e => updateForm('mobileNumber', e.target.value)} required />
+            </div>
+          </FormCard>
+
+          <FormCard step={3} title="Consent & Declarations" icon={FileSignature}>
+            <div className="space-y-4 mb-8">
+              <FormCheckbox 
+                label="I consent to seed my Aadhaar Number with my bank account." 
+                checked={formData.agreedToTerms} 
+                onChange={() => updateForm('agreedToTerms', !formData.agreedToTerms)} 
+              />
+              <FormCheckbox 
+                label="I authorize Surya Bank to fetch my personal details from UIDAI for verification." 
+                checked={formData.agreedToTerms} 
+                onChange={() => updateForm('agreedToTerms', !formData.agreedToTerms)} 
+              />
+              <FormCheckbox 
+                label="I wish to receive Direct Benefit Transfer (DBT) subsidies into this account." 
+                checked={formData.agreedToTerms} 
+                onChange={() => updateForm('agreedToTerms', !formData.agreedToTerms)} 
+              />
+            </div>
+            
+            <FileUploadZone 
+              label="Signature / Thumb Impression" 
+              description="Upload a clear image of your signature (PNG, JPG)" 
+              file={formData.signatureFile}
+              onChange={handleFileChange}
+            />
+          </FormCard>
+
+          <div className="flex justify-end gap-4 mt-8">
+            <FormButton type="button" variant="outline" onClick={printForm}>Print Form for Offline Submission</FormButton>
+          </div>
+        </form>
       </div>
 
-      <main className="aof-sheet" aria-label="Surya Bank Aadhaar seeding consent form">
-        <header className="aof-header">
-          <div className="aof-brand">
-            <img src="/logo.png" alt="Surya Bank" />
-            <div>
-              <strong>Surya Bank</strong>
-              <span>Trusted Digital Banking</span>
-            </div>
-          </div>
-          <div className="aof-title">
-            <p>Customer consent letter</p>
-            <h2>Aadhaar Seeding / Linking Form</h2>
-          </div>
-          <div className="aof-photo-box">Paste recent photograph</div>
-        </header>
-
-        <div className="aof-branch-row">
-          <Field label="Branch name" />
-          <Field label="Application date" small />
-          <Field label="Customer ID / CIF" small />
-          <Field label="Account number" />
-        </div>
-
-        <Section number="1" title="Customer Details">
-          <div className="aof-grid">
-            <Field label="Full name as per bank records" wide />
-            <Field label="Father / Mother / Spouse name" wide />
-            <Field label="Date of birth" small />
-            <Field label="Mobile number" small />
-            <Field label="Email address" />
-            <Field label="Address as per bank records" wide />
-          </div>
-        </Section>
-
-        <Section number="2" title="Aadhaar Details">
-          <div className="aof-grid">
-            <Field label="Aadhaar number / VID" />
-            <Field label="Name as printed on Aadhaar" />
-            <Field label="Last 4 digits of Aadhaar" small />
-            <Field label="Aadhaar linked mobile number" />
-          </div>
-          <div className="aof-check-grid compact">
-            <Check label="Savings Account" />
-            <Check label="Current Account" />
-            <Check label="Joint Account" />
-          </div>
-        </Section>
-
-        <Section number="3" title="Consent and Declaration">
-          <p className="aof-declaration">
-            I request and authorize Surya Bank to seed/link my Aadhaar number with my bank account mentioned
-            above after branch verification. I confirm that the Aadhaar details provided by me are correct, and
-            I understand that the linking will be completed only after the branch manager or authorized officer
-            verifies my original Aadhaar card and submitted photocopies.
-          </p>
-          <p className="aof-declaration">
-            I give my voluntary consent to Surya Bank to use my Aadhaar details for account seeding, identity
-            verification, and banking services as permitted under applicable rules and bank policy.
-          </p>
-          <div className="aof-signature-row">
-            <div>
-              <span>Customer signature / thumb impression</span>
-            </div>
-            <div>
-              <span>Place</span>
-            </div>
-            <div>
-              <span>Date</span>
-            </div>
-          </div>
-        </Section>
-
-        <Section number="4" title="Documents to be Submitted">
-          <div className="aof-check-grid documents">
-            <Check label="Original Aadhaar card carried for verification" />
-            <Check label="Two xerox copies of Aadhaar card attached" />
-            <Check label="Account passbook / statement copy attached" />
-            <Check label="Customer signature verified" />
-          </div>
-          <p className="aof-declaration">
-            Note: Customer must carry the original Aadhaar card along with 2 xerox copies of the Aadhaar card
-            while submitting this form at the branch.
-          </p>
-        </Section>
-
-        <Section number="5" title="Branch Manager Verification">
-          <div className="aof-check-grid documents">
-            <Check label="Original Aadhaar verified" />
-            <Check label="Photocopies received" />
-            <Check label="Customer identity confirmed" />
-            <Check label="Aadhaar linked after verification" />
-          </div>
-          <div className="aof-grid">
-            <Field label="Verified by manager / authorized officer" />
-            <Field label="Employee ID" small />
-            <Field label="Verification date" small />
-            <Field label="Aadhaar seeding reference number" />
-          </div>
-          <div className="aof-signature-row branch">
-            <div>
-              <span>Manager / authorized officer signature</span>
-            </div>
-            <div>
-              <span>Branch seal</span>
-            </div>
-            <div>
-              <span>Remarks</span>
-            </div>
-          </div>
-        </Section>
-
-        <footer className="aof-footer">
-          <FileText size={16} />
-          <span>Surya Bank Aadhaar seeding form. Please complete in BLOCK LETTERS using black or blue ink.</span>
-        </footer>
-      </main>
-    </div>
+      <div className="hidden print:block w-full">
+        <PrintableAadhaarForm data={formData} />
+      </div>
+    </FormLayout>
   );
 };
 

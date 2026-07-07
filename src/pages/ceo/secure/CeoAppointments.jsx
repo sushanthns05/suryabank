@@ -195,6 +195,8 @@ const CeoAppointments = () => {
     // Optimistic UI Update (Snapshot will override this shortly)
     setAppointments(prev => prev.map(a => a.id === selectedRequest.id ? { ...a, status, ceoStatus: status, ceoComments: reviewNotes } : a));
     setDrawerOpen(false);
+    setReviewAction(null);
+    setReviewNotes('');
     
     await updateAppointmentStatus(selectedRequest.id, { 
       status, 
@@ -420,7 +422,7 @@ const CeoAppointments = () => {
                     transition={{ delay: idx * 0.05 }}
                     key={req.id} 
                     className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden hover:shadow-xl transition-all group relative cursor-pointer"
-                    onClick={() => { setSelectedRequest(req); setDrawerOpen(true); }}
+                    onClick={() => { setSelectedRequest(req); setReviewAction(null); setReviewNotes(''); setDrawerOpen(true); }}
                   >
                     {/* Priority Strip */}
                     <div className={`h-1.5 w-full ${req.priority === 'Critical' ? 'bg-red-500' : req.priority === 'High' ? 'bg-orange-500' : 'bg-blue-500'}`} />
@@ -601,7 +603,7 @@ const CeoAppointments = () => {
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50"
-              onClick={() => setDrawerOpen(false)}
+              onClick={() => { setDrawerOpen(false); setReviewAction(null); setReviewNotes(''); }}
             />
             <motion.div 
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
@@ -616,7 +618,7 @@ const CeoAppointments = () => {
                   </div>
                   <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">{selectedRequest.subject}</h2>
                 </div>
-                <button onClick={() => setDrawerOpen(false)} className="p-2 bg-slate-200 dark:bg-slate-800 rounded-full hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors">
+                <button onClick={() => { setDrawerOpen(false); setReviewAction(null); setReviewNotes(''); }} className="p-2 bg-slate-200 dark:bg-slate-800 rounded-full hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors">
                   <XCircle size={20} />
                 </button>
               </div>
